@@ -32,7 +32,7 @@ class TextProcessor
                 $quote = $quotes[$index];
 
                 // Nahradíme nalezený text citátem obaleným v bloku pro zvýraznění
-                $replacement = '<blockquote class="border-l-4 border-primary pl-4 italic my-6 text-slate-600">' . $quote . '</blockquote>';
+                $replacement = '<blockquote class="border-l-4 border-primary pl-4 italic my-6 text-slate-600">'.$quote.'</blockquote>';
 
                 return str_replace('##MOTIVATIONAL_QUOTE##', $replacement, $description);
             }

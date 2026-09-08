@@ -1,9 +1,10 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 use App\Models\User;
+use Illuminate\Database\Migrations\Migration;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 return new class extends Migration
 {
@@ -13,7 +14,7 @@ return new class extends Migration
     public function up(): void
     {
         // Reset cached roles and permissions
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         // 1. Ujistíme se, že existují klíčové role a mají všechna oprávnění
         // To řeší problém s ignorováním super_admin role a zajišťuje plný přístup pro správce.
@@ -34,7 +35,7 @@ return new class extends Migration
             $editorRole->givePermissionTo([
                 'manage_users',
                 'manage_teams',
-                'manage_rosters'
+                'manage_rosters',
             ]);
         }
 
@@ -42,7 +43,7 @@ return new class extends Migration
         $coachRole = Role::where('name', 'coach')->first();
         if ($coachRole) {
             $coachRole->givePermissionTo([
-                'manage_users'
+                'manage_users',
             ]);
         }
 

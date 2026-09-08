@@ -5,22 +5,27 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class InjectFeedbackWidget
 {
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
         $response = $next($request);
 
-        if (!$this->shouldInject($request, $response)) {
+        if (! $this->shouldInject($request, $response)) {
             return $response;
         }
 
@@ -31,7 +36,7 @@ class InjectFeedbackWidget
 
     protected function shouldInject(Request $request, Response $response): bool
     {
-        if (!config('feedback.enabled', true)) {
+        if (! config('feedback.enabled', true)) {
             return false;
         }
 
@@ -43,7 +48,7 @@ class InjectFeedbackWidget
 
         // 1. MUST be HTML response
         $contentType = $response->headers->get('Content-Type');
-        if (!str_contains((string)$contentType, 'text/html')) {
+        if (! str_contains((string) $contentType, 'text/html')) {
             return false;
         }
 
@@ -52,7 +57,7 @@ class InjectFeedbackWidget
         $host = $request->getHost();
         $isTestHost = str_contains($host, 'new.') || str_contains($host, '.new.') || str_contains($host, 'staging.') || str_contains($host, 'dev.') || str_contains($host, '.test') || str_contains($host, 'localhost');
 
-        if (!$isAuthenticated && !$isTestHost) {
+        if (! $isAuthenticated && ! $isTestHost) {
             return false;
         }
 
@@ -65,9 +70,9 @@ class InjectFeedbackWidget
         }
 
         // 4. Skip redirects, special responses and partials
-        if ($response instanceof \Symfony\Component\HttpFoundation\RedirectResponse ||
-            $response instanceof \Symfony\Component\HttpFoundation\StreamedResponse ||
-            $response instanceof \Symfony\Component\HttpFoundation\BinaryFileResponse ||
+        if ($response instanceof RedirectResponse ||
+            $response instanceof StreamedResponse ||
+            $response instanceof BinaryFileResponse ||
             $response->isServerError() ||
             $response->isClientError()) {
             return false;
@@ -75,7 +80,7 @@ class InjectFeedbackWidget
 
         // 5. Content check: MUST have </body> tag for reliable injection
         $content = $response->getContent();
-        if (!str_contains($content, '</body>')) {
+        if (! str_contains($content, '</body>')) {
             return false;
         }
 
@@ -85,8 +90,13 @@ class InjectFeedbackWidget
     protected function getSourceArea(Request $request): string
     {
         $path = $request->getPathInfo();
-        if ($path === '/admin' || str_starts_with($path, '/admin/')) return 'admin';
-        if ($path === '/member' || str_starts_with($path, '/member/')) return 'member';
+        if ($path === '/admin' || str_starts_with($path, '/admin/')) {
+            return 'admin';
+        }
+        if ($path === '/member' || str_starts_with($path, '/member/')) {
+            return 'member';
+        }
+
         return 'public';
     }
 
@@ -107,13 +117,14 @@ class InjectFeedbackWidget
             $mtime = file_exists($manifestPath) ? filemtime($manifestPath) : '0';
             $cacheKey = "feedback_widget_js_url_{$mtime}";
 
-            $jsUrl = \Illuminate\Support\Facades\Cache::remember($cacheKey, 3600, function() use ($manifestPath) {
+            $jsUrl = Cache::remember($cacheKey, 3600, function () use ($manifestPath) {
                 if (file_exists($manifestPath)) {
                     $manifest = json_decode(file_get_contents($manifestPath), true);
                     if (isset($manifest['resources/js/feedback-widget.js']['file'])) {
-                        return asset('build/' . $manifest['resources/js/feedback-widget.js']['file']);
+                        return asset('build/'.$manifest['resources/js/feedback-widget.js']['file']);
                     }
                 }
+
                 return '';
             });
 
@@ -149,7 +160,8 @@ class InjectFeedbackWidget
             $cfgJson = json_encode($cfg);
 
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning('Feedback widget initialization failed, skipping injection: ' . $e->getMessage());
+            Log::warning('Feedback widget initialization failed, skipping injection: '.$e->getMessage());
+
             return;
         }
 
@@ -220,8 +232,8 @@ HTML;
         // Použijeme replace, aby se zamezilo chybnému rozdělení stringu
         $pos = strripos($content, '</body>');
 
-        if (false !== $pos) {
-            $newContent = substr_replace($content, $loader . "\n</body>", $pos, 7);
+        if ($pos !== false) {
+            $newContent = substr_replace($content, $loader."\n</body>", $pos, 7);
             $response->setContent($newContent);
         }
     }

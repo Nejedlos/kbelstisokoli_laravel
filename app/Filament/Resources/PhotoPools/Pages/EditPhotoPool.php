@@ -4,9 +4,13 @@ namespace App\Filament\Resources\PhotoPools\Pages;
 
 use App\Filament\Resources\PhotoPools\PhotoPoolResource;
 use App\Models\PhotoPool;
+use App\Services\PhotoPoolImporter;
 use App\Traits\HasPhotoPoolImport;
 use Filament\Actions\DeleteAction;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Contracts\View\View;
+use Illuminate\Support\HtmlString;
 
 class EditPhotoPool extends EditRecord
 {
@@ -25,12 +29,12 @@ class EditPhotoPool extends EditRecord
     {
         return [
             $this->getSaveFormAction()
-                ->label(new \Illuminate\Support\HtmlString('
+                ->label(new HtmlString('
                     <span x-data="{ uploadingCount: 0 }"
                           x-on:file-upload-started.window="uploadingCount++"
                           x-on:file-upload-finished.window="uploadingCount = Math.max(0, uploadingCount - 1)">
                         <span x-show="uploadingCount === 0">
-                            <i class="fa-light fa-floppy-disk mr-1.5"></i> ' . $this->getSaveFormAction()->getLabel() . '
+                            <i class="fa-light fa-floppy-disk mr-1.5"></i> '.$this->getSaveFormAction()->getLabel().'
                         </span>
                         <span x-show="uploadingCount > 0" x-cloak class="flex items-center gap-2">
                             <i class="fa-light fa-arrows-rotate fa-spin"></i>
@@ -49,7 +53,7 @@ class EditPhotoPool extends EditRecord
         ];
     }
 
-    public function render(): \Illuminate\Contracts\View\View
+    public function render(): View
     {
         return parent::render();
     }
@@ -68,14 +72,14 @@ class EditPhotoPool extends EditRecord
         $pool = $this->record;
 
         // Použijeme službu pro přípravu importu (přesun souborů a naplnění fronty)
-        $importer = app(\App\Services\PhotoPoolImporter::class);
+        $importer = app(PhotoPoolImporter::class);
         $importer->prepareForImport($pool, $files);
 
         // Vyčistíme pole photos ve formuláři bez resetu celého formuláře
         $this->data['photos'] = [];
 
         // Informujeme uživatele
-        \Filament\Notifications\Notification::make()
+        Notification::make()
             ->title(__('admin.resources.photo_pool.notifications.uploading'))
             ->info()
             ->body('Fotografie byly nahrány a zařazeny do fronty ke zpracování.')

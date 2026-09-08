@@ -10,10 +10,10 @@ use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Forms\Components\TextInput;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
 use Filament\Notifications\Notification;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
 
 class OpponentMergeSuggestionsTable
 {
@@ -48,7 +48,7 @@ class OpponentMergeSuggestionsTable
                         'rejected' => 'danger',
                         default => 'gray',
                     })
-                    ->formatStateUsing(fn (string $state): string => __('admin.resources.opponent_merge_suggestion.status.' . $state)),
+                    ->formatStateUsing(fn (string $state): string => __('admin.resources.opponent_merge_suggestion.status.'.$state)),
                 TextColumn::make('created_at')
                     ->label(__('admin.fields.created_at'))
                     ->dateTime()

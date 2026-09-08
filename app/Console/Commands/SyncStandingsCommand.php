@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Models\ExternalTeamSeasonConfig;
 use App\Models\Season;
 use App\Services\Stats\Sync\CompetitionSyncService;
+use App\Services\Support\ConsoleService;
 use Illuminate\Console\Command;
 
 class SyncStandingsCommand extends Command
@@ -34,7 +34,7 @@ class SyncStandingsCommand extends Command
 
         if ($seasonInput === 'all') {
             $seasons = Season::orderBy('name', 'desc')->get();
-            \App\Services\Support\ConsoleService::log("Zahajuji synchronizaci tabulek pro VŠECHNY sezóny (" . $seasons->count() . ").", 'info');
+            ConsoleService::log('Zahajuji synchronizaci tabulek pro VŠECHNY sezóny ('.$seasons->count().').', 'info');
 
             $totalSynced = 0;
             $totalUrls = 0;
@@ -45,14 +45,14 @@ class SyncStandingsCommand extends Command
                 $totalUrls += $result['total'];
             }
 
-            \App\Services\Support\ConsoleService::log("KOMPLETNÍ SYNCHRONIZACE DOKONČENA.", 'success');
-            \App\Services\Support\ConsoleService::log("Celkem sezón: " . $seasons->count(), 'info');
-            \App\Services\Support\ConsoleService::log("Celkem soutěží: {$totalSynced}/{$totalUrls}", 'success');
+            ConsoleService::log('KOMPLETNÍ SYNCHRONIZACE DOKONČENA.', 'success');
+            ConsoleService::log('Celkem sezón: '.$seasons->count(), 'info');
+            ConsoleService::log("Celkem soutěží: {$totalSynced}/{$totalUrls}", 'success');
 
             return self::SUCCESS;
         }
 
-        if (!$seasonInput) {
+        if (! $seasonInput) {
             $season = Season::where('is_active', true)->first() ?? Season::latest('id')->first();
         } else {
             $season = is_numeric($seasonInput)
@@ -60,8 +60,9 @@ class SyncStandingsCommand extends Command
                 : Season::where('name', $seasonInput)->first();
         }
 
-        if (!$season) {
-            $this->error("Sezóna nebyla nalezena.");
+        if (! $season) {
+            $this->error('Sezóna nebyla nalezena.');
+
             return self::FAILURE;
         }
 

@@ -5,10 +5,14 @@ namespace App\Filament\Resources\UserSeasonConfigs;
 use App\Filament\Resources\UserSeasonConfigs\Pages\CreateUserSeasonConfig;
 use App\Filament\Resources\UserSeasonConfigs\Pages\EditUserSeasonConfig;
 use App\Filament\Resources\UserSeasonConfigs\Pages\ListUserSeasonConfigs;
+use App\Filament\Resources\UserSeasonConfigs\Schemas\UserSeasonConfigForm;
+use App\Filament\Resources\UserSeasonConfigs\Tables\UserSeasonConfigsTable;
 use App\Models\UserSeasonConfig;
+use App\Support\IconHelper;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 
 class UserSeasonConfigResource extends Resource
 {
@@ -29,9 +33,9 @@ class UserSeasonConfigResource extends Resource
         return __('admin.resources.user_season_config.plural_label');
     }
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
-        return \App\Support\IconHelper::get(\App\Support\IconHelper::USER_GEAR);
+        return IconHelper::get(IconHelper::USER_GEAR);
     }
 
     public static function getNavigationSort(): ?int
@@ -41,12 +45,12 @@ class UserSeasonConfigResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        return \App\Filament\Resources\UserSeasonConfigs\Schemas\UserSeasonConfigForm::configure($schema);
+        return UserSeasonConfigForm::configure($schema);
     }
 
     public static function table(Table $table): Table
     {
-        return \App\Filament\Resources\UserSeasonConfigs\Tables\UserSeasonConfigsTable::configure($table);
+        return UserSeasonConfigsTable::configure($table);
     }
 
     public static function getRelations(): array

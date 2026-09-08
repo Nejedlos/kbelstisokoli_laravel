@@ -2,6 +2,8 @@
 
 namespace App\Jobs\Stats;
 
+use App\Models\ExternalImportRun;
+use App\Models\Season;
 use App\Models\User;
 use App\Services\Stats\Sync\PlayerSyncService;
 use App\Services\Support\ConsoleService;
@@ -32,7 +34,7 @@ class SyncPlayersJob implements ShouldQueue
      */
     public function handle(PlayerSyncService $syncService): void
     {
-        ConsoleService::log("Spouštím hromadnou synchronizaci hráčů...");
+        ConsoleService::log('Spouštím hromadnou synchronizaci hráčů...');
         ConsoleService::resetStop();
 
         $query = User::query();
@@ -61,22 +63,23 @@ class SyncPlayersJob implements ShouldQueue
         $users = $query->get();
 
         if ($users->isEmpty()) {
-            ConsoleService::log("Nebyli nalezeni žádní hráči k synchronizaci.", 'warning');
+            ConsoleService::log('Nebyli nalezeni žádní hráči k synchronizaci.', 'warning');
+
             return;
         }
 
         ConsoleService::log("Nalezeno {$users->count()} hráčů k synchronizaci.");
 
-        $seasonId = \App\Models\Season::where('is_active', true)->first()?->id ?? 0;
-        $batchRun = \App\Models\ExternalImportRun::start('czbasketball', $seasonId, $this->options['team_id'] ?? null, 'player_sync_batch', null);
-        $batchRun->updateProgress(0, $users->count(), "Inicializace hromadné synchronizace...");
+        $seasonId = Season::where('is_active', true)->first()?->id ?? 0;
+        $batchRun = ExternalImportRun::start('czbasketball', $seasonId, $this->options['team_id'] ?? null, 'player_sync_batch', null);
+        $batchRun->updateProgress(0, $users->count(), 'Inicializace hromadné synchronizace...');
 
         $successCount = 0;
         $currentIndex = 0;
         foreach ($users as $user) {
             $currentIndex++;
             if (ConsoleService::isStopped() || $batchRun->isCancelled() || $batchRun->status === 'skipped') {
-                ConsoleService::log("Synchronizace přerušena (stop flag nebo zrušeno/přeskočeno uživatelem).", 'warning');
+                ConsoleService::log('Synchronizace přerušena (stop flag nebo zrušeno/přeskočeno uživatelem).', 'warning');
                 if ($batchRun->status === 'running') {
                     $batchRun->cancel('Zrušeno uživatelem nebo stop flagem.');
                 }
@@ -97,16 +100,16 @@ class SyncPlayersJob implements ShouldQueue
                     $successCount++;
                 }
             } catch (\Exception $e) {
-                ConsoleService::log("Chyba při synchronizaci hráče #{$user->id}: " . $e->getMessage(), 'error');
-                $batchRun->addLog('player_sync_failed', $user, null, null, "Hráč #{$user->id} ({$user->name}) selhal: " . $e->getMessage());
+                ConsoleService::log("Chyba při synchronizaci hráče #{$user->id}: ".$e->getMessage(), 'error');
+                $batchRun->addLog('player_sync_failed', $user, null, null, "Hráč #{$user->id} ({$user->name}) selhal: ".$e->getMessage());
             }
         }
 
         $batchRun->finish([
             'imported_count' => $successCount,
-            'total_count' => $users->count()
+            'total_count' => $users->count(),
         ]);
 
-        ConsoleService::log("Synchronizace hráčů dokončena. Úspěšně: {$successCount}, Celkem: " . $users->count());
+        ConsoleService::log("Synchronizace hráčů dokončena. Úspěšně: {$successCount}, Celkem: ".$users->count());
     }
 }

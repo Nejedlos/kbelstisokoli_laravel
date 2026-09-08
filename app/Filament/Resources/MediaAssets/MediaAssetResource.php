@@ -5,10 +5,14 @@ namespace App\Filament\Resources\MediaAssets;
 use App\Filament\Resources\MediaAssets\Pages\CreateMediaAsset;
 use App\Filament\Resources\MediaAssets\Pages\EditMediaAsset;
 use App\Filament\Resources\MediaAssets\Pages\ListMediaAssets;
+use App\Filament\Resources\MediaAssets\Schemas\MediaAssetForm;
+use App\Filament\Resources\MediaAssets\Tables\MediaAssetsTable;
 use App\Models\MediaAsset;
+use App\Support\IconHelper;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 
 class MediaAssetResource extends Resource
 {
@@ -29,9 +33,9 @@ class MediaAssetResource extends Resource
         return __('admin.resources.media_asset.plural_label');
     }
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
-        return \App\Support\IconHelper::get(\App\Support\IconHelper::MEDIA_LIBRARY);
+        return IconHelper::get(IconHelper::MEDIA_LIBRARY);
     }
 
     public static function getNavigationSort(): ?int
@@ -41,12 +45,12 @@ class MediaAssetResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        return \App\Filament\Resources\MediaAssets\Schemas\MediaAssetForm::configure($schema);
+        return MediaAssetForm::configure($schema);
     }
 
     public static function table(Table $table): Table
     {
-        return \App\Filament\Resources\MediaAssets\Tables\MediaAssetsTable::configure($table);
+        return MediaAssetsTable::configure($table);
     }
 
     public static function getRelations(): array

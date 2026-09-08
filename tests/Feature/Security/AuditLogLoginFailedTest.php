@@ -4,7 +4,6 @@ namespace Tests\Feature\Security;
 
 use App\Models\AuditLog;
 use App\Models\User;
-use Illuminate\Auth\Events\Failed;
 use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
 
@@ -50,7 +49,7 @@ class AuditLogLoginFailedTest extends TestCase
      */
     public function test_failed_login_logs_null_actor_for_unknown_user(): void
     {
-        $email = 'nonexistent-' . uniqid() . '@example.com';
+        $email = 'nonexistent-'.uniqid().'@example.com';
 
         Auth::attempt([
             'email' => $email,

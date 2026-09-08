@@ -2,13 +2,26 @@
 
 namespace App\Providers;
 
+use App\Models\ChargePaymentAllocation;
+use App\Models\Dmarc\DmarcIncident;
+use App\Models\Dmarc\DmarcMailbox;
+use App\Models\Dmarc\DmarcReport;
+use App\Models\FinanceCharge;
+use App\Models\FinancePayment;
 use App\Models\PlayerProfile;
 use App\Models\User;
+use App\Policies\ChargePaymentAllocationPolicy;
+use App\Policies\DmarcIncidentPolicy;
+use App\Policies\DmarcMailboxPolicy;
+use App\Policies\DmarcReportPolicy;
+use App\Policies\FinanceChargePolicy;
+use App\Policies\FinancePaymentPolicy;
 use App\Policies\PermissionPolicy;
 use App\Policies\PlayerProfilePolicy;
 use App\Policies\RolePolicy;
 use App\Policies\UserPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -24,12 +37,12 @@ class AuthServiceProvider extends ServiceProvider
         PlayerProfile::class => PlayerProfilePolicy::class,
         Role::class => RolePolicy::class,
         Permission::class => PermissionPolicy::class,
-        \App\Models\FinanceCharge::class => \App\Policies\FinanceChargePolicy::class,
-        \App\Models\FinancePayment::class => \App\Policies\FinancePaymentPolicy::class,
-        \App\Models\ChargePaymentAllocation::class => \App\Policies\ChargePaymentAllocationPolicy::class,
-        \App\Models\Dmarc\DmarcMailbox::class => \App\Policies\DmarcMailboxPolicy::class,
-        \App\Models\Dmarc\DmarcReport::class => \App\Policies\DmarcReportPolicy::class,
-        \App\Models\Dmarc\DmarcIncident::class => \App\Policies\DmarcIncidentPolicy::class,
+        FinanceCharge::class => FinanceChargePolicy::class,
+        FinancePayment::class => FinancePaymentPolicy::class,
+        ChargePaymentAllocation::class => ChargePaymentAllocationPolicy::class,
+        DmarcMailbox::class => DmarcMailboxPolicy::class,
+        DmarcReport::class => DmarcReportPolicy::class,
+        DmarcIncident::class => DmarcIncidentPolicy::class,
     ];
 
     /**
@@ -39,7 +52,7 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        \Illuminate\Support\Facades\Gate::before(function ($user, $ability) {
+        Gate::before(function ($user, $ability) {
             return $user->hasAnyRole(['admin', 'super_admin']) ? true : null;
         });
     }

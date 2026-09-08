@@ -3,6 +3,7 @@
 namespace Tests\Feature\Livewire\Member;
 
 use App\Livewire\Member\PaymentWidget;
+use App\Models\FinanceCharge;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -74,7 +75,7 @@ class PaymentWidgetTest extends TestCase
         $user = User::factory()->create();
 
         // Vytvoříme dlužný předpis
-        \App\Models\FinanceCharge::create([
+        FinanceCharge::create([
             'user_id' => $user->id,
             'title' => 'Členský příspěvek',
             'amount_total' => 1500.00,
@@ -95,7 +96,7 @@ class PaymentWidgetTest extends TestCase
         $user = User::factory()->create();
 
         // Vytvoříme dlužný předpis
-        \App\Models\FinanceCharge::create([
+        FinanceCharge::create([
             'user_id' => $user->id,
             'title' => 'Doplatek',
             'amount_total' => 1500.50,

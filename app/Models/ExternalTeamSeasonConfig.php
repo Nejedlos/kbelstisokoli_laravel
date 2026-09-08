@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ExternalTeamSeasonConfig extends Model
 {
@@ -28,12 +29,12 @@ class ExternalTeamSeasonConfig extends Model
         'metadata' => 'array',
     ];
 
-    public function team(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    public function season(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function season(): BelongsTo
     {
         return $this->belongsTo(Season::class);
     }

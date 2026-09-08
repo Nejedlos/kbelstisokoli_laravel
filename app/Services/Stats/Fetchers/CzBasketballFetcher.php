@@ -84,7 +84,7 @@ class CzBasketballFetcher implements StatFetcherInterface
                     'verify' => false,
                     'curl' => [
                         CURLOPT_SSL_SESSIONID_CACHE => false,
-                    ]
+                    ],
                 ])
                 ->get($url);
 

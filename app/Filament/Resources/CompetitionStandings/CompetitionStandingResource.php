@@ -13,6 +13,7 @@ use App\Support\Icons\AppIcon;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 
 class CompetitionStandingResource extends Resource
 {
@@ -38,7 +39,7 @@ class CompetitionStandingResource extends Resource
         return __('admin.resources.competition_standing.label');
     }
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
         return FilamentIcon::get(AppIcon::TABLE);
     }

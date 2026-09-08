@@ -8,9 +8,11 @@ use App\Filament\Resources\CronTasks\Pages\ListCronTasks;
 use App\Filament\Resources\CronTasks\Schemas\CronTaskForm;
 use App\Filament\Resources\CronTasks\Tables\CronTasksTable;
 use App\Models\CronTask;
+use App\Support\IconHelper;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 
 class CronTaskResource extends Resource
 {
@@ -21,9 +23,9 @@ class CronTaskResource extends Resource
         return __('admin.resources.cron_task.plural_label');
     }
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
-        return \App\Support\IconHelper::get(\App\Support\IconHelper::CRON_TASKS);
+        return IconHelper::get(IconHelper::CRON_TASKS);
     }
 
     public static function getNavigationGroup(): ?string

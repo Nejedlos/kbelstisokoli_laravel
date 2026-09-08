@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class PlayerProfile extends Model
 {
@@ -78,7 +79,7 @@ class PlayerProfile extends Model
     /**
      * Externí mapování profilu.
      */
-    public function externalMappings(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    public function externalMappings(): MorphMany
     {
         return $this->morphMany(ExternalEntityMapping::class, 'internal');
     }

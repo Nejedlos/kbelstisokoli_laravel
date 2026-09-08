@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class UserSeasonConfig extends Model
 {
@@ -25,17 +26,17 @@ class UserSeasonConfig extends Model
         'metadata' => 'array',
     ];
 
-    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function season(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function season(): BelongsTo
     {
         return $this->belongsTo(Season::class);
     }
 
-    public function tariff(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function tariff(): BelongsTo
     {
         return $this->belongsTo(FinancialTariff::class, 'financial_tariff_id');
     }

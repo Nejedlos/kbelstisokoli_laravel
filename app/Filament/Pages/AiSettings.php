@@ -5,6 +5,8 @@ namespace App\Filament\Pages;
 use App\Models\AiRequestLog;
 use App\Models\AiSetting;
 use App\Services\AiSettingsService;
+use App\Support\IconHelper;
+use Filament\Actions\Action;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -20,6 +22,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\HtmlString;
@@ -34,9 +37,9 @@ class AiSettings extends Page implements HasForms
         return auth()->user()->can('manage_ai_settings');
     }
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
-        return \App\Support\IconHelper::get(\App\Support\IconHelper::AI);
+        return IconHelper::get(IconHelper::AI);
     }
 
     public static function getNavigationGroup(): ?string
@@ -54,7 +57,7 @@ class AiSettings extends Page implements HasForms
         return 2;
     }
 
-    public function getTitle(): string|\Illuminate\Contracts\Support\Htmlable
+    public function getTitle(): string|Htmlable
     {
         return __('admin.navigation.pages.ai_settings');
     }
@@ -467,7 +470,7 @@ class AiSettings extends Page implements HasForms
     public function getFormActions(): array
     {
         return [
-            \Filament\Actions\Action::make('save')
+            Action::make('save')
                 ->label(new HtmlString('<span x-data="{ success: false }" x-on:settings-saved.window="success = true; setTimeout(() => success = false, 2500)">
                     <span x-show="!success"><i class="fa-light fa-floppy-disk mr-1.5"></i> '.__('admin/ai-settings.actions.save').'</span>
                     <span x-show="success" x-cloak class="text-white dark:text-white"><i class="fa-solid fa-circle-check mr-1.5 animate-bounce"></i> '.__('admin/ai-settings.actions.saved').'</span>
@@ -476,7 +479,7 @@ class AiSettings extends Page implements HasForms
                 ->successNotification(null)
                 ->failureNotification(null),
 
-            \Filament\Actions\Action::make('test_connection')
+            Action::make('test_connection')
                 ->label(new HtmlString('<span x-data="{ state: \'idle\' }" x-on:test-connection-success.window="state = \'success\'; setTimeout(() => state = \'idle\', 2500)" x-on:test-connection-error.window="state = \'error\'; setTimeout(() => state = \'idle\', 2500)">
                     <span x-show="state === \'idle\'"><i class="fa-light fa-plug-circle-check mr-1.5"></i> '.__('admin/ai-settings.actions.test_connection').'</span>
                     <span x-show="state === \'success\'" x-cloak class="text-white"><i class="fa-solid fa-circle-check mr-1.5 animate-bounce"></i> '.__('admin/ai-settings.actions.test_success').'</span>
@@ -487,7 +490,7 @@ class AiSettings extends Page implements HasForms
                 ->successNotification(null)
                 ->failureNotification(null),
 
-            \Filament\Actions\Action::make('clear_cache')
+            Action::make('clear_cache')
                 ->label(new HtmlString('<span x-data="{ success: false }" x-on:cache-cleared.window="success = true; setTimeout(() => success = false, 2500)">
                     <span x-show="!success"><i class="fa-light fa-broom mr-1.5"></i> '.__('admin/ai-settings.actions.clear_cache').'</span>
                     <span x-show="success" x-cloak class="text-white"><i class="fa-solid fa-circle-check mr-1.5 animate-bounce"></i> '.__('admin/ai-settings.actions.cache_cleared').'</span>
@@ -498,7 +501,7 @@ class AiSettings extends Page implements HasForms
                 ->successNotification(null)
                 ->failureNotification(null),
 
-            \Filament\Actions\Action::make('reset_logs')
+            Action::make('reset_logs')
                 ->label(new HtmlString('<span x-data="{ success: false }" x-on:logs-reset.window="success = true; setTimeout(() => success = false, 2500)">
                     <span x-show="!success"><i class="fa-light fa-trash-can mr-1.5"></i> '.__('admin/ai-settings.actions.reset_logs').'</span>
                     <span x-show="success" x-cloak class="text-white"><i class="fa-solid fa-circle-check mr-1.5 animate-bounce"></i> '.__('admin/ai-settings.actions.logs_reset').'</span>
@@ -509,7 +512,7 @@ class AiSettings extends Page implements HasForms
                 ->successNotification(null)
                 ->failureNotification(null),
 
-            \Filament\Actions\Action::make('reset_defaults')
+            Action::make('reset_defaults')
                 ->label(new HtmlString('<span x-data="{ success: false }" x-on:defaults-reset.window="success = true; setTimeout(() => success = false, 2500)">
                     <span x-show="!success"><i class="fa-light fa-arrows-rotate mr-1.5"></i> '.__('admin/ai-settings.actions.defaults').'</span>
                     <span x-show="success" x-cloak class="text-white"><i class="fa-solid fa-circle-check mr-1.5 animate-bounce"></i> '.__('admin/ai-settings.actions.defaults_reset').'</span>

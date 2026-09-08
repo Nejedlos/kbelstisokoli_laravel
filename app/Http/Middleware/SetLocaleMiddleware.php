@@ -11,7 +11,7 @@ class SetLocaleMiddleware
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -30,6 +30,7 @@ class SetLocaleMiddleware
             // BYPASS pro priming cache a AJAX/API requesty
             if (! $request->hasHeader('X-Prime-Cache') && ! $request->ajax()) {
                 $url = $request->fullUrlWithQuery(['lang' => null]);
+
                 return redirect($url);
             }
         } else {

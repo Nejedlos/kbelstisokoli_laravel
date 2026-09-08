@@ -6,9 +6,11 @@ use App\Filament\Resources\NotFoundLogs\Pages\ListNotFoundLogs;
 use App\Filament\Resources\NotFoundLogs\Schemas\NotFoundLogForm;
 use App\Filament\Resources\NotFoundLogs\Tables\NotFoundLogsTable;
 use App\Models\NotFoundLog;
+use App\Support\IconHelper;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 
 class NotFoundLogResource extends Resource
 {
@@ -24,9 +26,9 @@ class NotFoundLogResource extends Resource
         return __('admin.resources.not_found_log.plural_label');
     }
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
-        return \App\Support\IconHelper::get(\App\Support\IconHelper::NOT_FOUND);
+        return IconHelper::get(IconHelper::NOT_FOUND);
     }
 
     public static function getPluralModelLabel(): string

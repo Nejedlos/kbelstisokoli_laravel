@@ -29,12 +29,12 @@ class LanguageController extends Controller
                 if (isset($query['lang'])) {
                     unset($query['lang']);
                     $newQuery = http_build_query($query);
-                    $url = (isset($parsed['scheme']) ? $parsed['scheme'] . '://' : '')
-                        . (isset($parsed['host']) ? $parsed['host'] : '')
-                        . (isset($parsed['port']) ? ':' . $parsed['port'] : '')
-                        . (isset($parsed['path']) ? $parsed['path'] : '')
-                        . ($newQuery ? '?' . $newQuery : '')
-                        . (isset($parsed['fragment']) ? '#' . $parsed['fragment'] : '');
+                    $url = (isset($parsed['scheme']) ? $parsed['scheme'].'://' : '')
+                        .(isset($parsed['host']) ? $parsed['host'] : '')
+                        .(isset($parsed['port']) ? ':'.$parsed['port'] : '')
+                        .(isset($parsed['path']) ? $parsed['path'] : '')
+                        .($newQuery ? '?'.$newQuery : '')
+                        .(isset($parsed['fragment']) ? '#'.$parsed['fragment'] : '');
 
                     return redirect()->to($url);
                 }

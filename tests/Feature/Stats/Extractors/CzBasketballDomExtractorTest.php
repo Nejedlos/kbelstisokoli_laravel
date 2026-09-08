@@ -13,7 +13,7 @@ class CzBasketballDomExtractorTest extends TestCase
     public function test_team_page_dom_extractor()
     {
         $html = file_get_contents(base_path('tests/Fixtures/Stats/CzBasketball/team_page.html'));
-        $extractor = new CzBasketballTeamPageDomExtractor();
+        $extractor = new CzBasketballTeamPageDomExtractor;
 
         $result = $extractor->extract($html, 7738, 2025);
 
@@ -33,7 +33,7 @@ class CzBasketballDomExtractorTest extends TestCase
     public function test_matches_list_dom_extractor()
     {
         $html = file_get_contents(base_path('tests/Fixtures/Stats/CzBasketball/matches_list.html'));
-        $extractor = new CzBasketballMatchesListDomExtractor();
+        $extractor = new CzBasketballMatchesListDomExtractor;
 
         $rows = $extractor->extract($html);
 
@@ -44,7 +44,7 @@ class CzBasketballDomExtractorTest extends TestCase
     public function test_match_detail_dom_extractor()
     {
         $html = file_get_contents(base_path('tests/Fixtures/Stats/CzBasketball/match_detail.html'));
-        $extractor = new CzBasketballMatchDetailDomExtractor();
+        $extractor = new CzBasketballMatchDetailDomExtractor;
 
         $result = $extractor->extract($html);
 
@@ -61,7 +61,7 @@ class CzBasketballDomExtractorTest extends TestCase
     public function test_player_page_dom_extractor()
     {
         $html = file_get_contents(base_path('tests/Fixtures/Stats/CzBasketball/player_page.html'));
-        $extractor = new CzBasketballPlayerDomExtractor();
+        $extractor = new CzBasketballPlayerDomExtractor;
         $result = $extractor->extract($html);
 
         $this->assertCount(1, $result['career_table']);

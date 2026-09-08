@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Security;
 
-use App\Models\User;
 use App\Livewire\Member\AvatarModal;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;

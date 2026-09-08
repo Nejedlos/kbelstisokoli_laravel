@@ -2,8 +2,13 @@
 
 namespace App\Livewire\Member;
 
+use App\Models\BasketballMatch;
+use App\Models\ExternalPlayerMatch;
+use App\Models\ExternalPlayerStat;
 use App\Models\Season;
 use App\Models\Team;
+use App\Models\User;
+use App\Services\Member\MemberContext;
 use App\Services\Stats\PlayerStatsService;
 use App\Services\Stats\TeamStatsService;
 use Illuminate\Support\Facades\Auth;
@@ -96,7 +101,7 @@ class MyStatistics extends Component
         // Pokud je teamId null, zkusíme najít nejlepšího kandidáta
         if (! $teamId) {
             // 1. Zkusíme MemberContext
-            $teamId = app(\App\Services\Member\MemberContext::class)->getActiveTeamId();
+            $teamId = app(MemberContext::class)->getActiveTeamId();
         }
 
         if (! $teamId && $user) {
@@ -129,7 +134,7 @@ class MyStatistics extends Component
     {
         if (in_array($propertyName, ['seasonId', 'teamId', 'sortField', 'sortDirection', 'view', 'statsView'])) {
             if ($propertyName === 'teamId') {
-                app(\App\Services\Member\MemberContext::class)->setActiveTeamId((int) $this->teamId);
+                app(MemberContext::class)->setActiveTeamId((int) $this->teamId);
             }
             $this->loadStats();
         }
@@ -179,7 +184,7 @@ class MyStatistics extends Component
         $teamId = ($this->teamId === 'all' || ! $this->teamId) ? null : (int) $this->teamId;
 
         $userId = $this->selectedUserId ?? Auth::id();
-        $user = $this->selectedUserId ? \App\Models\User::find($userId) : Auth::user();
+        $user = $this->selectedUserId ? User::find($userId) : Auth::user();
         $playerProfile = $user?->playerProfile;
 
         // Detekce aktivity v týmu
@@ -239,7 +244,7 @@ class MyStatistics extends Component
 
                 // Počet odehraných zápasů týmu v sezóně (pro indikátor 15/18)
                 if ($teamId) {
-                    $this->teamMatchesCount = \App\Models\BasketballMatch::where('team_id', $teamId)
+                    $this->teamMatchesCount = BasketballMatch::where('team_id', $teamId)
                         ->where('season_id', $this->seasonId)
                         ->whereNotNull('score_home') // Jen odehrané zápasy
                         ->count();
@@ -247,7 +252,7 @@ class MyStatistics extends Component
                     // Pokud jsou "Všechny týmy", sečteme unikátní zápasy všech týmů uživatele v sezóně
                     $userTeamsIds = $user?->playerProfile?->teams()->wherePivot('is_on_roster', true)->pluck('teams.id')->toArray() ?? [];
                     if (! empty($userTeamsIds)) {
-                        $this->teamMatchesCount = \App\Models\BasketballMatch::whereIn('team_id', $userTeamsIds)
+                        $this->teamMatchesCount = BasketballMatch::whereIn('team_id', $userTeamsIds)
                             ->where('season_id', $this->seasonId)
                             ->whereNotNull('score_home')
                             ->count();
@@ -267,8 +272,8 @@ class MyStatistics extends Component
                 }
 
                 // Načtení externích statistik z cz.basketball
-                $externalStatsQuery = \App\Models\ExternalPlayerStat::where('user_id', $userId);
-                $externalMatchesQuery = \App\Models\ExternalPlayerMatch::where('user_id', $userId);
+                $externalStatsQuery = ExternalPlayerStat::where('user_id', $userId);
+                $externalMatchesQuery = ExternalPlayerMatch::where('user_id', $userId);
 
                 // Filtrace podle sezóny pro externí data
                 $season = Season::find($this->seasonId);
@@ -407,7 +412,7 @@ class MyStatistics extends Component
                     $this->teamFormSummary = null;
                 }
 
-                $query = \App\Models\BasketballMatch::query()
+                $query = BasketballMatch::query()
                     ->where('season_id', $this->seasonId);
 
                 if ($teamId) {
@@ -419,7 +424,7 @@ class MyStatistics extends Component
                     });
                 } else {
                     // Pokud jsou "Všechny týmy", filtrujeme podle všech týmů uživatele
-                    $user = $this->selectedUserId ? \App\Models\User::find($this->selectedUserId) : Auth::user();
+                    $user = $this->selectedUserId ? User::find($this->selectedUserId) : Auth::user();
                     $userTeamsIds = $user?->playerProfile?->teams()->pluck('teams.id')->toArray() ?? [];
                     $query->whereIn('team_id', $userTeamsIds);
                 }
@@ -458,7 +463,7 @@ class MyStatistics extends Component
 
     public function render()
     {
-        $user = $this->selectedUserId ? \App\Models\User::find($this->selectedUserId) : Auth::user();
+        $user = $this->selectedUserId ? User::find($this->selectedUserId) : Auth::user();
         $playerProfile = $user?->playerProfile;
 
         // Získání týmů uživatele v aktuálně vybrané sezóně

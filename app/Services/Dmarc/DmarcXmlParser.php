@@ -67,6 +67,7 @@ class DmarcXmlParser
                 ];
             }
         }
+
         return $results;
     }
 
@@ -82,6 +83,7 @@ class DmarcXmlParser
                 ];
             }
         }
+
         return $results;
     }
 }

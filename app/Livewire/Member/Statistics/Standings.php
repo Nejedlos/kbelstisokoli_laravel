@@ -7,12 +7,13 @@ use App\Models\ExternalTeamSeasonConfig;
 use App\Models\Season;
 use App\Models\Team;
 use App\Services\Member\MemberContext;
-use Livewire\Component;
 use Illuminate\Support\Collection;
+use Livewire\Component;
 
 class Standings extends Component
 {
     public ?int $seasonId = null;
+
     public ?int $teamId = null;
 
     protected $queryString = [
@@ -22,18 +23,18 @@ class Standings extends Component
 
     public function mount()
     {
-        if (!$this->seasonId) {
+        if (! $this->seasonId) {
             $this->seasonId = Season::where('is_active', true)->first()?->id ?? Season::latest('id')->first()?->id;
         }
 
-        if (!$this->teamId) {
+        if (! $this->teamId) {
             $this->teamId = app(MemberContext::class)->getActiveTeamId();
         }
     }
 
     public function getStandingsProperty(): Collection
     {
-        if (!$this->seasonId) {
+        if (! $this->seasonId) {
             return collect();
         }
 

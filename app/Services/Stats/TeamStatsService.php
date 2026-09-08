@@ -3,8 +3,11 @@
 namespace App\Services\Stats;
 
 use App\Models\BasketballMatch;
+use App\Models\ExternalTeamSeasonConfig;
 use App\Models\StatisticRow;
+use App\Models\User;
 use App\Services\Stats\Sync\StatisticSetService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -90,7 +93,7 @@ class TeamStatsService
 
             $stats = DB::table('statistic_rows')
                 ->select('player_id')
-                ->selectRaw("COUNT(*) as gp")
+                ->selectRaw('COUNT(*) as gp')
                 ->selectRaw("SUM(CAST(JSON_EXTRACT(`values`, '$.pts') AS UNSIGNED)) as pts_total")
                 ->selectRaw("SUM(CAST(JSON_EXTRACT(`values`, '$.fg3_made') AS UNSIGNED)) as fg3_total")
                 ->selectRaw("SUM(CAST(JSON_EXTRACT(`values`, '$.ft_att') AS UNSIGNED)) as ft_att_total")
@@ -121,7 +124,7 @@ class TeamStatsService
 
             // Načtení jmen hráčů hromadně
             $playerIds = $stats->pluck('player_id')->toArray();
-            $players = \App\Models\User::whereIn('id', $playerIds)->get()->keyBy('id');
+            $players = User::whereIn('id', $playerIds)->get()->keyBy('id');
 
             return $stats->map(function ($row) use ($players) {
                 $player = $players->get($row->player_id);
@@ -193,30 +196,38 @@ class TeamStatsService
                 $isLoss = $margin < 0;
 
                 if ($isHome) {
-                    if ($isWin) $homeWins++;
-                    if ($isLoss) $homeLosses++;
+                    if ($isWin) {
+                        $homeWins++;
+                    }
+                    if ($isLoss) {
+                        $homeLosses++;
+                    }
                 } else {
-                    if ($isWin) $awayWins++;
-                    if ($isLoss) $awayLosses++;
+                    if ($isWin) {
+                        $awayWins++;
+                    }
+                    if ($isLoss) {
+                        $awayLosses++;
+                    }
                 }
 
-                if ($isWin && (!$biggestWin || $margin > $biggestWin['margin'])) {
+                if ($isWin && (! $biggestWin || $margin > $biggestWin['margin'])) {
                     $biggestWin = [
                         'margin' => $margin,
                         'score' => "{$scoreFor}:{$scoreAgainst}",
                         'opponent' => $match->opponent?->name ?? 'Neznámý soupeř',
                         'date' => $match->scheduled_at,
-                        'is_home' => $isHome
+                        'is_home' => $isHome,
                     ];
                 }
 
-                if ($isLoss && (!$biggestLoss || $margin < $biggestLoss['margin'])) {
+                if ($isLoss && (! $biggestLoss || $margin < $biggestLoss['margin'])) {
                     $biggestLoss = [
                         'margin' => abs($margin),
                         'score' => "{$scoreFor}:{$scoreAgainst}",
                         'opponent' => $match->opponent?->name ?? 'Neznámý soupeř',
                         'date' => $match->scheduled_at,
-                        'is_home' => $isHome
+                        'is_home' => $isHome,
                     ];
                 }
             }
@@ -228,13 +239,13 @@ class TeamStatsService
                     'wins' => $homeWins,
                     'losses' => $homeLosses,
                     'total' => $homeWins + $homeLosses,
-                    'pct' => ($homeWins + $homeLosses) > 0 ? round(($homeWins / ($homeWins + $homeLosses)) * 100, 1) : 0
+                    'pct' => ($homeWins + $homeLosses) > 0 ? round(($homeWins / ($homeWins + $homeLosses)) * 100, 1) : 0,
                 ],
                 'away_balance' => [
                     'wins' => $awayWins,
                     'losses' => $awayLosses,
                     'total' => $awayWins + $awayLosses,
-                    'pct' => ($awayWins + $awayLosses) > 0 ? round(($awayWins / ($awayWins + $awayLosses)) * 100, 1) : 0
+                    'pct' => ($awayWins + $awayLosses) > 0 ? round(($awayWins / ($awayWins + $awayLosses)) * 100, 1) : 0,
                 ],
                 'avg_margin' => round($totalMargin / $matches->count(), 1),
             ];
@@ -354,6 +365,7 @@ class TeamStatsService
                     });
                     $gp = $playerRows->count();
                     $player = $playerRows->first()?->player;
+
                     return [
                         'player_id' => $playerId,
                         'name' => $player?->name ?? 'Neznámý hráč',
@@ -371,8 +383,8 @@ class TeamStatsService
     protected function getOfficialTeamSummary(int $teamId, int $seasonId): ?array
     {
         try {
-            /** @var \App\Models\ExternalTeamSeasonConfig|null $config */
-            $config = \App\Models\ExternalTeamSeasonConfig::where('team_id', $teamId)
+            /** @var ExternalTeamSeasonConfig|null $config */
+            $config = ExternalTeamSeasonConfig::where('team_id', $teamId)
                 ->where('season_id', $seasonId)
                 ->first();
 
@@ -556,7 +568,7 @@ class TeamStatsService
      * Pomocná metoda pro získání query builderu zápasů týmu v sezóně.
      * Kombinuje legacy team_id a relaci teams.
      */
-    protected function getTeamMatchesQuery(int $teamId, int $seasonId): \Illuminate\Database\Eloquent\Builder
+    protected function getTeamMatchesQuery(int $teamId, int $seasonId): Builder
     {
         return BasketballMatch::where('season_id', $seasonId)
             ->where(function ($query) use ($teamId) {

@@ -5,6 +5,8 @@ namespace App\Http\Middleware;
 use App\Models\Redirect;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class RedirectMiddleware
@@ -12,7 +14,7 @@ class RedirectMiddleware
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -23,7 +25,7 @@ class RedirectMiddleware
 
         try {
             // 1. Hledání přesného match (nacachované)
-            $redirect = \Illuminate\Support\Facades\Cache::remember("redirect_exact_{$locale}_".md5($path), 3600, function() use ($path) {
+            $redirect = Cache::remember("redirect_exact_{$locale}_".md5($path), 3600, function () use ($path) {
                 return Redirect::where('is_active', true)
                     ->where('source_path', $path)
                     ->where('match_type', 'exact')
@@ -33,7 +35,7 @@ class RedirectMiddleware
 
             // 2. Pokud není exact, hledáme prefix match (nacachované)
             if (! $redirect) {
-                $prefixRedirects = \Illuminate\Support\Facades\Cache::remember("redirect_prefixes_{$locale}", 3600, function() {
+                $prefixRedirects = Cache::remember("redirect_prefixes_{$locale}", 3600, function () {
                     return Redirect::where('is_active', true)
                         ->where('match_type', 'prefix')
                         ->orderBy('priority', 'desc')
@@ -51,11 +53,11 @@ class RedirectMiddleware
         } catch (\Throwable $e) {
             // Při výpadku DB (např. Connection refused na produkci) tiše pokračujeme dál.
             // Logujeme to jako warning, abychom věděli, že k něčemu došlo, ale nezhodili web hned na začátku.
-            \Illuminate\Support\Facades\Log::warning('RedirectMiddleware: Database or Cache connection failure, skipping redirects: '.$e->getMessage());
+            Log::warning('RedirectMiddleware: Database or Cache connection failure, skipping redirects: '.$e->getMessage());
         }
 
         if ($redirect) {
-            \Illuminate\Support\Facades\Log::info('RedirectMiddleware.match', [
+            Log::info('RedirectMiddleware.match', [
                 'path' => $path,
                 'source' => $redirect->source_path,
                 'target_path' => $redirect->target_path,
@@ -78,7 +80,7 @@ class RedirectMiddleware
                 $redirect->update(['last_hit_at' => now()]);
             } catch (\Throwable $e) {
                 // Selhání zápisu statistik nás nezastaví v provedení redirectu
-                \Illuminate\Support\Facades\Log::error('RedirectMiddleware: Failed to update stats: '.$e->getMessage());
+                Log::error('RedirectMiddleware: Failed to update stats: '.$e->getMessage());
             }
 
             return redirect()->to($target, $redirect->status_code);

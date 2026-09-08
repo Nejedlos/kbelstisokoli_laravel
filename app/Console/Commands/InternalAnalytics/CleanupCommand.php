@@ -22,6 +22,7 @@ class CleanupCommand extends Command
 
         if ($this->option('dry-run')) {
             $this->info("Bylo by smazáno {$count} záznamů starších než {$date->toDateString()}.");
+
             return;
         }
 

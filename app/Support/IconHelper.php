@@ -234,7 +234,7 @@ class IconHelper
      * @param  string  $icon  Klíč ikony nebo název ikony
      * @param  string  $style  Styl ikony
      */
-    public static function render(string|AppIcon $icon, string $style = 'fal'): \Illuminate\Support\HtmlString
+    public static function render(string|AppIcon $icon, string $style = 'fal'): HtmlString
     {
         return FilamentIcon::render($icon, $style);
     }

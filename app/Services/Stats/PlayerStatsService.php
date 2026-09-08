@@ -2,7 +2,11 @@
 
 namespace App\Services\Stats;
 
+use App\Models\ExternalPlayerMatch;
+use App\Models\ExternalPlayerStat;
+use App\Models\Season;
 use App\Models\StatisticRow;
+use App\Models\Team;
 use App\Services\Stats\Sync\StatisticSetService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -58,13 +62,13 @@ class PlayerStatsService
     {
         return Cache::remember("player_stats_{$userId}_career_overview", 86400, function () use ($userId) {
             // 1. Získáme všechna externí data (historie)
-            $externalStats = \App\Models\ExternalPlayerStat::where('user_id', $userId)
+            $externalStats = ExternalPlayerStat::where('user_id', $userId)
                 ->where('is_career_total', false)
                 ->orderBy('season_label', 'asc')
                 ->get();
 
             // 2. Získáme všechna interní data (sezónní souhrny)
-            $internalStats = \App\Models\StatisticRow::where('player_id', $userId)
+            $internalStats = StatisticRow::where('player_id', $userId)
                 ->whereHas('set', function ($q) {
                     $q->where('slug', StatisticSetService::PLAYER_SEASON_SUMMARY_SET);
                 })
@@ -76,7 +80,7 @@ class PlayerStatsService
 
             // Přidáme externí data
             foreach ($externalStats as $row) {
-                $seasonLabel = \App\Models\Season::normalizeName($row->season_label);
+                $seasonLabel = Season::normalizeName($row->season_label);
 
                 if ($seasonLabel === 'Neznámá sezóna') {
                     continue;
@@ -105,7 +109,7 @@ class PlayerStatsService
 
             // Přidáme interní data (pokud už tam nejsou pro danou sezónu, nebo je sloučíme)
             foreach ($internalStats as $row) {
-                $seasonLabel = \App\Models\Season::normalizeName($row->season?->name ?? 'Neznámá sezóna');
+                $seasonLabel = Season::normalizeName($row->season?->name ?? 'Neznámá sezóna');
 
                 if ($seasonLabel === 'Neznámá sezóna') {
                     continue;
@@ -155,7 +159,7 @@ class PlayerStatsService
             $avgPpg = $totalGp > 0 ? round($totalPts / $totalGp, 1) : 0;
 
             // Fallback na speciální kariérní řádek z externích dat (pokud obsahuje víc historie)
-            $careerRow = \App\Models\ExternalPlayerStat::where('user_id', $userId)
+            $careerRow = ExternalPlayerStat::where('user_id', $userId)
                 ->where('is_career_total', true)
                 ->first();
 
@@ -188,7 +192,8 @@ class PlayerStatsService
      */
     public function getSeasonSummary(int $userId, int $seasonId, ?int $teamId = null): ?array
     {
-        $cacheKey = "player_stats_{$userId}_{$seasonId}_" . ($teamId ?? 'all') . "_season_summary";
+        $cacheKey = "player_stats_{$userId}_{$seasonId}_".($teamId ?? 'all').'_season_summary';
+
         return Cache::remember($cacheKey, 86400, function () use ($userId, $seasonId, $teamId) {
             // 1. Zkusíme najít interní souhrn (vytvořený systémem)
             $query = StatisticRow::where('player_id', $userId)
@@ -208,16 +213,16 @@ class PlayerStatsService
             }
 
             // 2. Zkusíme najít externí souhrn (přímo z cz.basketball profilu) jako fallback
-            $season = \App\Models\Season::find($seasonId);
+            $season = Season::find($seasonId);
             if ($season) {
-                $normalizedSeason = \App\Models\Season::normalizeName($season->name); // např. 2024/2025
+                $normalizedSeason = Season::normalizeName($season->name); // např. 2024/2025
                 $shortSeason = '';
                 $parts = explode('/', $normalizedSeason);
                 if (count($parts) === 2) {
                     $shortSeason = $parts[0].'/'.substr($parts[1], 2, 2); // 2024/25
                 }
 
-                $externalStatQuery = \App\Models\ExternalPlayerStat::where('user_id', $userId)
+                $externalStatQuery = ExternalPlayerStat::where('user_id', $userId)
                     ->where(function ($q) use ($normalizedSeason, $shortSeason) {
                         $q->where('season_label', 'LIKE', "%{$normalizedSeason}%");
                         if ($shortSeason) {
@@ -227,7 +232,7 @@ class PlayerStatsService
 
                 // Pokud máme teamId, zkusíme najít staty pro daný tým (podle názvu)
                 if ($teamId) {
-                    $team = \App\Models\Team::find($teamId);
+                    $team = Team::find($teamId);
                     if ($team) {
                         $teamName = $team->getTranslation('name', 'cs');
                         $externalStatQuery->where('team_name', 'LIKE', "%{$teamName}%");
@@ -306,7 +311,7 @@ class PlayerStatsService
         }
 
         // Fallback na ExternalPlayerMatch
-        $externalQuery = \App\Models\ExternalPlayerMatch::with(['basketballMatch', 'basketballMatch.opponent', 'basketballMatch.team'])
+        $externalQuery = ExternalPlayerMatch::with(['basketballMatch', 'basketballMatch.opponent', 'basketballMatch.team'])
             ->where('user_id', $userId)
             ->where(function ($q) use ($seasonId) {
                 // 1. Zápasy, které jsou spárované s interním zápasem dané sezóny
@@ -315,9 +320,9 @@ class PlayerStatsService
                 });
 
                 // 2. Zápasy, které nejsou spárované, ale spadají tam podle data
-                $season = \App\Models\Season::find($seasonId);
+                $season = Season::find($seasonId);
                 if ($season) {
-                    $normalized = \App\Models\Season::normalizeName($season->name);
+                    $normalized = Season::normalizeName($season->name);
                     $parts = explode('/', $normalized);
                     if (count($parts) === 2) {
                         $startYear = $parts[0];
@@ -344,19 +349,19 @@ class PlayerStatsService
         $internalExternalIds = [];
         if ($internal->isNotEmpty()) {
             $internalExternalIds = $internal->map(function ($row) {
-                return (string)($row->match?->metadata['external_id'] ?? '');
+                return (string) ($row->match?->metadata['external_id'] ?? '');
             })->filter()->toArray();
         }
 
-        if (!empty($internalExternalIds)) {
+        if (! empty($internalExternalIds)) {
             $results = $results->filter(function ($match) use ($internalExternalIds) {
-                return !in_array((string)($match->external_match_id), $internalExternalIds);
+                return ! in_array((string) ($match->external_match_id), $internalExternalIds);
             });
         }
 
         // Dodatečná filtrace v PHP pro externí zápasy (kvůli chybějícím sloupcům v SQL a staré DB)
         if ($teamId && $results->isNotEmpty()) {
-            $team = \App\Models\Team::find($teamId);
+            $team = Team::find($teamId);
             if ($team) {
                 $teamName = $team->getTranslation('name', 'cs');
                 $results = $results->filter(function ($match) use ($teamId, $teamName) {
@@ -488,13 +493,13 @@ class PlayerStatsService
         foreach ($selectedMetrics as $metric) {
             // MySQL 8 optimalizace: Použití Window Functions pro výpočet ranku přímo v DB
             $rankData = DB::table('statistic_rows')
-                ->selectRaw("rank_pos, total_count, val, avg_val, median_val, max_val")
+                ->selectRaw('rank_pos, total_count, val, avg_val, median_val, max_val')
                 ->fromSub(function ($query) use ($metric, $teamId, $seasonId, $summarySetId) {
                     $query->from('statistic_rows')
                         ->select('player_id')
                         ->selectRaw("CAST(JSON_EXTRACT(`values`, '$.{$metric}') AS DECIMAL(10,2)) as val")
                         ->selectRaw("RANK() OVER (ORDER BY CAST(JSON_EXTRACT(`values`, '$.{$metric}') AS DECIMAL(10,2)) DESC) as rank_pos")
-                        ->selectRaw("COUNT(*) OVER () as total_count")
+                        ->selectRaw('COUNT(*) OVER () as total_count')
                         ->selectRaw("AVG(CAST(JSON_EXTRACT(`values`, '$.{$metric}') AS DECIMAL(10,2))) OVER () as avg_val")
                         ->selectRaw("MAX(CAST(JSON_EXTRACT(`values`, '$.{$metric}') AS DECIMAL(10,2))) OVER () as max_val")
                         // Medián v MySQL je složitější, pro jednoduchost použijeme AVG pokud nechceme dělat složitý kód
@@ -603,7 +608,7 @@ class PlayerStatsService
     {
         // Prioritně zkusíme najít zápasy v interním systému (StatisticRow) a agregovat přes SQL (MySQL 8)
         $internalQuery = StatisticRow::query()
-            ->selectRaw("COUNT(*) as gp")
+            ->selectRaw('COUNT(*) as gp')
             ->selectRaw("SUM(CAST(JSON_EXTRACT(`values`, '$.pts') AS UNSIGNED)) as pts_total")
             ->selectRaw("SUM(CAST(JSON_EXTRACT(`values`, '$.minutes') AS UNSIGNED)) as minutes_total")
             ->selectRaw("SUM(CAST(JSON_EXTRACT(`values`, '$.fg2_made') AS UNSIGNED)) as fg2_made_total")
@@ -659,15 +664,15 @@ class PlayerStatsService
         }
 
         // Pokud nejsou interní, zkusíme externí (ExternalPlayerMatch)
-        $externalQuery = \App\Models\ExternalPlayerMatch::where('user_id', $userId)
+        $externalQuery = ExternalPlayerMatch::where('user_id', $userId)
             ->where(function ($q) use ($seasonId) {
                 $q->whereHas('basketballMatch', function ($mq) use ($seasonId) {
                     $mq->where('season_id', $seasonId);
                 });
 
-                $season = \App\Models\Season::find($seasonId);
+                $season = Season::find($seasonId);
                 if ($season) {
-                    $normalized = \App\Models\Season::normalizeName($season->name);
+                    $normalized = Season::normalizeName($season->name);
                     $parts = explode('/', $normalized);
                     if (count($parts) === 2) {
                         $startYear = $parts[0];
@@ -692,7 +697,7 @@ class PlayerStatsService
 
         // Filtrace v PHP (kvůli staré DB na produkci)
         if ($teamId && $externalMatches->isNotEmpty()) {
-            $team = \App\Models\Team::find($teamId);
+            $team = Team::find($teamId);
             if ($team) {
                 $teamName = $team->getTranslation('name', 'cs');
                 $externalMatches = $externalMatches->filter(function ($match) use ($teamId, $teamName) {

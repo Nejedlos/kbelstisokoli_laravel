@@ -8,7 +8,6 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Livewire\Attributes\On;
-use Illuminate\Support\Carbon;
 
 class RecentEventsTableWidget extends BaseWidget
 {

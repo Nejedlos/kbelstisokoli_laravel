@@ -9,9 +9,12 @@ use App\Filament\Resources\Trainings\Pages\ListTrainings;
 use App\Filament\Resources\Trainings\Schemas\TrainingForm;
 use App\Filament\Resources\Trainings\Tables\TrainingsTable;
 use App\Models\Training;
+use App\Support\IconHelper;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Builder;
 
 class TrainingResource extends Resource
 {
@@ -32,9 +35,9 @@ class TrainingResource extends Resource
         return __('admin.resources.training.plural_label');
     }
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
-        return \App\Support\IconHelper::get(\App\Support\IconHelper::TRAININGS);
+        return IconHelper::get(IconHelper::TRAININGS);
     }
 
     public static function getNavigationSort(): ?int
@@ -42,7 +45,7 @@ class TrainingResource extends Resource
         return 20;
     }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
             ->with(['teams']);

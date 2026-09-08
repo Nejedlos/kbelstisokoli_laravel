@@ -3,13 +3,10 @@
 namespace App\Listeners\InternalAnalytics;
 
 use App\Services\InternalAnalytics\InternalAnalyticsService;
+use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
-use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\PasswordReset;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Support\Facades\Request;
 
 class AuthEventListener
 {

@@ -16,7 +16,7 @@ return [
     'brand_url' => config('app.url'),
 
     // Logo musí být dostupné přes absolutní URL
-    'logo_url' => config('app.url') . '/assets/img/brand/email-logo.png',
+    'logo_url' => config('app.url').'/assets/img/brand/email-logo.png',
     'logo_width' => 120,
     'logo_alt' => 'Sokoli',
 

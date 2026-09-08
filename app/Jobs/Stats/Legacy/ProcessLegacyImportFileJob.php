@@ -10,6 +10,7 @@ use App\Models\StatisticRow;
 use App\Models\StatisticSet;
 use App\Models\Team;
 use App\Services\Stats\Legacy\Extractors\LegacyStatExtractor;
+use App\Services\Stats\Legacy\LegacyFileClassifier;
 use App\Services\Stats\Sync\StatisticSetService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -37,6 +38,7 @@ class ProcessLegacyImportFileJob implements ShouldQueue
         // Kontrola, zda nebyl celý batch zrušen
         if ($batch->status === 'cancelled') {
             $file->update(['status' => 'cancelled', 'error_summary' => 'Zrušeno uživatelem skrze dávku.']);
+
             return;
         }
 
@@ -98,7 +100,7 @@ class ProcessLegacyImportFileJob implements ShouldQueue
             }
 
             // 2. Parse
-            $classification = (new \App\Services\Stats\Legacy\LegacyFileClassifier)->classify($file->original_filename, $content);
+            $classification = (new LegacyFileClassifier)->classify($file->original_filename, $content);
             $extractedTables = $extractor->extract($content, $file->file_type, $classification['encoding']);
 
             // 3. Season & Team
@@ -132,8 +134,8 @@ class ProcessLegacyImportFileJob implements ShouldQueue
                     // Smazat staré řádky pro stejný set, sezónu a soubor
                     StatisticRow::where('statistic_set_id', $statSet->id)
                         ->where('season_id', $season->id)
-                        ->where('source_metadata', 'LIKE', '%"original_filename":"' . $file->original_filename . '"%')
-                        ->where('source_metadata', 'LIKE', '%"table_type":"' . $tableDto->type . '"%')
+                        ->where('source_metadata', 'LIKE', '%"original_filename":"'.$file->original_filename.'"%')
+                        ->where('source_metadata', 'LIKE', '%"table_type":"'.$tableDto->type.'"%')
                         ->delete();
 
                     foreach ($tableDto->rows as $row) {

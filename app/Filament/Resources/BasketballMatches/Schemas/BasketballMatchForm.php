@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\BasketballMatches\Schemas;
 
+use App\Models\Season;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -42,7 +43,7 @@ class BasketballMatchForm
                                     ->label('Sezóna')
                                     ->relationship('season', 'name')
                                     ->required()
-                                    ->default(\App\Models\Season::where('is_active', true)->first()?->id),
+                                    ->default(Season::where('is_active', true)->first()?->id),
                                 Select::make('opponent_id')
                                     ->label('Soupeř')
                                     ->relationship('opponent', 'name')

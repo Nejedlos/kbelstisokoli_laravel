@@ -10,11 +10,10 @@ trait SeedsHelpContent
     /**
      * Upsert help record with protection for customized entries.
      *
-     * @param string $modelClass The Eloquent model class
-     * @param array $data Non-translatable data (must include 'slug')
-     * @param array $translations Translatable data in format ['field' => ['cs' => '...', 'en' => '...']]
-     * @param bool $force Force update even if customized
-     * @return Model
+     * @param  string  $modelClass  The Eloquent model class
+     * @param  array  $data  Non-translatable data (must include 'slug')
+     * @param  array  $translations  Translatable data in format ['field' => ['cs' => '...', 'en' => '...']]
+     * @param  bool  $force  Force update even if customized
      */
     protected function upsertHelpItem(string $modelClass, array $data, array $translations = [], bool $force = false): Model
     {
@@ -31,13 +30,13 @@ trait SeedsHelpContent
 
         if ($record) {
             // Check if customized
-            if ($record->is_customized && !$force) {
+            if ($record->is_customized && ! $force) {
                 // Log::info("Help seeder: Skipping customized record '{$slug}' for model '{$modelClass}'");
                 return $record;
             }
 
             // Check if hash matches
-            if ($record->source_hash === $newHash && !$force) {
+            if ($record->source_hash === $newHash && ! $force) {
                 return $record;
             }
 
@@ -56,7 +55,7 @@ trait SeedsHelpContent
 
         // Create new
         /** @var Model $record */
-        $record = new $modelClass();
+        $record = new $modelClass;
         $record->fill($data);
         foreach ($translations as $field => $locales) {
             foreach ($locales as $locale => $value) {

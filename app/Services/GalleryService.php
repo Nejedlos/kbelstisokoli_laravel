@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Gallery;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class GalleryService
@@ -42,7 +43,7 @@ class GalleryService
 
             $caption = trim((string) brand_text($row->pool_title));
             if (! empty($row->event_date)) {
-                $date = \Carbon\Carbon::parse($row->event_date);
+                $date = Carbon::parse($row->event_date);
                 if ($date->day === 1 && $date->month === 1) {
                     $caption .= ' — '.$date->format('Y');
                 } else {

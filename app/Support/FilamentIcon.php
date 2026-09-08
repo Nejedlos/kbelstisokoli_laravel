@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Support\Icons\AppIcon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 
 /**
  * Robustní správa ikon pro Filament.
@@ -44,7 +45,7 @@ class FilamentIcon
         };
 
         // 2. Pokud už má prefix (např. heroicon-), vrátíme ji přímo
-        if (\Illuminate\Support\Str::contains($iconName, ['-'])) {
+        if (Str::contains($iconName, ['-'])) {
             $parts = explode('-', $iconName);
             $prefix = $parts[0];
             if ($prefix === 'heroicon') {

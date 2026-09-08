@@ -3,11 +3,7 @@
 namespace App\Filament\Resources\Posts\Schemas;
 
 use App\Filament\Forms\CmsForms;
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Schemas\Schema;
+use App\Support\IconHelper;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
@@ -15,9 +11,13 @@ use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Schema;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Log;
 
 class PostForm
 {
@@ -28,10 +28,10 @@ class PostForm
                 Tabs::make('Post Tabs')
                     ->tabs([
                         Tab::make('Obsah')
-                            ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::PAGES))
+                            ->icon(IconHelper::get(IconHelper::PAGES))
                             ->schema([
                                 Section::make('Základní informace')
-                                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::INFO))
+                                    ->icon(IconHelper::get(IconHelper::INFO))
                                     ->schema([
                                         TextInput::make('slug')
                                             ->label('URL adresa (slug)')
@@ -90,10 +90,10 @@ class PostForm
                             ]),
 
                         Tab::make('Publikace a média')
-                            ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::PHOTO_FILM))
+                            ->icon(IconHelper::get(IconHelper::PHOTO_FILM))
                             ->schema([
                                 Section::make('Stav publikace')
-                                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::ANNOUNCEMENTS))
+                                    ->icon(IconHelper::get(IconHelper::ANNOUNCEMENTS))
                                     ->schema([
                                         Grid::make(2)
                                             ->schema([
@@ -119,7 +119,7 @@ class PostForm
                                     ]),
 
                                 Section::make('Média')
-                                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::IMAGE))
+                                    ->icon(IconHelper::get(IconHelper::IMAGE))
                                     ->schema([
                                         SpatieMediaLibraryFileUpload::make('featured_image')
                                             ->label('Hlavní náhledový obrázek')
@@ -135,33 +135,33 @@ class PostForm
                                                 $ext = $file->getClientOriginalExtension();
 
                                                 $slugBase = null;
-                                                if (is_array($title) && !empty($title['cs'])) {
+                                                if (is_array($title) && ! empty($title['cs'])) {
                                                     $slugBase = $title['cs'];
-                                                } elseif (is_string($title) && !empty($title)) {
+                                                } elseif (is_string($title) && ! empty($title)) {
                                                     $slugBase = $title;
                                                 }
 
                                                 if ($slugBase) {
-                                                    return Str::slug($slugBase) . '.' . $ext;
+                                                    return Str::slug($slugBase).'.'.$ext;
                                                 }
 
-                                                return Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $ext;
+                                                return Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)).'.'.$ext;
                                             }),
                                     ]),
                             ]),
 
                         Tab::make('SEO')
-                            ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::SEO))
+                            ->icon(IconHelper::get(IconHelper::SEO))
                             ->schema([
                                 CmsForms::getSeoSection(),
                             ]),
 
                         Tab::make('Vývojář')
                             ->visible(fn () => auth()->user()?->can('manage_advanced_settings'))
-                            ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::CODE))
+                            ->icon(IconHelper::get(IconHelper::CODE))
                             ->schema([
                                 Section::make('Vlastní kódy a skripty')
-                                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::TERMINAL))
+                                    ->icon(IconHelper::get(IconHelper::TERMINAL))
                                     ->description('Vložte kód, který se provede pouze pro tuto novinku.')
                                     ->schema([
                                         Textarea::make('head_code')

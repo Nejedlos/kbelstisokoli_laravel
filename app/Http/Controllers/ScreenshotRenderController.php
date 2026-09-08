@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Support\ScreenshotMode;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
@@ -22,23 +21,24 @@ class ScreenshotRenderController extends Controller
         $targetUrl = $request->query('url');
         $userId = $request->query('user_id'); // ID uživatele, pro kterého renderujeme (volitelné)
 
-        if (!$targetUrl) {
+        if (! $targetUrl) {
             return response()->json(['error' => 'Missing url parameter'], 400);
         }
 
         // 1. Validace cílové URL (musí být interní)
-        if (!$this->isInternalUrl($targetUrl)) {
-            \Illuminate\Support\Facades\Log::warning('[ScreenshotProxy] Blocked external URL attempt', [
+        if (! $this->isInternalUrl($targetUrl)) {
+            Log::warning('[ScreenshotProxy] Blocked external URL attempt', [
                 'url' => $targetUrl,
-                'ip' => $request->ip()
+                'ip' => $request->ip(),
             ]);
+
             return response()->json(['error' => 'Only internal URLs are allowed'], 403);
         }
 
         // 2. Kontrola signatury (pro externí volání z NASu)
         // Pokud request obsahuje user_id a target_path, musí být signatura platná,
         // jinak se k cizím datům nikdo nedostane.
-        if ($userId && !$request->hasValidSignature()) {
+        if ($userId && ! $request->hasValidSignature()) {
             return response()->json(['error' => 'Invalid or expired signature'], 401);
         }
 
@@ -56,11 +56,11 @@ class ScreenshotRenderController extends Controller
             ])
             ->get($screenshotUrl);
 
-        if (!$response->successful()) {
+        if (! $response->successful()) {
             return response()->json([
                 'error' => 'Failed to fetch target URL',
                 'status' => $response->status(),
-                'url' => $screenshotUrl
+                'url' => $screenshotUrl,
             ], 502);
         }
 
@@ -82,7 +82,7 @@ class ScreenshotRenderController extends Controller
         $appUrl = config('app.url');
 
         // Pokud je to relativní URL, považujeme ji za interní (pokud nezačíná na //)
-        if (Str::startsWith($url, '/') && !Str::startsWith($url, '//')) {
+        if (Str::startsWith($url, '/') && ! Str::startsWith($url, '//')) {
             return true;
         }
 
@@ -100,7 +100,7 @@ class ScreenshotRenderController extends Controller
     protected function generateSignedScreenshotUrl(string $url, ?int $userId = null): string
     {
         // Převedeme na absolutní, pokud je relativní
-        if (!Str::startsWith($url, 'http')) {
+        if (! Str::startsWith($url, 'http')) {
             $url = URL::to($url);
         }
 
@@ -129,7 +129,7 @@ class ScreenshotRenderController extends Controller
 
         // Fix pro src="/..." a href="/..."
         // Ale ignorujeme data: URIs a externí linky
-        $html = preg_replace('/(src|href)=["\']\/(?!\/)([^"\']+)["\']/', '$1="' . $baseUrl . '/$2"', $html);
+        $html = preg_replace('/(src|href)=["\']\/(?!\/)([^"\']+)["\']/', '$1="'.$baseUrl.'/$2"', $html);
 
         // Fix pro Vite assety (pokud by se nějak prosmýkly relativní)
         // Ale standardní asset() by měl stačit.

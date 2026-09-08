@@ -99,7 +99,7 @@ return new class extends Migration
                                     }
                                 }
                             });
-                    } catch (\Throwable $e) {
+                    } catch (Throwable $e) {
                         // Tichý fail - pokud např. chybí ID sloupec v tabulce, chunkById selže
                     }
                 }

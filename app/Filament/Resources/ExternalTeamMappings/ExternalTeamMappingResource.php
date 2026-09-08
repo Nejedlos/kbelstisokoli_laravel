@@ -13,6 +13,7 @@ use App\Support\Icons\AppIcon;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 
 class ExternalTeamMappingResource extends Resource
 {
@@ -38,14 +39,14 @@ class ExternalTeamMappingResource extends Resource
         return __('admin.resources.external_team_mapping.label');
     }
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
         return FilamentIcon::get(AppIcon::TABLE);
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.statistics_and_data') . ' > ' . __('admin.navigation.groups.external_data');
+        return __('admin.navigation.groups.statistics_and_data').' > '.__('admin.navigation.groups.external_data');
     }
 
     public static function form(Schema $schema): Schema

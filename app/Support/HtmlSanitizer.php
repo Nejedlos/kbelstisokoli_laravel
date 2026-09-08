@@ -10,14 +10,14 @@ class HtmlSanitizer
      */
     public static function clean(?string $html, bool $allowScripts = false): string
     {
-        if (!$html) {
+        if (! $html) {
             return '';
         }
 
         $dom = $html;
 
         // 1. Odstranění skriptů, pokud nejsou povoleny
-        if (!$allowScripts) {
+        if (! $allowScripts) {
             $dom = preg_replace('/<script\b[^>]*>([\s\S]*?)<\/script>/i', '', $dom);
         }
 

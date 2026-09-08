@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class LegacyImportFile extends Model
 {
@@ -21,12 +22,12 @@ class LegacyImportFile extends Model
         'import_run_id',
     ];
 
-    public function batch(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function batch(): BelongsTo
     {
         return $this->belongsTo(LegacyImportBatch::class, 'legacy_import_batch_id');
     }
 
-    public function importRun(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function importRun(): BelongsTo
     {
         return $this->belongsTo(ExternalImportRun::class, 'import_run_id');
     }

@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Gate;
 use Laravel\Telescope\IncomingEntry;
 use Laravel\Telescope\Telescope;
 use Laravel\Telescope\TelescopeApplicationServiceProvider;
+use Laravel\Telescope\Watchers\ModelWatcher;
+use Laravel\Telescope\Watchers\QueryWatcher;
+use Laravel\Telescope\Watchers\ViewWatcher;
 
 class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
 {
@@ -24,9 +27,9 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
         // Optimalizace pro localhost: vypneme náročné sledovače, které nepotřebujeme neustále
         if ($isLocal) {
             config([
-                'telescope.watchers.' . \Laravel\Telescope\Watchers\ModelWatcher::class . '.hydrations' => false,
-                'telescope.watchers.' . \Laravel\Telescope\Watchers\QueryWatcher::class . '.slow' => 50, // Zaznamenáváme jen dotazy nad 50ms
-                'telescope.watchers.' . \Laravel\Telescope\Watchers\ViewWatcher::class => false, // ViewWatcher je na localhostu velmi hlučný
+                'telescope.watchers.'.ModelWatcher::class.'.hydrations' => false,
+                'telescope.watchers.'.QueryWatcher::class.'.slow' => 50, // Zaznamenáváme jen dotazy nad 50ms
+                'telescope.watchers.'.ViewWatcher::class => false, // ViewWatcher je na localhostu velmi hlučný
             ]);
         }
 

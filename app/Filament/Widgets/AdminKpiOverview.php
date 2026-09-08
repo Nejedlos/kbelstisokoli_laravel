@@ -48,20 +48,20 @@ class AdminKpiOverview extends BaseWidget
         $attendanceTotal = class_exists(Attendance::class) ? Attendance::count() : 0;
 
         return [
-            Stat::make(new HtmlString(IconHelper::render(IconHelper::USERS) . ' ' . __('admin/dashboard.kpi.users_total')), $users)
+            Stat::make(new HtmlString(IconHelper::render(IconHelper::USERS).' '.__('admin/dashboard.kpi.users_total')), $users)
                 ->description(__('admin/dashboard.kpi.users_active_desc', ['count' => $activeUsers]))
                 ->color('primary'),
-            Stat::make(new HtmlString(IconHelper::render(IconHelper::PLAYER_PROFILES) . ' ' . __('admin/dashboard.kpi.players_total')), $players)
+            Stat::make(new HtmlString(IconHelper::render(IconHelper::PLAYER_PROFILES).' '.__('admin/dashboard.kpi.players_total')), $players)
                 ->color('success'),
-            Stat::make(new HtmlString(IconHelper::render(IconHelper::TEAMS) . ' ' . __('admin/dashboard.kpi.teams_total')), $teams)
+            Stat::make(new HtmlString(IconHelper::render(IconHelper::TEAMS).' '.__('admin/dashboard.kpi.teams_total')), $teams)
                 ->color('warning'),
-            Stat::make(new HtmlString(IconHelper::render(IconHelper::MATCHES) . ' ' . __('admin/dashboard.kpi.matches_total')), $matchesTotal)
+            Stat::make(new HtmlString(IconHelper::render(IconHelper::MATCHES).' '.__('admin/dashboard.kpi.matches_total')), $matchesTotal)
                 ->description(__('admin/dashboard.kpi.matches_upcoming_desc', ['count' => $matchesUpcoming]))
                 ->color('info'),
-            Stat::make(new HtmlString(IconHelper::render(IconHelper::TRAININGS) . ' ' . __('admin/dashboard.kpi.trainings_total')), $trainingsTotal)
+            Stat::make(new HtmlString(IconHelper::render(IconHelper::TRAININGS).' '.__('admin/dashboard.kpi.trainings_total')), $trainingsTotal)
                 ->description(__('admin/dashboard.kpi.trainings_upcoming_desc', ['count' => $trainingsUpcoming]))
                 ->color('info'),
-            Stat::make(new HtmlString(IconHelper::render(IconHelper::CHECK_CIRCLE) . ' ' . __('admin/dashboard.kpi.attendance_total')), $attendanceTotal)
+            Stat::make(new HtmlString(IconHelper::render(IconHelper::CHECK_CIRCLE).' '.__('admin/dashboard.kpi.attendance_total')), $attendanceTotal)
                 ->description(__('admin/dashboard.kpi.attendance_desc'))
                 ->color('gray'),
         ];

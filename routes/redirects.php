@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // Hlavní stránky
@@ -26,7 +27,7 @@ Route::permanentRedirect('/fotoalbum', '/galerie');
 Route::permanentRedirect('/dokumenty', '/dokumenty');
 
 // Staré CMS Made Simple index s parametry (pokud Laravel zachytí)
-Route::get('/index.php', function (\Illuminate\Http\Request $request) {
+Route::get('/index.php', function (Request $request) {
     if ($request->has('page')) {
         $page = $request->query('page');
 
@@ -45,7 +46,7 @@ Route::get('/index.php', function (\Illuminate\Http\Request $request) {
         }
 
         // Zkusíme najít stránku se stejným slugem v novém systému
-        return redirect('/' . $page, 301);
+        return redirect('/'.$page, 301);
     }
 
     if ($request->has('rozpis_zapasu') || $request->query('zobrazit') === 'zapasy') {

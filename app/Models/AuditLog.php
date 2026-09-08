@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Prunable;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class AuditLog extends Model
 {
@@ -40,7 +43,7 @@ class AuditLog extends Model
         'is_system_event' => 'boolean',
     ];
 
-    public function actor(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function actor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'actor_user_id');
     }
@@ -49,12 +52,12 @@ class AuditLog extends Model
      * Definice záznamů k automatickému smazání (Prunable).
      * Mažeme záznamy starší než 7 dní.
      */
-    public function prunable(): \Illuminate\Database\Eloquent\Builder
+    public function prunable(): Builder
     {
         return static::where('occurred_at', '<', now()->subDays(7));
     }
 
-    public function subject(): \Illuminate\Database\Eloquent\Relations\MorphTo
+    public function subject(): MorphTo
     {
         return $this->morphTo();
     }

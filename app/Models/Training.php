@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Training extends Model
@@ -41,13 +42,13 @@ class Training extends Model
         return $this->attendances()->where('is_mismatch', true);
     }
 
-    public function teams(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function teams(): BelongsToMany
     {
         return $this->belongsToMany(Team::class, 'team_training');
     }
 
     public function getDisplayNameAttribute(): string
     {
-        return __('member.attendance.event_types.training_' . ($this->sport ?? 'basketball'));
+        return __('member.attendance.event_types.training_'.($this->sport ?? 'basketball'));
     }
 }

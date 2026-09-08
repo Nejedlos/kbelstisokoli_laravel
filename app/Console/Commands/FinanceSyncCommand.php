@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\FinanceSyncJob;
 use Illuminate\Console\Command;
 
 class FinanceSyncCommand extends Command
@@ -41,7 +42,7 @@ class FinanceSyncCommand extends Command
         }
 
         $this->info('Spouštím synchronizaci statusů financí...');
-        \App\Jobs\FinanceSyncJob::dispatchSync();
+        FinanceSyncJob::dispatchSync();
         $this->info('Hotovo.');
     }
 }

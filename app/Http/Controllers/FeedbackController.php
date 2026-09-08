@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Mail\FeedbackReportNotification;
 use App\Models\FeedbackReport;
+use App\Services\BrandingService;
+use App\Services\ScreenshotService;
 use App\Support\AppVersion;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -12,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class FeedbackController extends Controller
@@ -21,12 +24,12 @@ class FeedbackController extends Controller
         return view('partials.feedback-widget')->render();
     }
 
-    public function snapshot(string $token): \Illuminate\View\View
+    public function snapshot(string $token): View
     {
         // Snapshot token by měl být jednorázový a krátkodobý (např. 5 minut)
         $data = Cache::get("fb_snap_{$token}");
 
-        if (!$data) {
+        if (! $data) {
             abort(404, 'Snapshot not found or expired.');
         }
 
@@ -60,7 +63,7 @@ class FeedbackController extends Controller
         // 2. Duplicate guard
         $titleHash = md5($request->input('title'));
         $descHash = md5($request->input('description'));
-        $cacheKey = "feedback_dup_{$user->id}_" . md5($request->input('url')) . "_{$titleHash}_{$descHash}";
+        $cacheKey = "feedback_dup_{$user->id}_".md5($request->input('url'))."_{$titleHash}_{$descHash}";
 
         if (Cache::has($cacheKey)) {
             return response()->json([
@@ -95,7 +98,7 @@ class FeedbackController extends Controller
         // 4. Payload size guard (rough check)
         $payloadSize = strlen(serialize($request->all()));
         if ($payloadSize > config('feedback.limits.max_payload_bytes', 8388608)) {
-             return response()->json([
+            return response()->json([
                 'message' => 'Payload je příliš velký. Zkuste prosím vypnout přiložení screenshotu nebo DOM snapshotu.',
             ], 413);
         }
@@ -104,7 +107,7 @@ class FeedbackController extends Controller
         $redacted = $this->redactData($request->all());
 
         // 6. Uložení Reportu
-        $report = new FeedbackReport();
+        $report = new FeedbackReport;
         $report->user_id = $user->id;
         $report->type = $validated['type'];
         $report->severity = $validated['severity'] ?? null;
@@ -133,7 +136,7 @@ class FeedbackController extends Controller
         $storageDir = "feedback/{$report->id}";
         $screenshotStatus = 'missing';
 
-        if (!empty($redacted['capture']['screenshot'])) {
+        if (! empty($redacted['capture']['screenshot'])) {
             $data = $redacted['capture']['screenshot'];
             $extension = 'png';
             $size = strlen($data);
@@ -157,14 +160,14 @@ class FeedbackController extends Controller
                     $screenshotStatus = "storage_put_failed ({$size} chars)";
                     Log::error('[FeedbackController] Failed to save screenshot to storage', [
                         'report_id' => $report->id,
-                        'path' => $path
+                        'path' => $path,
                     ]);
                 }
             } catch (\Throwable $e) {
-                $screenshotStatus = "error: " . $e->getMessage();
+                $screenshotStatus = 'error: '.$e->getMessage();
                 Log::error('[FeedbackController] Screenshot processing error', [
                     'report_id' => $report->id,
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ]);
             }
         }
@@ -172,44 +175,44 @@ class FeedbackController extends Controller
         Log::info("[FeedbackController] Report #{$report->id} created", [
             'type' => $report->type,
             'screenshot' => $screenshotStatus,
-            'dom' => !empty($redacted['capture']['domLight']) ? 'present' : 'missing',
+            'dom' => ! empty($redacted['capture']['domLight']) ? 'present' : 'missing',
         ]);
 
-        if (!empty($redacted['capture']['domLight'])) {
+        if (! empty($redacted['capture']['domLight'])) {
             $path = "{$storageDir}/dom.html";
             Storage::disk('local')->put($path, $redacted['capture']['domLight']);
             $report->dom_path = $path;
         }
 
-        if (!empty($redacted['logs']['console']) || !empty($redacted['logs']['errors'])) {
+        if (! empty($redacted['logs']['console']) || ! empty($redacted['logs']['errors'])) {
             $path = "{$storageDir}/logs.json";
             Storage::disk('local')->put($path, json_encode([
                 'console' => $redacted['logs']['console'] ?? [],
-                'errors' => $redacted['logs']['errors'] ?? []
+                'errors' => $redacted['logs']['errors'] ?? [],
             ], JSON_PRETTY_PRINT));
             $report->logs_path = $path;
         }
 
-        if (!empty($redacted['logs']['network'])) {
+        if (! empty($redacted['logs']['network'])) {
             $path = "{$storageDir}/network.json";
             Storage::disk('local')->put($path, json_encode($redacted['logs']['network'], JSON_PRETTY_PRINT));
             $report->network_path = $path;
         }
 
-        if (!empty($redacted['logs']['breadcrumbs'])) {
+        if (! empty($redacted['logs']['breadcrumbs'])) {
             $path = "{$storageDir}/breadcrumbs.json";
             Storage::disk('local')->put($path, json_encode($redacted['logs']['breadcrumbs'], JSON_PRETTY_PRINT));
             $report->breadcrumbs_path = $path;
         }
 
         // Clicks jsou nyní v breadcrumbs nebo meta, pokud jsou povoleny
-        if (!empty($redacted['clicks'])) {
-             $path = "{$storageDir}/clicks.json";
-             Storage::disk('local')->put($path, json_encode($redacted['clicks'], JSON_PRETTY_PRINT));
-             $report->clicks_path = $path;
+        if (! empty($redacted['clicks'])) {
+            $path = "{$storageDir}/clicks.json";
+            Storage::disk('local')->put($path, json_encode($redacted['clicks'], JSON_PRETTY_PRINT));
+            $report->clicks_path = $path;
         }
 
-        if (!empty($redacted['performance'])) {
+        if (! empty($redacted['performance'])) {
             $path = "{$storageDir}/performance.json";
             Storage::disk('local')->put($path, json_encode($redacted['performance'], JSON_PRETTY_PRINT));
             $report->performance_path = $path;
@@ -222,11 +225,11 @@ class FeedbackController extends Controller
 
         // 8. Notifikace
         if (config('feedback.notifications.mail')) {
-            $branding = app(\App\Services\BrandingService::class)->getSettings();
+            $branding = app(BrandingService::class)->getSettings();
             // Prioritně admin email z nastavení brandingu, pak z configu (který bere ENV ERROR_REPORT_EMAIL)
             $recipients = $branding['admin_contact']['email'] ?? config('feedback.recipients');
 
-            if (!empty($recipients)) {
+            if (! empty($recipients)) {
                 // Podpora pro více adres oddělených čárkou
                 $recipientList = is_string($recipients) ? array_map('trim', explode(',', $recipients)) : $recipients;
                 Mail::to($recipientList)->send(new FeedbackReportNotification($report));
@@ -243,11 +246,11 @@ class FeedbackController extends Controller
     {
         // Kontrola oprávnění (zjednodušená na to, zda má uživatel přístup do adminu)
         // V produkci by tu byla kontrola na konkrétní permission spatie
-        if (!auth()->user() || !auth()->user()->hasRole(['super_admin', 'admin', 'technician'])) {
+        if (! auth()->user() || ! auth()->user()->hasRole(['super_admin', 'admin', 'technician'])) {
             abort(403);
         }
 
-        if (!$report->screenshot_path || !Storage::disk('local')->exists($report->screenshot_path)) {
+        if (! $report->screenshot_path || ! Storage::disk('local')->exists($report->screenshot_path)) {
             abort(404);
         }
 
@@ -260,7 +263,7 @@ class FeedbackController extends Controller
         $strategy = config('feedback.screenshot.strategy', 'auto');
         $allow = in_array($strategy, ['auto', 'playwright', 'local'], true) && config('feedback.screenshot.playwright.enabled', true);
 
-        if (!$allow) {
+        if (! $allow) {
             return response()->json([
                 'ok' => false,
                 'message' => 'Server-side screenshot is disabled in configuration.',
@@ -284,7 +287,7 @@ class FeedbackController extends Controller
         ]);
 
         if (empty($validated['dom']) && empty($validated['url'])) {
-             return response()->json(['ok' => false, 'message' => 'DOM or URL must be provided.'], 422);
+            return response()->json(['ok' => false, 'message' => 'DOM or URL must be provided.'], 422);
         }
 
         Log::info('[FeedbackController] Server screenshot request accepted', [
@@ -294,8 +297,8 @@ class FeedbackController extends Controller
         ]);
 
         try {
-            /** @var \App\Services\ScreenshotService $svc */
-            $svc = app(\App\Services\ScreenshotService::class);
+            /** @var ScreenshotService $svc */
+            $svc = app(ScreenshotService::class);
 
             $result = $svc->captureViaPlaywrightFromDom($validated['dom'] ?? '', [
                 'url' => $validated['url'] ?? null,
@@ -314,7 +317,7 @@ class FeedbackController extends Controller
             ]);
 
             if (empty($result['data_url'])) {
-                 throw new \RuntimeException('Playwright worker finished successfully but produced no image data.');
+                throw new \RuntimeException('Playwright worker finished successfully but produced no image data.');
             }
 
             return response()->json([
@@ -355,8 +358,9 @@ class FeedbackController extends Controller
         array_walk_recursive($data, function (&$value, $key) use ($redactKeys, $redactPatterns) {
             if (is_string($value)) {
                 // Redact by key name
-                if (in_array(strtolower((string)$key), $redactKeys)) {
+                if (in_array(strtolower((string) $key), $redactKeys)) {
                     $value = '[REDACTED]';
+
                     return;
                 }
 

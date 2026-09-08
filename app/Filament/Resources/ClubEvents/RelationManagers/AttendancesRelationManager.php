@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ClubEvents\RelationManagers;
 
 use App\Enums\ExcuseReason;
+use App\Models\Attendance;
 use App\Support\FilamentIcon;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -18,6 +19,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class AttendancesRelationManager extends RelationManager
 {
@@ -29,7 +31,7 @@ class AttendancesRelationManager extends RelationManager
 
     protected static ?string $pluralModelLabel = 'admin.resources.attendance.plural_label';
 
-    public static function getTitle(\Illuminate\Database\Eloquent\Model $ownerRecord, string $pageClass): string
+    public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
         return __('admin.resources.attendance.plural_label');
     }
@@ -93,7 +95,7 @@ class AttendancesRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('user.name')
-            ->recordClasses(fn (\App\Models\Attendance $record) => $record->is_mismatch ? 'bg-danger-50 dark:bg-danger-900/20' : null)
+            ->recordClasses(fn (Attendance $record) => $record->is_mismatch ? 'bg-danger-50 dark:bg-danger-900/20' : null)
             ->columns([
                 TextColumn::make('user.name')
                     ->label(__('admin.resources.attendance.fields.user'))
@@ -116,7 +118,7 @@ class AttendancesRelationManager extends RelationManager
                         'maybe' => __('admin.resources.attendance.planned_statuses.maybe'),
                         default => $state,
                     })
-                    ->description(fn (\App\Models\Attendance $record): ?string => $record->excuse_reason?->getLabel())
+                    ->description(fn (Attendance $record): ?string => $record->excuse_reason?->getLabel())
                     ->sortable(),
                 TextColumn::make('actual_status')
                     ->label(__('admin.resources.attendance.fields.actual_status'))

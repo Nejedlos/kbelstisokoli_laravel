@@ -16,8 +16,10 @@ return new class extends Migration
             Schema::table('financial_tariffs', function (Blueprint $table) {
                 $table->integer('prepaid_events_count')->nullable()->after('type');
             });
-        } catch (\Throwable $e) {
-            if (!str_contains($e->getMessage(), '1060')) throw $e;
+        } catch (Throwable $e) {
+            if (! str_contains($e->getMessage(), '1060')) {
+                throw $e;
+            }
         }
 
         // 2. extra_event_amount
@@ -25,8 +27,10 @@ return new class extends Migration
             Schema::table('financial_tariffs', function (Blueprint $table) {
                 $table->decimal('extra_event_amount', 10, 2)->nullable()->after('prepaid_events_count');
             });
-        } catch (\Throwable $e) {
-            if (!str_contains($e->getMessage(), '1060')) throw $e;
+        } catch (Throwable $e) {
+            if (! str_contains($e->getMessage(), '1060')) {
+                throw $e;
+            }
         }
     }
 
@@ -38,8 +42,10 @@ return new class extends Migration
         Schema::table('financial_tariffs', function (Blueprint $table) {
             try {
                 $table->dropColumn(['prepaid_events_count', 'extra_event_amount']);
-            } catch (\Throwable $e) {
-                if (!str_contains($e->getMessage(), '1091')) throw $e;
+            } catch (Throwable $e) {
+                if (! str_contains($e->getMessage(), '1091')) {
+                    throw $e;
+                }
             }
         });
     }

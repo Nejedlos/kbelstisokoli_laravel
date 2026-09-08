@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ExternalStatSource extends Model
 {
@@ -26,7 +27,7 @@ class ExternalStatSource extends Model
         'last_run_at' => 'datetime',
     ];
 
-    public function teamMappings(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function teamMappings(): HasMany
     {
         return $this->hasMany(ExternalTeamMapping::class, 'source_key', 'slug');
     }

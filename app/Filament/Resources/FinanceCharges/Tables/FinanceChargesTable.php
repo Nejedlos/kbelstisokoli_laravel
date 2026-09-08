@@ -2,11 +2,14 @@
 
 namespace App\Filament\Resources\FinanceCharges\Tables;
 
+use App\Support\IconHelper;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class FinanceChargesTable
@@ -68,7 +71,7 @@ class FinanceChargesTable
                     ->toggleable(),
             ])
             ->filters([
-                \Filament\Tables\Filters\SelectFilter::make('status')
+                SelectFilter::make('status')
                     ->label('Stav')
                     ->options([
                         'open' => 'K úhradě',
@@ -78,7 +81,7 @@ class FinanceChargesTable
                         'cancelled' => 'Zrušeno',
                         'waived' => 'Prominuto',
                     ]),
-                \Filament\Tables\Filters\SelectFilter::make('charge_type')
+                SelectFilter::make('charge_type')
                     ->label('Typ')
                     ->options([
                         'membership_fee' => 'Členský příspěvek',
@@ -91,9 +94,9 @@ class FinanceChargesTable
                     ]),
             ])
             ->actions([
-                \Filament\Actions\Action::make('waive')
+                Action::make('waive')
                     ->label('Prominout')
-                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::CANCEL))
+                    ->icon(IconHelper::get(IconHelper::CANCEL))
                     ->requiresConfirmation()
                     ->modalHeading('Prominout předpis platby?')
                     ->modalDescription('Předpis bude označen jako prominutý a nebude vyžadováno jeho zaplacení.')

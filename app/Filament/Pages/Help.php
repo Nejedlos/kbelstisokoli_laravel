@@ -4,11 +4,14 @@ namespace App\Filament\Pages;
 
 use App\Services\Help\HelpService;
 use Filament\Navigation\NavigationItem;
+use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\HtmlString;
 use Livewire\Attributes\Url;
-use Illuminate\Support\Facades\Log;
 
 use function Filament\Support\original_request;
 
@@ -19,9 +22,7 @@ class Help extends Page
         return 'filament.pages.help';
     }
 
-    public function mount(): void
-    {
-    }
+    public function mount(): void {}
 
     protected static ?string $title = 'Nápověda';
 
@@ -72,14 +73,14 @@ class Help extends Page
         return __('admin.navigation.pages.help');
     }
 
-    public function render(): \Illuminate\Contracts\View\View
+    public function render(): View
     {
         try {
             return parent::render();
         } catch (\Throwable $e) {
-            Log::error("Help Page Render Error: " . $e->getMessage(), [
+            Log::error('Help Page Render Error: '.$e->getMessage(), [
                 'exception' => $e,
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
             throw $e;
         }
@@ -100,24 +101,18 @@ class Help extends Page
         return $this->getHelpService()->search($this->searchQuery);
     }
 
-    /**
-     * @return array|null
-     */
     public function getCategoryData(): ?array
     {
-        if (!$this->currentCategory) {
+        if (! $this->currentCategory) {
             return null;
         }
 
         return $this->getHelpService()->getCategoryData($this->currentCategory);
     }
 
-    /**
-     * @return array|null
-     */
     public function getArticleData(): ?array
     {
-        if (!$this->currentFile) {
+        if (! $this->currentFile) {
             return null;
         }
 
@@ -163,7 +158,7 @@ class Help extends Page
         ];
     }
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
         return new HtmlString('
             <div class="relative inline-flex items-center justify-center">
@@ -189,7 +184,7 @@ class Help extends Page
     public function submitContactForm(): void
     {
         // Redirect to dashboard where contact form is or just show notification
-        \Filament\Notifications\Notification::make()
+        Notification::make()
             ->title(__('admin.navigation.pages.help_contact_title'))
             ->body(__('admin.navigation.pages.help_contact_body'))
             ->info()

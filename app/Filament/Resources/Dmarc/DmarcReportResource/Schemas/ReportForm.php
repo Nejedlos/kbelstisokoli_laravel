@@ -4,9 +4,9 @@ namespace App\Filament\Resources\Dmarc\DmarcReportResource\Schemas;
 
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ViewField;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Forms\Components\ViewField;
 
 class ReportForm
 {

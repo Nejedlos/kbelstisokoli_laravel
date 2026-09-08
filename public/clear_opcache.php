@@ -1,7 +1,8 @@
 <?php
+
 if (function_exists('opcache_reset')) {
     opcache_reset();
-    echo "OPCache reset successful";
+    echo 'OPCache reset successful';
 } else {
-    echo "OPCache reset not available";
+    echo 'OPCache reset not available';
 }

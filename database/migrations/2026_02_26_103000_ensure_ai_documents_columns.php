@@ -30,7 +30,7 @@ return new class extends Migration
             if (empty($columnExists)) {
                 DB::statement("ALTER TABLE {$table} ADD COLUMN keywords LONGTEXT NULL AFTER content");
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Log or ignore
         }
 
@@ -40,7 +40,7 @@ return new class extends Migration
             if (empty($columnExists)) {
                 DB::statement("ALTER TABLE {$table} ADD COLUMN metadata LONGTEXT NULL AFTER keywords");
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Log or ignore
         }
 
@@ -50,7 +50,7 @@ return new class extends Migration
             if (empty($columnExists)) {
                 DB::statement("ALTER TABLE {$table} ADD COLUMN summary TEXT NULL AFTER title");
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Log or ignore
         }
 
@@ -61,7 +61,7 @@ return new class extends Migration
                 DB::statement("ALTER TABLE {$table} ADD COLUMN section VARCHAR(191) NULL AFTER id");
                 DB::statement("CREATE INDEX ai_documents_section_index ON {$table} (section)");
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Log or ignore
         }
 
@@ -71,7 +71,7 @@ return new class extends Migration
             if (empty($columnExists)) {
                 DB::statement("ALTER TABLE {$table} ADD COLUMN source_type VARCHAR(191) NULL AFTER source");
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Log or ignore
         }
 
@@ -81,7 +81,7 @@ return new class extends Migration
             if (empty($columnExists)) {
                 DB::statement("ALTER TABLE {$table} ADD COLUMN source_id BIGINT UNSIGNED NULL AFTER source_type");
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Log or ignore
         }
 
@@ -91,7 +91,7 @@ return new class extends Migration
             if (empty($columnExists)) {
                 DB::statement("ALTER TABLE {$table} ADD COLUMN content_hash CHAR(64) NULL AFTER checksum");
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Log or ignore
         }
 
@@ -102,7 +102,7 @@ return new class extends Migration
                 DB::statement("ALTER TABLE {$table} ADD COLUMN is_active TINYINT(1) DEFAULT 1 NOT NULL AFTER content_hash");
                 DB::statement("CREATE INDEX ai_documents_section_is_active_index ON {$table} (section, is_active)");
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Log or ignore
         }
 
@@ -112,7 +112,7 @@ return new class extends Migration
             if (empty($columnExists)) {
                 DB::statement("ALTER TABLE {$table} ADD COLUMN last_indexed_at TIMESTAMP NULL AFTER is_active");
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Log or ignore
         }
     }

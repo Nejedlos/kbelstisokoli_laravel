@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\AnnouncementSyncJob;
 use Illuminate\Console\Command;
 
 class AnnouncementsSyncCommand extends Command
@@ -26,7 +27,7 @@ class AnnouncementsSyncCommand extends Command
     public function handle(): void
     {
         $this->info('Dispatching Announcement sync job...');
-        \App\Jobs\AnnouncementSyncJob::dispatch();
+        AnnouncementSyncJob::dispatch();
         $this->info('Job dispatched successfully.');
     }
 }

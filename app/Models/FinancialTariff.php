@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class FinancialTariff extends Model
 {
@@ -30,7 +31,7 @@ class FinancialTariff extends Model
         'metadata' => 'array',
     ];
 
-    public function userSeasonConfigs(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function userSeasonConfigs(): HasMany
     {
         return $this->hasMany(UserSeasonConfig::class);
     }

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
+use App\Models\Page;
+use App\Models\Season;
 use App\Models\Team;
 use Illuminate\View\View;
 
@@ -10,7 +12,7 @@ class TrainingController extends Controller
 {
     public function index(): View
     {
-        $currentSeasonId = \App\Models\Season::where('is_active', true)->first()?->id;
+        $currentSeasonId = Season::where('is_active', true)->first()?->id;
 
         // Vynecháme virtuální tým "Celý klub" z hlavního výpisu
         $teams = Team::where('slug', '!=', 'klub')
@@ -40,17 +42,17 @@ class TrainingController extends Controller
                                 ->where('track_attendance', true);
                         })
                         ->pluck('user_id');
-                    
+
                     $expectedUserIds = $expectedUserIds->concat($userIds);
                 }
-                
+
                 $training->total_expected_count = $expectedUserIds->unique()->count();
             }
 
             $team->setRelation('trainings', $trainings);
         }
 
-        $page = \App\Models\Page::where('slug', 'treninky')->first();
+        $page = Page::where('slug', 'treninky')->first();
 
         return view('public.trainings.index', compact('teams', 'page'));
     }

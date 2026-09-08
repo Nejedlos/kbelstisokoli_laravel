@@ -6,6 +6,7 @@ use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use Filament\Actions\Action;
 use Filament\Auth\Pages\EmailVerification\EmailVerificationPrompt as BaseEmailVerificationPrompt;
 use Filament\Notifications\Notification;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Validation\ValidationException;
 
 class EmailVerificationPrompt extends BaseEmailVerificationPrompt
@@ -44,12 +45,12 @@ class EmailVerificationPrompt extends BaseEmailVerificationPrompt
 
     protected string $view = 'filament.admin.auth.email-verification-prompt';
 
-    public function getHeading(): string|\Illuminate\Contracts\Support\Htmlable
+    public function getHeading(): string|Htmlable
     {
         return __('Ověření e-mailu');
     }
 
-    public function getSubheading(): string|\Illuminate\Contracts\Support\Htmlable
+    public function getSubheading(): string|Htmlable
     {
         return __('Ještě jeden krok před výkopem. Potvrďte svůj e-mail.');
     }

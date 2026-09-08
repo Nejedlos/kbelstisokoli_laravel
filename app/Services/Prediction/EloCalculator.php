@@ -5,9 +5,13 @@ namespace App\Services\Prediction;
 class EloCalculator
 {
     public const INITIAL_ELO = 1500;
+
     public const HOME_ADVANTAGE = 50;
+
     public const K_FACTOR_DEFAULT = 20;
+
     public const K_FACTOR_LOW_DATA = 30;
+
     public const K_FACTOR_HIGH_DATA = 15;
 
     /**
@@ -16,6 +20,7 @@ class EloCalculator
     public function calculateExpected(float $eloTeam, float $eloOpponent, bool $isHome = false): float
     {
         $ratingDiff = ($eloOpponent - ($eloTeam + ($isHome ? self::HOME_ADVANTAGE : 0)));
+
         return 1 / (1 + 10 ** ($ratingDiff / 800));
     }
 
@@ -35,7 +40,7 @@ class EloCalculator
         return [
             'new_elo_team' => $eloTeam + $change,
             'new_elo_opponent' => $eloOpponent - $change,
-            'change' => $change
+            'change' => $change,
         ];
     }
 
@@ -47,6 +52,7 @@ class EloCalculator
         if ($gamesPlayed > 30) {
             return self::K_FACTOR_HIGH_DATA;
         }
+
         return self::K_FACTOR_DEFAULT;
     }
 

@@ -9,9 +9,12 @@ use App\Filament\Resources\BasketballMatches\Schemas\BasketballMatchForm;
 use App\Filament\Resources\BasketballMatches\Tables\BasketballMatchesTable;
 use App\Filament\Resources\ClubEvents\RelationManagers\AttendancesRelationManager;
 use App\Models\BasketballMatch;
+use App\Support\IconHelper;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Builder;
 
 class BasketballMatchResource extends Resource
 {
@@ -32,9 +35,9 @@ class BasketballMatchResource extends Resource
         return __('admin.resources.basketball_match.plural_label');
     }
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
-        return \App\Support\IconHelper::get(\App\Support\IconHelper::MATCHES);
+        return IconHelper::get(IconHelper::MATCHES);
     }
 
     public static function getNavigationSort(): ?int
@@ -47,7 +50,7 @@ class BasketballMatchResource extends Resource
         return []; // Vypnuto kvůli relacím na translatable pole a kompatibilitě s Webglobe (json_unquote)
     }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
             ->with(['teams', 'opponent', 'season'])

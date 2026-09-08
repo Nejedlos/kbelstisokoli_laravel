@@ -6,6 +6,8 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Resources\Pages\CreateRecord;
+use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -27,13 +29,13 @@ class PlayerProfileForm
                                     ->preload()
                                     ->required()
                                     ->helperText('Vyberte uživatele, pro kterého profil zakládáte. Zobrazeni jsou pouze uživatelé bez profilu.')
-                                    ->visible(fn ($livewire) => $livewire instanceof \Filament\Resources\Pages\CreateRecord),
+                                    ->visible(fn ($livewire) => $livewire instanceof CreateRecord),
 
                                 Select::make('user_id')
                                     ->label('Uživatel (Účet)')
                                     ->relationship('user', 'name')
                                     ->disabled()
-                                    ->visible(fn ($livewire) => $livewire instanceof \Filament\Resources\Pages\EditRecord),
+                                    ->visible(fn ($livewire) => $livewire instanceof EditRecord),
 
                                 TextInput::make('jersey_number')
                                     ->label('Číslo dresu')

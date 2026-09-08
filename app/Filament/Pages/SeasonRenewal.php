@@ -23,7 +23,7 @@ use Filament\Pages\Page;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\HtmlString;
 
 class SeasonRenewal extends Page implements HasForms
@@ -31,7 +31,7 @@ class SeasonRenewal extends Page implements HasForms
     use InteractsWithFormActions;
     use InteractsWithForms;
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
         return FilamentIcon::get(AppIcon::REFRESH);
     }

@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Spatie\Translatable\HasTranslations;
 
 /**
@@ -22,12 +25,11 @@ use Spatie\Translatable\HasTranslations;
  * @property bool $is_featured
  * @property bool $is_customized
  * @property string|null $source_hash
- * @property \Illuminate\Support\Carbon $created_at
- * @property \Illuminate\Support\Carbon $updated_at
- *
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  * @property-read HelpCategory|null $parent
- * @property-read \Illuminate\Database\Eloquent\Collection<int, HelpCategory> $children
- * @property-read \Illuminate\Database\Eloquent\Collection<int, HelpArticle> $articles
+ * @property-read Collection<int, HelpCategory> $children
+ * @property-read Collection<int, HelpArticle> $articles
  */
 class HelpCategory extends Model
 {
@@ -87,8 +89,8 @@ class HelpCategory extends Model
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param  Builder  $query
+     * @return Builder
      */
     public function scopeActive($query)
     {
@@ -96,8 +98,8 @@ class HelpCategory extends Model
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param  Builder  $query
+     * @return Builder
      */
     public function scopeFeatured($query)
     {
@@ -105,9 +107,9 @@ class HelpCategory extends Model
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param string|array $roles
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param  Builder  $query
+     * @param  string|array  $roles
+     * @return Builder
      */
     public function scopeForAudience($query, $roles)
     {
@@ -122,19 +124,20 @@ class HelpCategory extends Model
             foreach ($roles as $role) {
                 // FALLBACK: Pro produkční DB bez JSON funkcí (Webglobe) použijeme LIKE.
                 // V JSON poli rolí ["role"] je název role v uvozovkách.
-                $q->orWhere('audience_roles', 'LIKE', '%"' . (string) $role . '"%');
+                $q->orWhere('audience_roles', 'LIKE', '%"'.(string) $role.'"%');
             }
         });
     }
 
     /**
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param  Builder  $query
+     * @return Builder
      */
     public function scopeRoot($query)
     {
         return $query->whereNull('parent_id');
     }
+
     public function getFallbackLocale(): string
     {
         return config('app.fallback_locale', 'cs');

@@ -51,12 +51,20 @@ class StatusCodesChartWidget extends ChartWidget
         $dateTo = now();
 
         switch ($filters['period'] ?? 'last_7_days') {
-            case 'today': $dateFrom = now()->startOfDay(); break;
-            case 'yesterday': $dateFrom = now()->subDay()->startOfDay(); $dateTo = now()->subDay()->endOfDay(); break;
-            case 'last_30_days': $dateFrom = now()->subDays(30); break;
-            case 'this_month': $dateFrom = now()->startOfMonth(); break;
-            case 'last_month': $dateFrom = now()->subMonth()->startOfMonth(); $dateTo = now()->subMonth()->endOfMonth(); break;
-            case 'last_7_days': default: $dateFrom = now()->subDays(7); break;
+            case 'today': $dateFrom = now()->startOfDay();
+                break;
+            case 'yesterday': $dateFrom = now()->subDay()->startOfDay();
+                $dateTo = now()->subDay()->endOfDay();
+                break;
+            case 'last_30_days': $dateFrom = now()->subDays(30);
+                break;
+            case 'this_month': $dateFrom = now()->startOfMonth();
+                break;
+            case 'last_month': $dateFrom = now()->subMonth()->startOfMonth();
+                $dateTo = now()->subMonth()->endOfMonth();
+                break;
+            case 'last_7_days': default: $dateFrom = now()->subDays(7);
+                break;
         }
 
         return [

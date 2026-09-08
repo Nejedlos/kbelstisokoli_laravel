@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Gallery;
+use App\Models\PhotoPool;
+use App\Support\PhotoGallery;
 use Illuminate\View\View;
 
 class GalleryController extends Controller
@@ -20,7 +22,7 @@ class GalleryController extends Controller
             ->orderBy('published_at', 'desc')
             ->get();
 
-        $pools = \App\Models\PhotoPool::with(['mediaAssets' => function ($query) {
+        $pools = PhotoPool::with(['mediaAssets' => function ($query) {
             $query->with('media')
                 ->where('media_assets.is_public', true)
                 ->where('photo_pool_media_asset.is_visible', true)
@@ -32,7 +34,7 @@ class GalleryController extends Controller
             ->get();
 
         // Náhodný výběr fotek pro celou stránku
-        $randomPhotos = \App\Support\PhotoGallery::getRandomPhotos(12);
+        $randomPhotos = PhotoGallery::getRandomPhotos(12);
 
         return view('public.galleries.index', compact('galleries', 'pools', 'randomPhotos'));
     }
@@ -53,7 +55,7 @@ class GalleryController extends Controller
         }
 
         // Pak zkusíme Photo Pool (sbírku)
-        $pool = \App\Models\PhotoPool::with(['mediaAssets' => function ($query) {
+        $pool = PhotoPool::with(['mediaAssets' => function ($query) {
             $query->with('media')
                 ->where('media_assets.is_public', true)
                 ->where('photo_pool_media_asset.is_visible', true)

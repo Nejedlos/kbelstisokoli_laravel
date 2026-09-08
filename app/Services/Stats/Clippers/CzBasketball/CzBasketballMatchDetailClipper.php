@@ -38,6 +38,7 @@ class CzBasketballMatchDetailClipper implements ClipperInterface
         // Často je to tabulka s porovnáním (3 sloupce: home, label, away)
         $previewTable = $crawler->filter('table.table-condensed, table')->reduce(function (Crawler $node) {
             $text = $node->text();
+
             return str_contains($text, 'Body na zápas') || str_contains($text, 'Doskoky') || str_contains($text, 'Asistence');
         })->first();
 
@@ -76,6 +77,7 @@ class CzBasketballMatchDetailClipper implements ClipperInterface
         if ($header->count() === 0) {
             $potentialHeaders = $crawler->filter('.row')->reduce(function (Crawler $node) {
                 $text = $node->text();
+
                 return str_contains($text, ':') && (strlen($text) < 1000);
             });
             $header = $potentialHeaders->first();
@@ -107,7 +109,9 @@ class CzBasketballMatchDetailClipper implements ClipperInterface
 
             // Obsahuje aspoň 2 hráče?
             $playerLinks = $node->filter('a[href*="/hrac/"]');
-            if ($playerLinks->count() < 2) return false;
+            if ($playerLinks->count() < 2) {
+                return false;
+            }
 
             // Obsahuje body nebo jiné basketbalové zkratky?
             return str_contains($text, 'Body') || str_contains($text, '2B') || str_contains($text, '3B') || str_contains($text, 'TH') || str_contains($text, 'PTS');
@@ -127,7 +131,7 @@ class CzBasketballMatchDetailClipper implements ClipperInterface
             $table->filter('a[href]')->each(function (Crawler $a) use (&$links) {
                 $href = $a->attr('href');
                 if (str_starts_with($href, '/')) {
-                    $href = 'https://cz.basketball' . $href;
+                    $href = 'https://cz.basketball'.$href;
                 }
                 $links[] = [
                     'id' => preg_match('/\/(hrac|zapas|tym|soutez)\/(\d+)/', $href, $m) ? $m[2] : null,
@@ -137,7 +141,7 @@ class CzBasketballMatchDetailClipper implements ClipperInterface
             });
 
             $clips[] = new ClipDTO(
-                id: ($i === 0 ? 'boxscore_home' : ($i === 1 ? 'boxscore_away' : "boxscore_table_" . ($i + 1))),
+                id: ($i === 0 ? 'boxscore_home' : ($i === 1 ? 'boxscore_away' : 'boxscore_table_'.($i + 1))),
                 htmlFragment: $html,
                 textHint: "Boxscore table for {$teamName}",
                 links: $links,

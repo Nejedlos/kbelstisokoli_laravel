@@ -57,8 +57,8 @@ class TeamRosterExtractor implements StatExtractorInterface
 
             if ($photoImg->count() > 0) {
                 $photoUrl = $photoImg->attr('src');
-                if ($photoUrl && !str_starts_with($photoUrl, 'http') && !str_starts_with($photoUrl, 'data:')) {
-                    $photoUrl = 'https://cz.basketball' . (str_starts_with($photoUrl, '/') ? '' : '/') . $photoUrl;
+                if ($photoUrl && ! str_starts_with($photoUrl, 'http') && ! str_starts_with($photoUrl, 'data:')) {
+                    $photoUrl = 'https://cz.basketball'.(str_starts_with($photoUrl, '/') ? '' : '/').$photoUrl;
                 }
             }
 
@@ -95,16 +95,18 @@ class TeamRosterExtractor implements StatExtractorInterface
             }
 
             // Procházíme ostatní buňky a hledáme specifické údaje
-            $cells->each(function (Crawler $td, $i) use (&$birthYear, &$height, &$weight, &$position, &$nationality, $jerseyNumber) {
+            $cells->each(function (Crawler $td, $i) use (&$birthYear, &$height, &$weight, &$position, &$nationality) {
                 $text = trim($td->text());
-                if (empty($text)) return;
+                if (empty($text)) {
+                    return;
+                }
 
                 // Rok narození (4-místné číslo 19xx nebo 20xx)
                 if (preg_match('/^(19|20)\d{2}$/', $text)) {
                     $birthYear = (int) $text;
                 }
                 // Výška (3-místné číslo, obvykle 150-230)
-                elseif (preg_match('/^\d{3}$/', $text) && (int)$text > 140 && (int)$text < 230 && $i > 1) {
+                elseif (preg_match('/^\d{3}$/', $text) && (int) $text > 140 && (int) $text < 230 && $i > 1) {
                     $height = (int) $text;
                 }
                 // Pozice (1, 2, 3, 4, 5 nebo kód jako G, F, C, PG, SG, SF, PF)
@@ -112,14 +114,14 @@ class TeamRosterExtractor implements StatExtractorInterface
                     $position = $text;
                 }
                 // Národnost (často vlajka nebo zkratka státu CZE, SVK, atd.)
-                elseif (preg_match('/^[A-Z]{3}$/', $text) && !in_array($text, ['MIN', 'VAL', 'PTS'])) {
+                elseif (preg_match('/^[A-Z]{3}$/', $text) && ! in_array($text, ['MIN', 'VAL', 'PTS'])) {
                     $nationality = $text;
                 }
             });
 
             // Speciální detekce z CSS tříd nebo obrázků (vlajky)
             $flagImg = $tr->filter('img[src*="/flags/"], img[alt*="Flag"]')->first();
-            if ($flagImg->count() > 0 && !$nationality) {
+            if ($flagImg->count() > 0 && ! $nationality) {
                 $nationality = $flagImg->attr('alt') ?: preg_replace('/.*\/([a-z]{2,3})\..*/i', '$1', $flagImg->attr('src'));
             }
 

@@ -4,14 +4,18 @@ namespace App\Livewire\Admin;
 
 use App\Models\Attendance;
 use App\Models\User;
+use App\Services\Finance\FinanceAutomationService;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Component;
 
 class AttendanceTracker extends Component
 {
     public $attendableId;
+
     public $attendableType;
+
     public $search = '';
+
     public $selectedUserId = null;
 
     protected $listeners = ['refreshAttendance' => '$refresh'];
@@ -24,14 +28,15 @@ class AttendanceTracker extends Component
 
     public function getAttendableProperty(): ?Model
     {
-        if (!$this->attendableType || !$this->attendableId) {
+        if (! $this->attendableType || ! $this->attendableId) {
             return null;
         }
 
         try {
-            if (!class_exists($this->attendableType)) {
+            if (! class_exists($this->attendableType)) {
                 return null;
             }
+
             return $this->attendableType::with(['teams'])->find($this->attendableId);
         } catch (\Throwable $e) {
             return null;
@@ -65,14 +70,14 @@ class AttendanceTracker extends Component
 
         $query = User::query();
 
-        if (!empty($teamIds)) {
-            $query->where(function($q) use ($teamIds) {
-                $q->whereHas('teams', fn($t) => $t->whereIn('teams.id', $teamIds))
-                  ->orWhereHas('playerProfiles.teams', fn($t) => $t->whereIn('teams.id', $teamIds));
+        if (! empty($teamIds)) {
+            $query->where(function ($q) use ($teamIds) {
+                $q->whereHas('teams', fn ($t) => $t->whereIn('teams.id', $teamIds))
+                    ->orWhereHas('playerProfiles.teams', fn ($t) => $t->whereIn('teams.id', $teamIds));
             });
         }
 
-        return $query->where('name', 'like', '%' . $this->search . '%')
+        return $query->where('name', 'like', '%'.$this->search.'%')
             ->whereNotIn('id', $this->attendances->pluck('user_id'))
             ->limit(10)
             ->get();
@@ -109,7 +114,7 @@ class AttendanceTracker extends Component
     {
         $event = $this->attendable;
         if ($event) {
-            app(\App\Services\Finance\FinanceAutomationService::class)->finalizeAttendance($event);
+            app(FinanceAutomationService::class)->finalizeAttendance($event);
             session()->flash('message', 'Docházka uzavřena a pokuty vygenerovány.');
         }
     }

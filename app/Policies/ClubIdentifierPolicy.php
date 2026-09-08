@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\ClubIdentifier;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class ClubIdentifierPolicy
 {

@@ -24,8 +24,10 @@ return new class extends Migration
                 Schema::table('seasons', function (Blueprint $table) use ($column) {
                     $table->decimal($column[0], $column[1], $column[2])->default(0)->after($column[3]);
                 });
-            } catch (\Throwable $e) {
-                if (!str_contains($e->getMessage(), '1060')) throw $e;
+            } catch (Throwable $e) {
+                if (! str_contains($e->getMessage(), '1060')) {
+                    throw $e;
+                }
             }
         }
     }
@@ -44,8 +46,10 @@ return new class extends Migration
                     'fine_excused_show',
                     'fine_missed_free_throw',
                 ]);
-            } catch (\Throwable $e) {
-                if (!str_contains($e->getMessage(), '1091')) throw $e;
+            } catch (Throwable $e) {
+                if (! str_contains($e->getMessage(), '1091')) {
+                    throw $e;
+                }
             }
         });
     }

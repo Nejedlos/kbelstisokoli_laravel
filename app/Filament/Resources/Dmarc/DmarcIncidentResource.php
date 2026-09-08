@@ -10,6 +10,7 @@ use App\Support\IconHelper;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 
 class DmarcIncidentResource extends Resource
 {
@@ -22,7 +23,7 @@ class DmarcIncidentResource extends Resource
         return __('admin.navigation.groups.dmarc_monitor');
     }
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
         return IconHelper::get(IconHelper::EMERGENCY);
     }

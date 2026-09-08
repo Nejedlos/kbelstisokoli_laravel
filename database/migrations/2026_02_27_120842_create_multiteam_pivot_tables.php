@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -45,9 +46,9 @@ return new class extends Migration
         }
 
         // Data migration (PhotoPool)
-        $photoPools = \Illuminate\Support\Facades\DB::table('photo_pools')->whereNotNull('team_id')->get();
+        $photoPools = DB::table('photo_pools')->whereNotNull('team_id')->get();
         foreach ($photoPools as $pool) {
-            \Illuminate\Support\Facades\DB::table('photo_pool_team')->insert([
+            DB::table('photo_pool_team')->insert([
                 'photo_pool_id' => $pool->id,
                 'team_id' => $pool->team_id,
                 'created_at' => now(),
@@ -56,9 +57,9 @@ return new class extends Migration
         }
 
         // Data migration (ClubCompetitionEntry)
-        $entries = \Illuminate\Support\Facades\DB::table('club_competition_entries')->whereNotNull('team_id')->get();
+        $entries = DB::table('club_competition_entries')->whereNotNull('team_id')->get();
         foreach ($entries as $entry) {
-            \Illuminate\Support\Facades\DB::table('club_competition_entry_team')->insert([
+            DB::table('club_competition_entry_team')->insert([
                 'entry_id' => $entry->id,
                 'team_id' => $entry->team_id,
                 'created_at' => now(),
@@ -67,9 +68,9 @@ return new class extends Migration
         }
 
         // Data migration (StatisticRow)
-        $rows = \Illuminate\Support\Facades\DB::table('statistic_rows')->whereNotNull('team_id')->get();
+        $rows = DB::table('statistic_rows')->whereNotNull('team_id')->get();
         foreach ($rows as $row) {
-            \Illuminate\Support\Facades\DB::table('statistic_row_team')->insert([
+            DB::table('statistic_row_team')->insert([
                 'statistic_row_id' => $row->id,
                 'team_id' => $row->team_id,
                 'created_at' => now(),

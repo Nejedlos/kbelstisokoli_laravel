@@ -8,17 +8,19 @@ use App\Filament\Resources\ClubCompetitions\Pages\ListClubCompetitions;
 use App\Filament\Resources\ClubCompetitions\Schemas\ClubCompetitionForm;
 use App\Filament\Resources\ClubCompetitions\Tables\ClubCompetitionsTable;
 use App\Models\ClubCompetition;
+use App\Support\IconHelper;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 
 class ClubCompetitionResource extends Resource
 {
     protected static ?string $model = ClubCompetition::class;
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
-        return \App\Support\IconHelper::get(\App\Support\IconHelper::COMPETITIONS);
+        return IconHelper::get(IconHelper::COMPETITIONS);
     }
 
     public static function getNavigationGroup(): ?string

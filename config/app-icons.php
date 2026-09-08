@@ -1,6 +1,5 @@
 <?php
 
-use App\Support\IconHelper;
 use App\Support\Icons\AppIcon as Icons;
 
 return [

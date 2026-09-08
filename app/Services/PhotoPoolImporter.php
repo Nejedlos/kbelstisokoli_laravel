@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\MediaAsset;
 use App\Models\PhotoPool;
+use Illuminate\Http\File;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -96,7 +97,7 @@ class PhotoPoolImporter
                 }
 
                 $fullPath = $disk->path($path);
-                $file = new \Illuminate\Http\File($fullPath);
+                $file = new File($fullPath);
                 $sort++;
 
                 DB::transaction(function () use ($pool, $file, $sort, $userId) {

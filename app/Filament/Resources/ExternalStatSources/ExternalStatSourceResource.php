@@ -8,22 +8,24 @@ use App\Filament\Resources\ExternalStatSources\Pages\ListExternalStatSources;
 use App\Filament\Resources\ExternalStatSources\Schemas\ExternalStatSourceForm;
 use App\Filament\Resources\ExternalStatSources\Tables\ExternalStatSourcesTable;
 use App\Models\ExternalStatSource;
+use App\Support\IconHelper;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 
 class ExternalStatSourceResource extends Resource
 {
     protected static ?string $model = ExternalStatSource::class;
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
-        return \App\Support\IconHelper::get(\App\Support\IconHelper::STAT_SOURCES);
+        return IconHelper::get(IconHelper::STAT_SOURCES);
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.statistics_and_data') . ' > ' . __('admin.navigation.groups.external_data');
+        return __('admin.navigation.groups.statistics_and_data').' > '.__('admin.navigation.groups.external_data');
     }
 
     public static function getModelLabel(): string

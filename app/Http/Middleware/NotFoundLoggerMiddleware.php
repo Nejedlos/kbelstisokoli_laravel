@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\NotFoundLog;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class NotFoundLoggerMiddleware
@@ -12,7 +13,7 @@ class NotFoundLoggerMiddleware
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -71,7 +72,7 @@ class NotFoundLoggerMiddleware
             }
         } catch (\Throwable $e) {
             // Tichý fail, nechceme aby logger shodil aplikaci
-            \Illuminate\Support\Facades\Log::error('NotFoundLoggerMiddleware error: '.$e->getMessage());
+            Log::error('NotFoundLoggerMiddleware error: '.$e->getMessage());
         }
     }
 }

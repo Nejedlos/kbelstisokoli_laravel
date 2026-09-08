@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\Page;
+use App\Models\Post;
 use Illuminate\Support\Collection;
 
 class BreadcrumbService
@@ -33,7 +35,7 @@ class BreadcrumbService
         return $this->add(__('general.nav.home'), route('public.home'));
     }
 
-    public function generateForPage(\App\Models\Page $page): self
+    public function generateForPage(Page $page): self
     {
         $this->addHome();
 
@@ -41,7 +43,7 @@ class BreadcrumbService
         return $this->add($page->title);
     }
 
-    public function generateForPost(\App\Models\Post $post): self
+    public function generateForPost(Post $post): self
     {
         $this->addHome();
         $this->add(__('general.nav.news'), route('public.news.index'));

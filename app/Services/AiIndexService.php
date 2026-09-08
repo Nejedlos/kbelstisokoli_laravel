@@ -2,10 +2,16 @@
 
 namespace App\Services;
 
+use App\Filament\Resources\PhotoPools\PhotoPoolResource;
 use App\Models\AiDocument;
+use App\Models\HelpArticle;
 use App\Models\Page;
+use App\Models\PhotoPool;
 use App\Models\Post;
 use App\Models\User;
+use Filament\Facades\Filament;
+use Filament\Schemas\Schema;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
@@ -13,7 +19,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
+use Illuminate\Support\ViewErrorBag;
 
 class AiIndexService
 {
@@ -264,12 +272,12 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
         }
 
         // 0. Indexování Photo Poolů
-        $pools = \App\Models\PhotoPool::all();
+        $pools = PhotoPool::all();
         Log::info('AI Indexing: [Filament] Indexing '.$pools->count().' PhotoPools');
         foreach ($pools as $pool) {
             $title = $pool->getTranslation('title', $locale);
             $description = $pool->getTranslation('description', $locale);
-            $url = \App\Filament\Resources\PhotoPools\PhotoPoolResource::getUrl('edit', ['record' => $pool]);
+            $url = PhotoPoolResource::getUrl('edit', ['record' => $pool]);
 
             $dateStr = '';
             if ($pool->event_date) {
@@ -301,7 +309,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
         }
 
         // Indexování stránek (Pages)
-        $pages = \Filament\Facades\Filament::getPanel('admin')->getPages();
+        $pages = Filament::getPanel('admin')->getPages();
         Log::info('AI Indexing: [Filament] Indexing '.count($pages).' Pages');
         foreach ($pages as $pageClass) {
             try {
@@ -324,7 +332,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                     // EXTRAKCE ZE SCHÉMATU (Formuláře na stránkách)
                     try {
                         if (method_exists($page, 'form')) {
-                            $schema = app(\Filament\Schemas\Schema::class);
+                            $schema = app(Schema::class);
                             $page->form($schema);
                             $content .= $this->extractTextsFromSchema($schema);
                         }
@@ -367,7 +375,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
         }
 
         // Indexování resources
-        $resources = \Filament\Facades\Filament::getPanel('admin')->getResources();
+        $resources = Filament::getPanel('admin')->getResources();
         Log::info('AI Indexing: [Filament] Indexing '.count($resources).' Resources');
         foreach ($resources as $resourceClass) {
             try {
@@ -384,7 +392,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                     $status = 'schema';
                     $content = "Správa sekce {$title}. Zde můžete přidávat, upravovat nebo mazat záznamy. ";
                     try {
-                        $schema = app(\Filament\Schemas\Schema::class);
+                        $schema = app(Schema::class);
                         $resourceClass::form($schema);
                         $schemaTexts = $this->extractTextsFromSchema($schema);
                         if ($schemaTexts) {
@@ -447,7 +455,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
             // Label
             if (method_exists($component, 'getLabel')) {
                 $label = $component->getLabel();
-                if ($label instanceof \Illuminate\Contracts\Support\Htmlable) {
+                if ($label instanceof Htmlable) {
                     $label = $label->toHtml();
                 }
                 $label = strip_tags((string) $label);
@@ -460,7 +468,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
             foreach (['getHeading', 'getTitle', 'getLabel'] as $method) {
                 if (method_exists($component, $method)) {
                     $val = $component->$method();
-                    if ($val instanceof \Illuminate\Contracts\Support\Htmlable) {
+                    if ($val instanceof Htmlable) {
                         $val = $val->toHtml();
                     }
                     $val = strip_tags((string) $val);
@@ -482,7 +490,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
             foreach (['getDescription', 'getHelperText'] as $method) {
                 if (method_exists($component, $method)) {
                     $val = $component->$method();
-                    if ($val instanceof \Illuminate\Contracts\Support\Htmlable) {
+                    if ($val instanceof Htmlable) {
                         $val = $val->toHtml();
                     }
                     $val = strip_tags((string) $val);
@@ -607,7 +615,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
     private function indexDocumentation(string $locale, ?\Closure $onProgress = null, bool $force = false): int
     {
         $count = 0;
-        $docsPath = base_path('docs' . DIRECTORY_SEPARATOR . $locale);
+        $docsPath = base_path('docs'.DIRECTORY_SEPARATOR.$locale);
 
         if (! File::exists($docsPath)) {
             // Pokud neexistuje složka pro daný locale, zkusíme fallback na cs pouze pokud indexujeme cs
@@ -627,7 +635,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
 
             // Ignorujeme kořenové složky cs/en pokud jsme v docs rootu (fallback)
             $relativePath = $file->getRelativePathname();
-            if (($locale === 'cs' || $locale === 'en') && Str::startsWith($relativePath, [$locale . '/', $locale . '\\'])) {
+            if (($locale === 'cs' || $locale === 'en') && Str::startsWith($relativePath, [$locale.'/', $locale.'\\'])) {
                 continue;
             }
 
@@ -665,7 +673,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
     {
         $count = 0;
         // Používáme moderní systém HelpArticle
-        $articles = \App\Models\HelpArticle::published()->get();
+        $articles = HelpArticle::published()->get();
 
         foreach ($articles as $article) {
             $title = $article->getTranslation('title', $locale, false);
@@ -692,8 +700,8 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                     $q = $faq->getTranslation('question', $locale, false);
                     $a = $faq->getTranslation('answer', $locale, false);
                     if ($q && $a) {
-                        $content .= "Otázka: ".$q."\n";
-                        $content .= "Odpověď: ".$a."\n\n";
+                        $content .= 'Otázka: '.$q."\n";
+                        $content .= 'Odpověď: '.$a."\n\n";
                     }
                 }
             }
@@ -746,7 +754,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
             $content = File::get($file->getPathname());
 
             // Pokusíme se najít článek v databázi pro získání metadat a klíčových slov
-            $article = \App\Models\HelpArticle::where('slug', $slug)->first();
+            $article = HelpArticle::where('slug', $slug)->first();
 
             $title = $file->getFilenameWithoutExtension();
             $keywords = [];
@@ -763,8 +771,8 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
                 if ($faqs->isNotEmpty()) {
                     $content .= "\n\n### Časté dotazy (FAQ):\n";
                     foreach ($faqs as $faq) {
-                        $content .= "Otázka: ".$faq->getTranslation('question', $locale)."\n";
-                        $content .= "Odpověď: ".$faq->getTranslation('answer', $locale)."\n\n";
+                        $content .= 'Otázka: '.$faq->getTranslation('question', $locale)."\n";
+                        $content .= 'Odpověď: '.$faq->getTranslation('answer', $locale)."\n\n";
                     }
                 }
             } else {
@@ -977,7 +985,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
             ->limit(100)
             ->get();
 
-        $scored = $candidates->map(function (AiDocument $doc) use ($q, $words, $stems, $locale) {
+        $scored = $candidates->map(function (AiDocument $doc) use ($q, $words, $stems) {
             // Použijeme metodu z modelu pro získání lokalizovaných textů
             $title = Str::lower($doc->getLocalizedValue('title'));
             $content = Str::lower($doc->getLocalizedValue('content'));
@@ -1093,7 +1101,7 @@ Mustíš vrátit POUZE validní JSON. Nic jiného.
             app()->instance('middleware.disable', true);
 
             // Podvrhneme prázdný ErrorBag, protože ShareErrorsFromSession middleware je vypnutý
-            \Illuminate\Support\Facades\View::share('errors', new \Illuminate\Support\ViewErrorBag);
+            View::share('errors', new ViewErrorBag);
 
             // Použijeme app()->handle pro interní zpracování requestu bez sítě
             $response = app()->handle($request);

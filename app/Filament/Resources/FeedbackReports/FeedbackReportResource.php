@@ -7,17 +7,18 @@ use App\Filament\Resources\FeedbackReports\Pages\ViewFeedbackReport;
 use App\Filament\Resources\FeedbackReports\Schemas\FeedbackReportForm;
 use App\Filament\Resources\FeedbackReports\Tables\FeedbackReportsTable;
 use App\Models\FeedbackReport;
-use App\Support\Icons\AppIcon;
 use App\Support\FilamentIcon;
+use App\Support\Icons\AppIcon;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 
 class FeedbackReportResource extends Resource
 {
     protected static ?string $model = FeedbackReport::class;
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
         return FilamentIcon::get(AppIcon::BUG);
     }

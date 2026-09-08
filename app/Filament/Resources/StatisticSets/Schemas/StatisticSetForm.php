@@ -2,6 +2,9 @@
 
 namespace App\Filament\Resources\StatisticSets\Schemas;
 
+use App\Models\Season;
+use App\Models\Team;
+use App\Support\IconHelper;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -21,7 +24,7 @@ class StatisticSetForm
                 Tabs::make('StatisticSet Tabs')
                     ->tabs([
                         Tabs\Tab::make('Základní informace')
-                            ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::INFO))
+                            ->icon(IconHelper::get(IconHelper::INFO))
                             ->schema([
                                 Section::make('Metadata')
                                     ->schema([
@@ -95,7 +98,7 @@ class StatisticSetForm
                             ]),
 
                         Tabs\Tab::make('Konfigurace sloupců')
-                            ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::TABLE))
+                            ->icon(IconHelper::get(IconHelper::TABLE))
                             ->schema([
                                 Section::make('Definice tabulky')
                                     ->description('Definujte sloupce, které se budou v této tabulce zobrazovat.')
@@ -128,7 +131,7 @@ class StatisticSetForm
                             ]),
 
                         Tabs\Tab::make('Rozsah (Scope)')
-                            ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::FILTER))
+                            ->icon(IconHelper::get(IconHelper::FILTER))
                             ->schema([
                                 Section::make('Filtry a vazby')
                                     ->description('K čemu se tato sada statistik vztahuje (vazby jsou informativní pro renderování).')
@@ -137,11 +140,11 @@ class StatisticSetForm
                                             ->schema([
                                                 Select::make('scope.season_id')
                                                     ->label('Sezóna')
-                                                    ->options(\App\Models\Season::pluck('name', 'id'))
+                                                    ->options(Season::pluck('name', 'id'))
                                                     ->searchable(),
                                                 Select::make('scope.team_id')
                                                     ->label('Tým')
-                                                    ->options(\App\Models\Team::pluck('name', 'id'))
+                                                    ->options(Team::pluck('name', 'id'))
                                                     ->searchable(),
                                             ]),
                                     ]),

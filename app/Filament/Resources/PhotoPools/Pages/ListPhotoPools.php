@@ -6,6 +6,7 @@ use App\Filament\Forms\CmsForms;
 use App\Filament\Resources\PhotoPools\PhotoPoolResource;
 use App\Models\PhotoPool;
 use App\Services\AiTextEnhancer;
+use App\Services\PhotoPoolImporter;
 use App\Support\IconHelper;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
@@ -15,15 +16,18 @@ use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Wizard;
 use Filament\Schemas\Components\Wizard\Step;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class ListPhotoPools extends ListRecords
 {
@@ -167,7 +171,7 @@ class ListPhotoPools extends ListRecords
                                             $set('seo.og_title.en', $result['en']['seo']['og_title']);
                                             $set('seo.og_description.en', $result['en']['seo']['og_description']);
 
-                                            \Filament\Notifications\Notification::make()
+                                            Notification::make()
                                                 ->title(__('admin.resources.photo_pool.notifications.ai_regenerated'))
                                                 ->success()
                                                 ->send();
@@ -207,10 +211,10 @@ class ListPhotoPools extends ListRecords
                                         Tabs\Tab::make('SEO')
                                             ->icon(new HtmlString('<i class="fa-light fa-globe"></i>'))
                                             ->schema([
-                                                \Filament\Schemas\Components\Group::make()
+                                                Group::make()
                                                     ->statePath('seo')
                                                     ->schema([
-                                                        \App\Filament\Forms\CmsForms::getSeoSection(false),
+                                                        CmsForms::getSeoSection(false),
                                                     ]),
                                             ]),
                                     ]),
@@ -244,7 +248,7 @@ class ListPhotoPools extends ListRecords
                                         'x-on:file-pond-add-file' => "console.log('KS DEBUG: Soubor přidán do fronty:', \$event.detail.file.filename)",
                                         'x-on:file-pond-process-file' => "console.log('KS DEBUG: Soubor úspěšně nahrán na server:', \$event.detail.file.filename)",
                                     ])
-                                    ->getUploadedFileNameForStorageUsing(fn (\Livewire\Features\SupportFileUploads\TemporaryUploadedFile $file): string => Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)).'.'.strtolower($file->getClientOriginalExtension()))
+                                    ->getUploadedFileNameForStorageUsing(fn (TemporaryUploadedFile $file): string => Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)).'.'.strtolower($file->getClientOriginalExtension()))
                                     ->helperText(new HtmlString('<div class="mt-2 p-3 bg-amber-50 dark:bg-amber-900/30 rounded-lg border border-amber-200 dark:border-amber-800 text-xs text-amber-700 dark:text-amber-300 flex items-start gap-3">'.IconHelper::render(IconHelper::INFO, 'fal')->toHtml().'<div><strong>Důležité:</strong> Fotografie jsou nahrávány hromadně. <strong>Během nahrávání a následného zpracování (po uložení) nezavírejte toto okno.</strong> Fotografie jsou automaticky optimalizovány pro web.</div></div>'))
                                     ->required(),
                             ]),
@@ -285,11 +289,11 @@ class ListPhotoPools extends ListRecords
                     }
 
                     // Použijeme službu pro přípravu importu (přesun souborů a naplnění fronty)
-                    $importer = app(\App\Services\PhotoPoolImporter::class);
+                    $importer = app(PhotoPoolImporter::class);
                     $importer->prepareForImport($record, $files);
 
                     // Informujeme uživatele
-                    \Filament\Notifications\Notification::make()
+                    Notification::make()
                         ->title(__('admin.resources.photo_pool.notifications.uploading'))
                         ->info()
                         ->body('Fotografie byly nahrány. Budete přesměrováni na detail galerie pro dokončení zpracování.')

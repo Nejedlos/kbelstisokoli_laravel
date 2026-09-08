@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Translatable\HasTranslations;
 
 class Post extends Model implements HasMedia
@@ -46,7 +47,9 @@ class Post extends Model implements HasMedia
                 if ($post->isDirty('title')) {
                     foreach ($post->getMedia('featured_image') as $media) {
                         $title = $post->getTranslation('title', 'cs') ?: $post->title;
-                        if (empty($title)) continue;
+                        if (empty($title)) {
+                            continue;
+                        }
 
                         $newFileName = Str::slug($title).'.'.$media->extension;
                         if ($media->file_name !== $newFileName) {
@@ -56,7 +59,7 @@ class Post extends Model implements HasMedia
                     }
                 }
             } catch (\Throwable $e) {
-                Log::error('Post model updating hook error: ' . $e->getMessage());
+                Log::error('Post model updating hook error: '.$e->getMessage());
             }
         });
     }
@@ -75,7 +78,7 @@ class Post extends Model implements HasMedia
     /**
      * Zaregistruje konverze médií.
      */
-    public function registerMediaConversions(?\Spatie\MediaLibrary\MediaCollections\Models\Media $media = null): void
+    public function registerMediaConversions(?Media $media = null): void
     {
         $this->addMediaConversion('thumb')
             ->width(400)

@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Jobs\Stats\SyncTeamSeasonJob;
+use App\Models\ExternalImportRun;
 use App\Models\Season;
 use App\Models\Team;
 use App\Services\Stats\Sync\ExternalStatsSyncService;
@@ -54,6 +55,7 @@ class SyncTeamSeasonCommand extends Command
                 $teams = [$team];
             } else {
                 $this->error("Tým se slugem '{$teamSlugInput}' nebyl nalezen.");
+
                 return self::FAILURE;
             }
         }
@@ -70,6 +72,7 @@ class SyncTeamSeasonCommand extends Command
                 $seasons = [$season];
             } else {
                 $this->error("Sezóna '{$seasonInput}' nebyla nalezena.");
+
                 return self::FAILURE;
             }
         }
@@ -100,6 +103,7 @@ class SyncTeamSeasonCommand extends Command
                     ['URL zápasů', $results['config']['matches_list_url'] ?? 'N/A'],
                 ]);
             }
+
             return self::SUCCESS;
         }
 
@@ -107,7 +111,7 @@ class SyncTeamSeasonCommand extends Command
             $this->info('Spouštím synchronizaci...');
 
             // Vytvoření hlavního běhu pro UI/Progress
-            $mainRun = \App\Models\ExternalImportRun::start(
+            $mainRun = ExternalImportRun::start(
                 'czbasketball',
                 $seasons[0]->id ?? 0,
                 $teams[0]->id ?? 0,
@@ -145,7 +149,7 @@ class SyncTeamSeasonCommand extends Command
                         // Kontrola, zda nebyl běh zrušen nebo přeskočen z UI
                         $currentStatus = $mainRun->refresh()->status;
                         if ($currentStatus === 'cancelled' || $currentStatus === 'skipped') {
-                            $logSection->writeln('<fg=yellow>Synchronizace byla ' . ($currentStatus === 'cancelled' ? 'zrušena' : 'přeskočena') . ' uživatelem.</>');
+                            $logSection->writeln('<fg=yellow>Synchronizace byla '.($currentStatus === 'cancelled' ? 'zrušena' : 'přeskočena').' uživatelem.</>');
                             break 2;
                         }
 

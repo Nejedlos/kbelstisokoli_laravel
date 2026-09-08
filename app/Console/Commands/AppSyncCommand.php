@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Models\ExternalTeamSeasonConfig;
+use Dotenv\Dotenv;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
 
@@ -96,19 +98,19 @@ class AppSyncCommand extends Command
         }
 
         // Ikony
-        if (class_exists(\App\Console\Commands\IconsSyncCommand::class)) {
+        if (class_exists(IconsSyncCommand::class)) {
             $this->call('app:icons:sync');
         }
 
         // Oznámení
-        if (class_exists(\App\Console\Commands\AnnouncementsSyncCommand::class)) {
+        if (class_exists(AnnouncementsSyncCommand::class)) {
             $this->call('announcements:sync');
         }
 
         // Livewire (v Livewire 3 se používá auto-discovery, příkaz discover již neexistuje)
 
         // Finance
-        if (class_exists(\App\Console\Commands\FinanceSyncCommand::class)) {
+        if (class_exists(FinanceSyncCommand::class)) {
             $financeFlags = [];
             if ($this->option('finance-fresh')) {
                 $this->warn('⚠️  Pozor: Příznak --finance-fresh SMAŽE všechna finanční data!');
@@ -125,15 +127,15 @@ class AppSyncCommand extends Command
             $this->info('Spouštím synchronizaci statistik a externích dat...');
 
             // 1. Synchronizace hráčů (fotky, apod.)
-            if (class_exists(\App\Console\Commands\StatsSyncPlayersCommand::class)) {
+            if (class_exists(StatsSyncPlayersCommand::class)) {
                 $this->call('stats:sync-players', [
                     '--force' => $this->option('force') || $statsFresh,
                 ]);
             }
 
             // 2. Synchronizace aktivních týmů a sezón
-            if (class_exists(\App\Models\ExternalTeamSeasonConfig::class)) {
-                $configs = \App\Models\ExternalTeamSeasonConfig::where('is_enabled', true)->get();
+            if (class_exists(ExternalTeamSeasonConfig::class)) {
+                $configs = ExternalTeamSeasonConfig::where('is_enabled', true)->get();
 
                 if ($configs->isEmpty()) {
                     $this->warn('Nebyly nalezeny žádné aktivní konfigurace pro synchronizaci statistik.');
@@ -651,7 +653,7 @@ class AppSyncCommand extends Command
 
         $toTransfer = [];
         if (file_exists($rootEnvPath)) {
-            $rootVars = \Dotenv\Dotenv::parse(file_get_contents($rootEnvPath));
+            $rootVars = Dotenv::parse(file_get_contents($rootEnvPath));
             foreach ($rootVars as $key => $value) {
                 if (str_starts_with($key, 'PROD_') || in_array($key, ['APP_KEY', 'FONTAWESOME_TOKEN', 'OPENAI_API_KEY', 'ERROR_REPORT_EMAIL', 'ERROR_REPORT_SENDER'])) {
                     if (! empty($value) || $key === 'PROD_DB_PASSWORD') {
@@ -675,7 +677,7 @@ class AppSyncCommand extends Command
 
         if (file_exists($rootEnvPath)) {
             try {
-                \Dotenv\Dotenv::createMutable(base_path(), '.env')->load();
+                Dotenv::createMutable(base_path(), '.env')->load();
             } catch (\Exception $e) {
             }
         }

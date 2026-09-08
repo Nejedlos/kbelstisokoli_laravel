@@ -4,11 +4,11 @@ namespace App\Services\Dmarc;
 
 use App\Models\Dmarc\DmarcIpEnrichment;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
 
 class DmarcIpEnrichmentService
 {
     protected bool $enabled;
+
     protected int $cacheHours;
 
     public function __construct()
@@ -21,19 +21,19 @@ class DmarcIpEnrichmentService
     {
         $enrichment = DmarcIpEnrichment::firstOrNew(['ip_address' => $ip]);
 
-        if (!$this->enabled) {
+        if (! $this->enabled) {
             return $enrichment;
         }
 
         $now = now();
         $enrichment->times_seen++;
         $enrichment->last_seen_at = $now;
-        if (!$enrichment->exists) {
+        if (! $enrichment->exists) {
             $enrichment->first_seen_at = $now;
         }
 
         // Pokud je lookup starší než cacheHours, provedeme nový
-        if (!$enrichment->last_lookup_at || $enrichment->last_lookup_at->diffInHours($now) >= $this->cacheHours) {
+        if (! $enrichment->last_lookup_at || $enrichment->last_lookup_at->diffInHours($now) >= $this->cacheHours) {
             $this->performLookup($enrichment);
         }
 
@@ -60,7 +60,7 @@ class DmarcIpEnrichmentService
             Log::info("DMARC IP Enrichment: Lookup success for {$ip} -> {$enrichment->reverse_dns}");
         } catch (\Exception $e) {
             $enrichment->lookup_status = 'error';
-            Log::warning("DMARC IP Enrichment: Lookup failed for {$enrichment->ip_address}: " . $e->getMessage());
+            Log::warning("DMARC IP Enrichment: Lookup failed for {$enrichment->ip_address}: ".$e->getMessage());
         }
     }
 }

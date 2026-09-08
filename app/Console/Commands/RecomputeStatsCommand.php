@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\ExternalTeamSeasonConfig;
 use App\Models\Season;
 use App\Models\Team;
 use App\Services\Stats\Sync\StatisticSyncService;
@@ -66,7 +67,7 @@ class RecomputeStatsCommand extends Command
             $teams->push($team);
         } else {
             // 1. Prioritně bereme týmy z ExternalTeamSeasonConfig (databázové nastavení)
-            $configs = \App\Models\ExternalTeamSeasonConfig::where('season_id', $season->id)
+            $configs = ExternalTeamSeasonConfig::where('season_id', $season->id)
                 ->where('is_enabled', true)
                 ->with('team')
                 ->get();
@@ -91,7 +92,7 @@ class RecomputeStatsCommand extends Command
         $statService->recomputePlayerSummaries($season->id);
 
         // 2. Přepočet týmů
-        $this->info("2/2 Přepočítávám souhrny pro " . $teams->count() . " týmů...");
+        $this->info('2/2 Přepočítávám souhrny pro '.$teams->count().' týmů...');
         foreach ($teams as $team) {
             $this->info("- {$team->name}");
             $statService->recomputeTeamSummary($season->id, $team->id);

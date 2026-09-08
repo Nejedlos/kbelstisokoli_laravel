@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\MediaAssets\Schemas;
 
+use App\Support\IconHelper;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
@@ -19,7 +20,7 @@ class MediaAssetForm
         return $schema
             ->components([
                 Section::make('Soubor')
-                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::UPLOAD))
+                    ->icon(IconHelper::get(IconHelper::UPLOAD))
                     ->schema([
                         SpatieMediaLibraryFileUpload::make('file')
                             ->label('Nahrát soubor')
@@ -44,7 +45,7 @@ class MediaAssetForm
                     ]),
 
                 Section::make('Metadata')
-                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::METADATA))
+                    ->icon(IconHelper::get(IconHelper::METADATA))
                     ->description('Popisné informace o médiu pro SEO a přístupnost.')
                     ->schema([
                         Grid::make(2)
@@ -71,7 +72,7 @@ class MediaAssetForm
                     ]),
 
                 Section::make('Nastavení')
-                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::SETTINGS))
+                    ->icon(IconHelper::get(IconHelper::SETTINGS))
                     ->schema([
                         Grid::make(3)
                             ->schema([

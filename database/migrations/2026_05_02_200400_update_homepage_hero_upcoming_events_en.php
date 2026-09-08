@@ -1,8 +1,7 @@
 <?php
 
+use App\Models\Page;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -11,15 +10,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $page = \App\Models\Page::where('slug', 'home')->first();
+        $page = Page::where('slug', 'home')->first();
 
-        if (!$page) {
+        if (! $page) {
             return;
         }
 
         $contentTranslations = $page->getTranslations('content');
 
-        if (!isset($contentTranslations['en'])) {
+        if (! isset($contentTranslations['en'])) {
             return;
         }
 
@@ -44,15 +43,15 @@ return new class extends Migration
      */
     public function down(): void
     {
-        $page = \App\Models\Page::where('slug', 'home')->first();
+        $page = Page::where('slug', 'home')->first();
 
-        if (!$page) {
+        if (! $page) {
             return;
         }
 
         $contentTranslations = $page->getTranslations('content');
 
-        if (!isset($contentTranslations['en'])) {
+        if (! isset($contentTranslations['en'])) {
             return;
         }
 

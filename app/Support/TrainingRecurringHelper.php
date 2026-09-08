@@ -11,13 +11,13 @@ class TrainingRecurringHelper
     /**
      * Replikuje trénink podle zadaných parametrů.
      *
-     * @param Training $training Původní trénink
-     * @param array $data Data z formuláře (repeat_frequency, repeat_count, repeat_period, target_date atd.)
+     * @param  Training  $training  Původní trénink
+     * @param  array  $data  Data z formuláře (repeat_frequency, repeat_count, repeat_period, target_date atd.)
      * @return Collection<int, Training> Kolekce vytvořených tréninků
      */
     public static function replicate(Training $training, array $data): Collection
     {
-        $createdTrainings = new Collection();
+        $createdTrainings = new Collection;
 
         $startsAt = Carbon::parse($training->starts_at);
         $endsAt = $training->ends_at ? Carbon::parse($training->ends_at) : null;
@@ -26,9 +26,9 @@ class TrainingRecurringHelper
         $dates = [];
 
         // 1. Jednorázové klonování na konkrétní datum
-        if (!empty($data['target_date'])) {
+        if (! empty($data['target_date'])) {
             $targetDate = Carbon::parse($data['target_date']);
-            
+
             // Zachováme čas z původního tréninku, změníme jen datum
             $newDate = $targetDate->copy()->setTime(
                 $startsAt->hour,
@@ -36,9 +36,9 @@ class TrainingRecurringHelper
                 $startsAt->second
             );
             $dates[] = $newDate;
-        } 
+        }
         // 2. Opakované klonování (původní logika z CreateTraining)
-        elseif (!empty($data['repeat_frequency'])) {
+        elseif (! empty($data['repeat_frequency'])) {
             $frequency = $data['repeat_frequency'];
             $count = (int) ($data['repeat_count'] ?? 0);
             $period = $data['repeat_period'] ?? null;

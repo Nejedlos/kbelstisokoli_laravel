@@ -2,6 +2,8 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\AiSetting;
+use App\Models\CronLog;
 use Filament\Widgets\Widget;
 
 class SystemHealthWidget extends Widget
@@ -22,9 +24,9 @@ class SystemHealthWidget extends Widget
 
         // Cron last run - best effort
         $lastRun = null;
-        if (class_exists(\App\Models\CronLog::class)) {
+        if (class_exists(CronLog::class)) {
             try {
-                $last = \App\Models\CronLog::query()->latest('created_at')->first();
+                $last = CronLog::query()->latest('created_at')->first();
                 if ($last) {
                     $lastRun = $last->created_at ?? $last->occurred_at ?? null;
                 }
@@ -39,9 +41,9 @@ class SystemHealthWidget extends Widget
 
         // AI index status - best effort
         $aiReady = false;
-        if (class_exists(\App\Models\AiSetting::class)) {
+        if (class_exists(AiSetting::class)) {
             try {
-                $ai = \App\Models\AiSetting::first();
+                $ai = AiSetting::first();
                 $aiReady = (bool) ($ai?->enabled ?? config('ai.enabled', true));
             } catch (\Throwable $e) {
                 $aiReady = (bool) config('ai.enabled', true);

@@ -7,13 +7,15 @@ use Illuminate\Support\Facades\Cache;
 class ConsoleService
 {
     protected const CACHE_KEY = 'debug_console_output';
+
     protected const STOP_FLAG_KEY = 'debug_sync_stop_flag';
+
     protected const MAX_LINES = 500;
 
     public static function log(string $message, string $type = 'info'): void
     {
         if (app()->runningInConsole()) {
-            echo $message . "\n";
+            echo $message."\n";
         }
 
         $timestamp = now()->format('H:i:s');

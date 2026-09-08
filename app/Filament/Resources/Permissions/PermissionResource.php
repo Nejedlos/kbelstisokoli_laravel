@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Permissions;
 
 use App\Filament\Resources\Permissions\Pages\ListPermissions;
 use App\Models\Permission;
+use App\Support\IconHelper;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -14,14 +15,15 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 
 class PermissionResource extends Resource
 {
     protected static ?string $model = Permission::class;
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
-        return \App\Support\IconHelper::get(\App\Support\IconHelper::PERMISSIONS);
+        return IconHelper::get(IconHelper::PERMISSIONS);
     }
 
     public static function getNavigationGroup(): ?string

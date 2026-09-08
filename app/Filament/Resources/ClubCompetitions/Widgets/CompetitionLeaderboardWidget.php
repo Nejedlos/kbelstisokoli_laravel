@@ -12,7 +12,7 @@ class CompetitionLeaderboardWidget extends Widget
 {
     public ?Model $ownerRecord = null;
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     protected string $view = 'filament.resources.club-competitions.widgets.leaderboard-widget';
 
@@ -31,15 +31,15 @@ class CompetitionLeaderboardWidget extends Widget
         }
 
         $entries = ClubCompetitionEntry::query()
-            ->where("club_competition_id", $this->ownerRecord->id)
-            ->leftJoin('users', "users.id", '=', "player_id")
+            ->where('club_competition_id', $this->ownerRecord->id)
+            ->leftJoin('users', 'users.id', '=', 'player_id')
             ->select(
-                "player_id",
-                "label",
-                "users.name as user_name",
-                DB::raw("SUM(value) as total_value")
+                'player_id',
+                'label',
+                'users.name as user_name',
+                DB::raw('SUM(value) as total_value')
             )
-            ->groupBy("player_id", "label", "users.name")
+            ->groupBy('player_id', 'label', 'users.name')
             ->orderBy('total_value', 'desc')
             ->get();
 

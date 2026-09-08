@@ -3,13 +3,18 @@
 namespace App\Console\Commands;
 
 use App\Models\BasketballMatch;
+use App\Models\ExternalEntityMapping;
 use App\Models\ExternalTeamSeasonConfig;
+use App\Models\LegacyImportBatch;
+use App\Models\LegacyImportFile;
 use App\Models\Season;
 use App\Models\StatisticRow;
 use App\Models\Team;
 use App\Models\User;
 use App\Services\Stats\Contracts\StatFetcherInterface;
+use App\Services\Stats\Legacy\LegacyFileClassifier;
 use App\Services\Stats\Sync\ExternalStatsSyncService;
+use App\Services\Stats\Sync\StatisticSyncService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
@@ -62,8 +67,8 @@ class QARun extends Command
 
                 $this->info("Mapuji uživatele {$admin->email} na testovacího hráče (ID 11246)...");
 
-                app(\App\Services\Stats\Sync\StatisticSyncService::class)->linkPlayerAndRecompute(
-                    \App\Models\ExternalEntityMapping::updateOrCreate([
+                app(StatisticSyncService::class)->linkPlayerAndRecompute(
+                    ExternalEntityMapping::updateOrCreate([
                         'source_key' => 'czbasketball',
                         'entity_type' => 'player',
                         'external_id' => '11246',
@@ -190,7 +195,7 @@ class QARun extends Command
         $this->info("Spouštím reálný legacy import z {$path}...");
 
         // Vytvoříme batch
-        $batch = \App\Models\LegacyImportBatch::create([
+        $batch = LegacyImportBatch::create([
             'title' => 'QA Smoke Run Legacy Import',
             'status' => 'queued',
             'total_files' => 0,
@@ -199,7 +204,7 @@ class QARun extends Command
 
         $files = File::files($path);
         $count = 0;
-        $classifier = app(\App\Services\Stats\Legacy\LegacyFileClassifier::class);
+        $classifier = app(LegacyFileClassifier::class);
 
         foreach ($files as $file) {
             if (in_array($file->getExtension(), ['html', 'htm'])) {
@@ -210,7 +215,7 @@ class QARun extends Command
                     $this->warn("U souboru {$file->getFilename()} nebyla detekována sezóna!");
                 }
 
-                \App\Models\LegacyImportFile::create([
+                LegacyImportFile::create([
                     'legacy_import_batch_id' => $batch->id,
                     'original_filename' => $file->getFilename(),
                     'stored_path' => 'legacystats/'.$file->getFilename(),
@@ -280,7 +285,7 @@ class QARun extends Command
         $report .= 'Celkem zápasů: '.BasketballMatch::count()."\n";
         $report .= 'Externí statistiky (řádky): '.StatisticRow::where('source_metadata', 'LIKE', '%"source":"czbasketball"%')->count()."\n";
         $report .= 'Legacy statistiky (řádky): '.StatisticRow::where('source_metadata', 'LIKE', '%"source_type":"legacy"%')->count()."\n";
-        $report .= 'Unmatched hráči: '.\App\Models\ExternalEntityMapping::where('entity_type', 'player')->whereNull('internal_id')->count()."\n";
+        $report .= 'Unmatched hráči: '.ExternalEntityMapping::where('entity_type', 'player')->whereNull('internal_id')->count()."\n";
 
         $this->info($report);
 

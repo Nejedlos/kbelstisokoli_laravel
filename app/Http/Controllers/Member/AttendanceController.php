@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Member;
 
 use App\Enums\ExcuseReason;
+use App\Events\RsvpChanged;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\BasketballMatch;
@@ -13,6 +14,9 @@ use App\Models\UserSeasonConfig;
 use App\Services\Member\MemberContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class AttendanceController extends Controller
@@ -33,7 +37,7 @@ class AttendanceController extends Controller
 
         // Načteme ID uživatelů, kterým se hlídá docházka v této sezóně
         $trackedUserIds = $currentSeasonId
-            ? \Illuminate\Support\Facades\Cache::remember("tracked_user_ids_{$currentSeasonId}", 3600, function () use ($currentSeasonId) {
+            ? Cache::remember("tracked_user_ids_{$currentSeasonId}", 3600, function () use ($currentSeasonId) {
                 return UserSeasonConfig::where('season_id', $currentSeasonId)
                     ->where('track_attendance', true)
                     ->pluck('user_id')
@@ -146,7 +150,7 @@ class AttendanceController extends Controller
                     if (! isset($teamTrackedUserIds[$team->id])) {
                         $teamTrackedUserIds[$team->id] = $team->activePlayers
                             ->pluck('user_id')
-                            ->filter(fn($uid) => in_array($uid, $trackedUserIds))
+                            ->filter(fn ($uid) => in_array($uid, $trackedUserIds))
                             ->toArray();
                     }
                     $expectedIds = $expectedIds->concat($teamTrackedUserIds[$team->id]);
@@ -160,8 +164,8 @@ class AttendanceController extends Controller
             ->map(function ($item) use ($currentSeasonId, $trackedUserIds, &$teamTrackedUserIds) {
                 // U zápasu může být jiná sezóna než aktuální, ale většinou je to stejné
                 $seasonId = $item->season_id ?: $currentSeasonId;
-                
-                $seasonTrackedIds = ($seasonId == $currentSeasonId) ? $trackedUserIds : \Illuminate\Support\Facades\Cache::remember("tracked_user_ids_{$seasonId}", 3600, function () use ($seasonId) {
+
+                $seasonTrackedIds = ($seasonId == $currentSeasonId) ? $trackedUserIds : Cache::remember("tracked_user_ids_{$seasonId}", 3600, function () use ($seasonId) {
                     return UserSeasonConfig::where('season_id', $seasonId)->where('track_attendance', true)->pluck('user_id')->toArray();
                 });
 
@@ -183,7 +187,7 @@ class AttendanceController extends Controller
                     if (! isset($teamTrackedUserIds[$cacheKey])) {
                         $teamTrackedUserIds[$cacheKey] = $team->activePlayers
                             ->pluck('user_id')
-                            ->filter(fn($uid) => in_array($uid, $seasonTrackedIds))
+                            ->filter(fn ($uid) => in_array($uid, $seasonTrackedIds))
                             ->toArray();
                     }
                     $expectedIds = $expectedIds->concat($teamTrackedUserIds[$cacheKey]);
@@ -200,7 +204,7 @@ class AttendanceController extends Controller
                     if (! isset($teamTrackedUserIds[$team->id])) {
                         $teamTrackedUserIds[$team->id] = $team->activePlayers
                             ->pluck('user_id')
-                            ->filter(fn($uid) => in_array($uid, $trackedUserIds))
+                            ->filter(fn ($uid) => in_array($uid, $trackedUserIds))
                             ->toArray();
                     }
                     $expectedIds = $expectedIds->concat($teamTrackedUserIds[$team->id]);
@@ -219,7 +223,7 @@ class AttendanceController extends Controller
         }
 
         // Seznam roků pro filtr (unikátní roky z dostupných dat) - Cachujeme na hodinu
-        $years = \Illuminate\Support\Facades\Cache::remember('attendance_filter_years', 3600, function () {
+        $years = Cache::remember('attendance_filter_years', 3600, function () {
             $trainingYears = Training::selectRaw('YEAR(starts_at) as year')->distinct()->pluck('year');
             $matchYears = BasketballMatch::selectRaw('YEAR(scheduled_at) as year')->distinct()->pluck('year');
             $eventYears = ClubEvent::selectRaw('YEAR(starts_at) as year')->distinct()->pluck('year');
@@ -480,7 +484,7 @@ class AttendanceController extends Controller
             ]
         );
 
-        event(new \App\Events\RsvpChanged($attendance));
+        event(new RsvpChanged($attendance));
 
         return back()->with('status', __('member.attendance.save_success'));
     }
@@ -494,7 +498,7 @@ class AttendanceController extends Controller
                 'status' => 'required|in:confirmed,declined',
                 'excuse_reason' => 'nullable|string',
             ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => false,
@@ -518,7 +522,7 @@ class AttendanceController extends Controller
             }
         }
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($idsByType, $request, $user, &$updatedCount, &$changedAttendances) {
+        DB::transaction(function () use ($idsByType, $request, $user, &$updatedCount, &$changedAttendances) {
             $nowWithMargin = now()->addMinutes(90);
 
             foreach ($idsByType as $type => $ids) {
@@ -529,7 +533,9 @@ class AttendanceController extends Controller
                     default => null,
                 };
 
-                if (! $modelClass) continue;
+                if (! $modelClass) {
+                    continue;
+                }
 
                 $items = $modelClass::whereIn('id', $ids)->get();
 
@@ -539,7 +545,9 @@ class AttendanceController extends Controller
                         default => $item->starts_at,
                     };
 
-                    if ($eventDate->isBefore($nowWithMargin)) continue;
+                    if ($eventDate->isBefore($nowWithMargin)) {
+                        continue;
+                    }
 
                     $attendance = Attendance::updateOrCreate(
                         [
@@ -564,23 +572,23 @@ class AttendanceController extends Controller
 
         // Eventy odpálíme až po transakci
         foreach ($changedAttendances as $attendance) {
-            event(new \App\Events\RsvpChanged($attendance));
+            event(new RsvpChanged($attendance));
         }
 
         // Vymazat cache dashboardu pro všechny dotčené uživatele (všechny možné jazyky a týmy)
         try {
             $affectedUserIds = collect($changedAttendances)->pluck('user_id')->unique()->push($user->id);
             $locales = ['cs', 'en'];
-            $activeTeamId = app(\App\Services\Member\MemberContext::class)->getActiveTeamId();
+            $activeTeamId = app(MemberContext::class)->getActiveTeamId();
 
             foreach ($affectedUserIds as $uid) {
                 foreach ($locales as $l) {
-                    \Illuminate\Support\Facades\Cache::forget("member_dashboard_{$uid}_{$l}_{$activeTeamId}_v2");
-                    \Illuminate\Support\Facades\Cache::forget("member_dashboard_{$uid}_{$l}__v2");
+                    Cache::forget("member_dashboard_{$uid}_{$l}_{$activeTeamId}_v2");
+                    Cache::forget("member_dashboard_{$uid}_{$l}__v2");
                 }
             }
         } catch (\Exception $e) {
-            \Log::warning("Failed to clear dashboard cache: " . $e->getMessage());
+            \Log::warning('Failed to clear dashboard cache: '.$e->getMessage());
         }
 
         if ($request->ajax() || $request->wantsJson()) {

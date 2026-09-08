@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\ExternalEntityMappings\Tables;
 
 use App\Models\User;
-use App\Models\ExternalEntityMapping;
 use App\Services\Stats\Sync\StatisticSyncService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
@@ -17,6 +16,7 @@ use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Collection;
 use Illuminate\Support\HtmlString;
 
 class ExternalEntityMappingsTable
@@ -66,7 +66,7 @@ class ExternalEntityMappingsTable
             ->actions([
                 Action::make('linkUser')
                     ->label('Spárovat')
-                    ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-link"></i>'))
+                    ->icon(new HtmlString('<i class="fa-light fa-link"></i>'))
                     ->color('primary')
                     ->form([
                         Select::make('user_id')
@@ -86,7 +86,7 @@ class ExternalEntityMappingsTable
                     ->visible(fn ($record) => ! $record->internal_id),
                 Action::make('recompute')
                     ->label('Přepočítat')
-                    ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-arrows-rotate"></i>'))
+                    ->icon(new HtmlString('<i class="fa-light fa-arrows-rotate"></i>'))
                     ->color('info')
                     ->action(function ($record, StatisticSyncService $service) {
                         if ($record->internal_id) {
@@ -99,13 +99,13 @@ class ExternalEntityMappingsTable
                     })
                     ->visible(fn ($record) => (bool) $record->internal_id),
                 EditAction::make()
-                    ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-pen-to-square"></i>')),
+                    ->icon(new HtmlString('<i class="fa-light fa-pen-to-square"></i>')),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
                     BulkAction::make('batchLinkUser')
                         ->label('Hromadně spárovat')
-                        ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-users"></i>'))
+                        ->icon(new HtmlString('<i class="fa-light fa-users"></i>'))
                         ->form([
                             Select::make('user_id')
                                 ->label('Přiřadit k uživateli')
@@ -113,7 +113,7 @@ class ExternalEntityMappingsTable
                                 ->searchable()
                                 ->required(),
                         ])
-                        ->action(function (\Illuminate\Support\Collection $records, array $data, StatisticSyncService $service) {
+                        ->action(function (Collection $records, array $data, StatisticSyncService $service) {
                             $records->each(function ($record) use ($data, $service) {
                                 $service->linkPlayerAndRecompute($record, $data['user_id']);
                             });
@@ -127,7 +127,7 @@ class ExternalEntityMappingsTable
                         ->label('Hromadně přepočítat')
                         ->icon(new HtmlString('<i class="fa-light fa-arrows-rotate"></i>'))
                         ->color('info')
-                        ->action(function (\Illuminate\Support\Collection $records, StatisticSyncService $service) {
+                        ->action(function (Collection $records, StatisticSyncService $service) {
                             $records->each(function ($record) use ($service) {
                                 if ($record->internal_id) {
                                     $service->linkPlayerAndRecompute($record, $record->internal_id);
@@ -143,7 +143,7 @@ class ExternalEntityMappingsTable
                         ->label('Automaticky spárovat')
                         ->icon(new HtmlString('<i class="fa-light fa-magic"></i>'))
                         ->color('success')
-                        ->action(function (\Illuminate\Support\Collection $records, StatisticSyncService $service) {
+                        ->action(function (Collection $records, StatisticSyncService $service) {
                             $count = 0;
                             foreach ($records as $record) {
                                 if ($record->internal_id) {
@@ -163,7 +163,7 @@ class ExternalEntityMappingsTable
                                 ->send();
                         }),
                     DeleteBulkAction::make()
-                        ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-trash"></i>')),
+                        ->icon(new HtmlString('<i class="fa-light fa-trash"></i>')),
                 ]),
             ]);
     }

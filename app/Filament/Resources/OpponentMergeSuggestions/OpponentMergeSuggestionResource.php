@@ -2,19 +2,16 @@
 
 namespace App\Filament\Resources\OpponentMergeSuggestions;
 
-use App\Filament\Resources\OpponentMergeSuggestions\Pages\CreateOpponentMergeSuggestion;
-use App\Filament\Resources\OpponentMergeSuggestions\Pages\EditOpponentMergeSuggestion;
 use App\Filament\Resources\OpponentMergeSuggestions\Pages\ListOpponentMergeSuggestions;
 use App\Filament\Resources\OpponentMergeSuggestions\Schemas\OpponentMergeSuggestionForm;
 use App\Filament\Resources\OpponentMergeSuggestions\Tables\OpponentMergeSuggestionsTable;
 use App\Models\OpponentMergeSuggestion;
 use App\Support\FilamentIcon;
 use App\Support\Icons\AppIcon;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 
 class OpponentMergeSuggestionResource extends Resource
 {
@@ -25,7 +22,7 @@ class OpponentMergeSuggestionResource extends Resource
         return __('admin.navigation.groups.sports_agenda');
     }
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
         return FilamentIcon::get(AppIcon::OPPONENTS);
     }

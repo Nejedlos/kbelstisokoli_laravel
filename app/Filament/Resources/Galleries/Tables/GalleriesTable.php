@@ -9,6 +9,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class GalleriesTable
 {
@@ -18,8 +19,9 @@ class GalleriesTable
             ->columns([
                 TextColumn::make('title')
                     ->label('Název')
-                    ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
+                    ->searchable(query: function ($query, string $search): Builder {
                         $locale = app()->getLocale();
+
                         return $query->where("title->{$locale}", 'LIKE', "%{$search}%");
                     })
                     ->description(fn ($record) => $record->slug),

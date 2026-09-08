@@ -8,6 +8,7 @@ use App\Models\ExternalTeamSeasonConfig;
 use App\Models\PlayerProfile;
 use App\Models\User;
 use App\Services\Stats\Contracts\StatFetcherInterface;
+use App\Services\Stats\DTO\NormalizedTableDTO;
 use App\Services\Stats\Extractors\CzBasketball\TeamRosterExtractor;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -68,7 +69,7 @@ class RosterSyncService
     /**
      * Synchronizuje soupisku s již vyparsovanými daty.
      */
-    public function syncWithData(ExternalTeamSeasonConfig $config, \App\Services\Stats\DTO\NormalizedTableDTO $tableDto): void
+    public function syncWithData(ExternalTeamSeasonConfig $config, NormalizedTableDTO $tableDto): void
     {
         $importedCount = 0;
         $skippedCount = 0;
@@ -110,7 +111,7 @@ class RosterSyncService
                 }
 
                 // 3. Synchronizace fotografie (pokud je v DTO)
-                if (!empty($row->values['photo_url'])) {
+                if (! empty($row->values['photo_url'])) {
                     $this->playerSyncService->syncPhoto($user, $row->values['photo_url']);
                 }
 
@@ -281,7 +282,7 @@ class RosterSyncService
             }
         }
 
-        if (!empty($toUpdate)) {
+        if (! empty($toUpdate)) {
             $profile->update($toUpdate);
         }
     }
@@ -289,10 +290,10 @@ class RosterSyncService
     protected function prepareProfileData(array $values): array
     {
         $metadata = [];
-        if (!empty($values['birth_year'])) {
+        if (! empty($values['birth_year'])) {
             $metadata['birth_year'] = $values['birth_year'];
         }
-        if (!empty($values['nationality'])) {
+        if (! empty($values['nationality'])) {
             $metadata['nationality'] = $values['nationality'];
         }
 
@@ -301,15 +302,18 @@ class RosterSyncService
             'position' => $this->mapPosition($values['position'] ?? null),
             'height_cm' => $values['height'] ?? null,
             'weight_kg' => $values['weight'] ?? null,
-            'metadata' => !empty($metadata) ? $metadata : null,
+            'metadata' => ! empty($metadata) ? $metadata : null,
         ];
     }
 
     protected function mapPosition(?string $pos): ?string
     {
-        if (!$pos) return null;
+        if (! $pos) {
+            return null;
+        }
 
         $pos = mb_strtoupper(trim($pos));
+
         return match ($pos) {
             '1', 'PG' => 'PG',
             '2', 'SG', 'G' => 'SG',

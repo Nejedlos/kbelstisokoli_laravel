@@ -6,11 +6,11 @@ use App\Models\BasketballMatch;
 use App\Models\TeamEloRating;
 use App\Services\Prediction\EloCalculator;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 
 class RecomputeEloRatings extends Command
 {
     protected $signature = 'stats:elo:recompute {season?} {team?}';
+
     protected $description = 'Recompute Elo ratings from historical matches';
 
     private EloCalculator $eloCalculator;
@@ -42,11 +42,12 @@ class RecomputeEloRatings extends Command
 
         if ($matches->isEmpty()) {
             $this->info('No matches found to recompute Elo.');
+
             return 0;
         }
 
         // Reset Elo ratings if we are recomputing everything or a specific season
-        if (!$teamId) {
+        if (! $teamId) {
             $eloQuery = TeamEloRating::query();
             if ($seasonId) {
                 $eloQuery->where('season_id', $seasonId);
@@ -63,14 +64,14 @@ class RecomputeEloRatings extends Command
             $teamKey = TeamEloRating::getInternalTeamKey($match->team_id);
             $oppKey = TeamEloRating::getOpponentKey($match->opponent_id);
 
-            if (!$oppKey) {
+            if (! $oppKey) {
                 continue;
             }
 
-            if (!isset($eloRatings[$seasonId][$teamKey])) {
+            if (! isset($eloRatings[$seasonId][$teamKey])) {
                 $eloRatings[$seasonId][$teamKey] = TeamEloRating::where('season_id', $seasonId)->where('team_key', $teamKey)->value('rating') ?? $this->eloCalculator::INITIAL_ELO;
             }
-            if (!isset($eloRatings[$seasonId][$oppKey])) {
+            if (! isset($eloRatings[$seasonId][$oppKey])) {
                 $eloRatings[$seasonId][$oppKey] = TeamEloRating::where('season_id', $seasonId)->where('team_key', $oppKey)->value('rating') ?? $this->eloCalculator::INITIAL_ELO;
             }
 

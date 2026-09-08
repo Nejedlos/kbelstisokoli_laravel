@@ -8,17 +8,20 @@ use App\Filament\Resources\FinancePayments\Pages\ListFinancePayments;
 use App\Filament\Resources\FinancePayments\Schemas\FinancePaymentForm;
 use App\Filament\Resources\FinancePayments\Tables\FinancePaymentsTable;
 use App\Models\FinancePayment;
+use App\Support\IconHelper;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Builder;
 
 class FinancePaymentResource extends Resource
 {
     protected static ?string $model = FinancePayment::class;
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
-        return \App\Support\IconHelper::get(\App\Support\IconHelper::FINANCE_PAYMENTS);
+        return IconHelper::get(IconHelper::FINANCE_PAYMENTS);
     }
 
     public static function getNavigationGroup(): ?string
@@ -41,7 +44,7 @@ class FinancePaymentResource extends Resource
         return 10;
     }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
             ->with(['user'])

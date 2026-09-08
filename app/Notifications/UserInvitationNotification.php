@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Services\BrandingService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -39,7 +40,7 @@ class UserInvitationNotification extends BaseNotification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $branding = app(\App\Services\BrandingService::class)->getSettings();
+        $branding = app(BrandingService::class)->getSettings();
         $clubName = $branding['club_name'];
         $resetUrl = url(route('password.reset', [
             'token' => $this->token,

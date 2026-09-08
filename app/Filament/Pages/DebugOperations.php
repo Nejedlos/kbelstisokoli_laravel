@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Jobs\ComputeMatchPredictionJob;
 use App\Jobs\Stats\DiscoverSeasonsJob;
 use App\Jobs\Stats\SyncMatchDetailJob;
 use App\Jobs\Stats\SyncPlayersJob;
@@ -10,17 +11,28 @@ use App\Models\BasketballMatch;
 use App\Models\ExternalImportRun;
 use App\Models\ExternalTeamSeasonConfig;
 use App\Models\LegacyImportBatch;
+use App\Models\PlayerProfile;
 use App\Models\Season;
 use App\Models\StatisticRow;
 use App\Models\StatisticSet;
 use App\Models\Team;
-use App\Services\Support\ConsoleService;
 use App\Services\Stats\Sync\MatchCleanupService;
+use App\Services\Stats\Sync\SeasonDataStatusService;
+use App\Services\Stats\Sync\SeasonDiscoveryService;
+use App\Services\Stats\Sync\StatisticSyncService;
+use App\Services\Support\ConsoleService;
 use App\Support\IconHelper;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -45,16 +57,17 @@ class DebugOperations extends Page
     }
 
     public string $consoleOutput = '';
+
     public string $pollingInterval = '5s';
 
     public function mount(): void
     {
-        $this->consoleOutput = \App\Services\Support\ConsoleService::getContent();
+        $this->consoleOutput = ConsoleService::getContent();
     }
 
     public function refreshConsoleLogs(): void
     {
-        $newContent = \App\Services\Support\ConsoleService::getContent();
+        $newContent = ConsoleService::getContent();
         if ($this->consoleOutput !== $newContent) {
             $this->consoleOutput = $newContent;
             $this->dispatch('console-updated');
@@ -114,40 +127,40 @@ class DebugOperations extends Page
                     ->icon(IconHelper::render(IconHelper::REFRESH))
                     ->color('primary')
                     ->form([
-                        \Filament\Forms\Components\Select::make('season_id')
+                        Select::make('season_id')
                             ->label('Sezóna')
                             ->helperText('Vyberte sezónu, pro kterou chcete spustit import dat (soupisky, zápasy, statistiky).')
                             ->options(Season::query()->orderBy('name', 'desc')->pluck('name', 'id'))
                             ->default(fn () => Season::where('is_active', true)->first()?->id)
                             ->required(),
-                        \Filament\Schemas\Components\Grid::make(3)
+                        Grid::make(3)
                             ->schema([
-                                \Filament\Forms\Components\Toggle::make('force')
+                                Toggle::make('force')
                                     ->label('Force mode')
                                     ->helperText('Ignoruje hash obsahu.')
                                     ->onColor('warning'),
-                                \Filament\Forms\Components\Toggle::make('fresh')
+                                Toggle::make('fresh')
                                     ->label('Fresh mode')
                                     ->helperText('Smaže a znovu importuje (nebezpečné!).')
                                     ->onColor('danger'),
-                                \Filament\Forms\Components\Toggle::make('ai')
+                                Toggle::make('ai')
                                     ->label('AI mode')
                                     ->helperText('Použije OpenAI pro synchronizaci.')
                                     ->onColor('info'),
                             ]),
-                        \Filament\Schemas\Components\Section::make(new HtmlString(IconHelper::render(IconHelper::LIST_ICON) . ' Rozsah synchronizace'))
+                        Section::make(new HtmlString(IconHelper::render(IconHelper::LIST_ICON).' Rozsah synchronizace'))
                             ->schema([
-                                \Filament\Forms\Components\Toggle::make('sync_roster')
+                                Toggle::make('sync_roster')
                                     ->label('Soupiska')
                                     ->default(true),
-                                \Filament\Forms\Components\Toggle::make('sync_matches')
+                                Toggle::make('sync_matches')
                                     ->label('Zápasy')
                                     ->default(true),
-                                \Filament\Forms\Components\Toggle::make('sync_details')
+                                Toggle::make('sync_details')
                                     ->label('Statistiky')
                                     ->default(true)
                                     ->hidden(fn ($get) => ! $get('sync_matches')),
-                                \Filament\Forms\Components\TextInput::make('max_match_details')
+                                TextInput::make('max_match_details')
                                     ->label('Max detailů')
                                     ->numeric()
                                     ->default(100)
@@ -201,18 +214,18 @@ class DebugOperations extends Page
                     ->icon(IconHelper::render(IconHelper::USER))
                     ->color('info')
                     ->form([
-                        \Filament\Forms\Components\Toggle::make('force')
+                        Toggle::make('force')
                             ->label('Force mode')
                             ->helperText('Ignoruje hash obsahu.')
                             ->onColor('warning'),
-                        \Filament\Forms\Components\Select::make('team_id')
+                        Select::make('team_id')
                             ->label('Pouze pro tým')
                             ->options(Team::pluck('name', 'id'))
                             ->placeholder('Všichni hráči'),
                     ])
                     ->requiresConfirmation()
                     ->action(function (array $data) {
-                        ConsoleService::log("Spouštím hloubkovou synchronizaci hráčů...");
+                        ConsoleService::log('Spouštím hloubkovou synchronizaci hráčů...');
                         SyncPlayersJob::dispatch($data);
                         Notification::make()->title('Synchronizace hráčů naplánována.')->info()->send();
                     }),
@@ -223,16 +236,16 @@ class DebugOperations extends Page
                     ->icon(IconHelper::render(IconHelper::REFRESH))
                     ->color('primary')
                     ->form([
-                        \Filament\Forms\Components\Select::make('season_id')
+                        Select::make('season_id')
                             ->label('Sezóna')
                             ->helperText('Ponechte prázdné pro VŠECHNY sezóny.')
                             ->options(Season::query()->orderBy('name', 'desc')->pluck('name', 'id'))
                             ->nullable(),
-                        \Filament\Forms\Components\Toggle::make('force')
+                        Toggle::make('force')
                             ->label('Force mode')
                             ->helperText('Ignoruje hash obsahu u synchronizace.')
                             ->default(false),
-                        \Filament\Forms\Components\TextInput::make('max_match_details')
+                        TextInput::make('max_match_details')
                             ->label('Max detailů zápasů')
                             ->numeric()
                             ->default(100)
@@ -248,9 +261,9 @@ class DebugOperations extends Page
 
                         if ($seasonId) {
                             $seasonName = Season::find($seasonId)?->name ?? '???';
-                            ConsoleService::log("Spouštím synchronizaci pro sezónu: {$seasonName} (celkem: " . $teams->count() . " týmů).");
+                            ConsoleService::log("Spouštím synchronizaci pro sezónu: {$seasonName} (celkem: ".$teams->count().' týmů).');
                         } else {
-                            ConsoleService::log('Spouštím hromadnou synchronizaci VŠECH sezón (celkem: ' . $seasons->count() . ' sezón, ' . $teams->count() . ' týmů).');
+                            ConsoleService::log('Spouštím hromadnou synchronizaci VŠECH sezón (celkem: '.$seasons->count().' sezón, '.$teams->count().' týmů).');
                         }
 
                         foreach ($seasons as $season) {
@@ -278,17 +291,17 @@ class DebugOperations extends Page
                     ->icon(IconHelper::render(IconHelper::CIRCLE_CHECK))
                     ->color('success')
                     ->form([
-                        \Filament\Forms\Components\Select::make('season_id')
+                        Select::make('season_id')
                             ->label('Sezóna')
                             ->helperText('Vyberte sezónu pro synchronizaci i přepočet.')
                             ->options(Season::query()->orderBy('name', 'desc')->pluck('name', 'id'))
                             ->default(fn () => Season::where('is_active', true)->first()?->id)
                             ->required(),
-                        \Filament\Forms\Components\Toggle::make('force')
+                        Toggle::make('force')
                             ->label('Force mode')
                             ->helperText('Ignoruje hash obsahu u synchronizace.')
                             ->default(false),
-                        \Filament\Forms\Components\TextInput::make('max_match_details')
+                        TextInput::make('max_match_details')
                             ->label('Max detailů zápasů')
                             ->numeric()
                             ->default(100)
@@ -304,6 +317,7 @@ class DebugOperations extends Page
 
                         if (! $season) {
                             Notification::make()->title('Season not found')->danger()->send();
+
                             return;
                         }
 
@@ -321,11 +335,11 @@ class DebugOperations extends Page
                                 'maxMatchDetails' => $data['max_match_details'] ?? null,
                             ]);
                         }
-                        ConsoleService::log("Synchronizační joby byly přidány do fronty. Poznámka: samotná data se v DB objeví až po doběhnutí jobů na pozadí.", 'warning');
+                        ConsoleService::log('Synchronizační joby byly přidány do fronty. Poznámka: samotná data se v DB objeví až po doběhnutí jobů na pozadí.', 'warning');
 
                         // 2. Přepočet statistik (proběhne hned)
-                        ConsoleService::log("KROK 2: Spouštím přepočet statistik nad aktuálními daty v DB...", 'info');
-                        $statService = app(\App\Services\Stats\Sync\StatisticSyncService::class);
+                        ConsoleService::log('KROK 2: Spouštím přepočet statistik nad aktuálními daty v DB...', 'info');
+                        $statService = app(StatisticSyncService::class);
                         $statService->recomputePlayerSummaries($season->id);
                         foreach ($teams as $team) {
                             $statService->recomputeTeamSummary($season->id, $team->id);
@@ -344,7 +358,7 @@ class DebugOperations extends Page
                     ->modalHeading('Vyčistit duplicity zápasů?')
                     ->modalDescription('Tato akce prohledá celou databázi a sloučí zápasy stejného týmu, které se časově překrývají (tolerance 120 min). Data (docházka, statistiky) budou sloučena do jednoho záznamu.')
                     ->action(function (MatchCleanupService $service) {
-                        ConsoleService::log("Spouštím hromadné čištění duplicitních zápasů...");
+                        ConsoleService::log('Spouštím hromadné čištění duplicitních zápasů...');
                         $stats = $service->cleanupDuplicates(false);
                         ConsoleService::log("Čištění dokončeno. Nalezeno skupin: {$stats['groups_found']}, Sloučeno zápasů: {$stats['matches_merged']}");
                         Notification::make()
@@ -360,12 +374,12 @@ class DebugOperations extends Page
                     ->icon(IconHelper::render(IconHelper::SEO))
                     ->color('info')
                     ->form([
-                        \Filament\Forms\Components\Select::make('season_id')
+                        Select::make('season_id')
                             ->label('Konkrétní sezóna')
                             ->helperText('Vyberte, pokud chcete hledat jen pro jednu sezónu. Jinak se projdou všechny prázdné.')
                             ->options(Season::query()->orderBy('name', 'desc')->pluck('name', 'id'))
                             ->nullable(),
-                        \Filament\Forms\Components\Select::make('mode')
+                        Select::make('mode')
                             ->label('Spouštěcí mód')
                             ->options([
                                 'sync' => 'Synchronně (v prohlížeči - hrozí timeout)',
@@ -373,7 +387,7 @@ class DebugOperations extends Page
                             ])
                             ->default('job')
                             ->required(),
-                        \Filament\Forms\Components\Toggle::make('force')
+                        Toggle::make('force')
                             ->label('Force mode')
                             ->helperText('Zkusí re-discovery i u sezón, které už konfiguraci mají.'),
                     ])
@@ -388,15 +402,15 @@ class DebugOperations extends Page
 
                         if ($data['mode'] === 'job') {
                             DiscoverSeasonsJob::dispatch(null, $seasonName, $options);
-                            ConsoleService::log('Discovery proces ' . ($seasonName ? "pro sezónu $seasonName " : '') . 'naplánován jako job na pozadí.', 'info');
+                            ConsoleService::log('Discovery proces '.($seasonName ? "pro sezónu $seasonName " : '').'naplánován jako job na pozadí.', 'info');
                             Notification::make()->title('Discovery job dispatched')->success()->send();
 
                             return;
                         }
 
                         // Synchronní běh (původní)
-                        ConsoleService::log('Zahajuji proces vyhledávání chybějících sezón (Discovery)' . ($seasonName ? " pro sezónu $seasonName" : '') . '...', 'info');
-                        $discoveryService = app(\App\Services\Stats\Sync\SeasonDiscoveryService::class);
+                        ConsoleService::log('Zahajuji proces vyhledávání chybějících sezón (Discovery)'.($seasonName ? " pro sezónu $seasonName" : '').'...', 'info');
+                        $discoveryService = app(SeasonDiscoveryService::class);
                         $results = $discoveryService->discover(null, $seasonName, $options);
 
                         $found = count(array_filter($results, fn ($r) => ! in_array($r['status'], ['not found', 'error'])));
@@ -422,7 +436,7 @@ class DebugOperations extends Page
                     ->icon(IconHelper::render(IconHelper::GAUGE))
                     ->color('warning')
                     ->form([
-                        \Filament\Forms\Components\Select::make('season_id')
+                        Select::make('season_id')
                             ->label('Sezóna')
                             ->helperText('Vyberte sezónu, pro kterou chcete přepočítat agregované statistiky hráčů a týmu.')
                             ->options(Season::query()->orderBy('name', 'desc')->pluck('name', 'id'))
@@ -437,6 +451,7 @@ class DebugOperations extends Page
 
                         if (! $season) {
                             Notification::make()->title('Season not found')->danger()->send();
+
                             return;
                         }
 
@@ -444,13 +459,13 @@ class DebugOperations extends Page
 
                         foreach ($teams as $team) {
                             ConsoleService::log("- Přepočítávám tým: {$team->name}", 'info');
-                            $statService = app(\App\Services\Stats\Sync\StatisticSyncService::class);
+                            $statService = app(StatisticSyncService::class);
                             $statService->recomputePlayerSummaries($season->id);
                             $statService->recomputeTeamSummary($season->id, $team->id);
                         }
 
                         ConsoleService::log('Přepočet statistik dokončen.', 'success');
-                        Notification::make()->title('Aggregations recomputed for season: ' . $season->name)->success()->send();
+                        Notification::make()->title('Aggregations recomputed for season: '.$season->name)->success()->send();
                     }),
 
                 Action::make('recomputeAllSeasons')
@@ -459,7 +474,7 @@ class DebugOperations extends Page
                     ->icon(IconHelper::render(IconHelper::GAUGE))
                     ->color('warning')
                     ->form([
-                        \Filament\Forms\Components\Select::make('season_id')
+                        Select::make('season_id')
                             ->label('Sezóna')
                             ->helperText('Ponechte prázdné pro VŠECHNY sezóny.')
                             ->options(Season::query()->orderBy('name', 'desc')->pluck('name', 'id'))
@@ -470,13 +485,13 @@ class DebugOperations extends Page
                         $seasonId = $data['season_id'] ?? null;
                         $seasons = $seasonId ? Season::where('id', $seasonId)->get() : Season::all();
                         $teams = Team::whereHas('externalMappings')->get();
-                        $statService = app(\App\Services\Stats\Sync\StatisticSyncService::class);
+                        $statService = app(StatisticSyncService::class);
 
                         if ($seasonId) {
                             $seasonName = Season::find($seasonId)?->name ?? '???';
-                            ConsoleService::log("Spouštím přepočet statistiky pro sezónu: {$seasonName} (celkem: " . $teams->count() . " týmů).");
+                            ConsoleService::log("Spouštím přepočet statistiky pro sezónu: {$seasonName} (celkem: ".$teams->count().' týmů).');
                         } else {
-                            ConsoleService::log('Spouštím hromadný přepočet VŠECH sezón (celkem: ' . $seasons->count() . ' sezón).');
+                            ConsoleService::log('Spouštím hromadný přepočet VŠECH sezón (celkem: '.$seasons->count().' sezón).');
                         }
 
                         foreach ($seasons as $season) {
@@ -500,12 +515,12 @@ class DebugOperations extends Page
                     ->icon(IconHelper::render(IconHelper::GAUGE))
                     ->color('warning')
                     ->form([
-                        \Filament\Forms\Components\Select::make('season_id')
+                        Select::make('season_id')
                             ->label('Sezóna')
                             ->helperText('Ponechte prázdné pro VŠECHNY sezóny.')
                             ->options(Season::query()->orderBy('name', 'desc')->pluck('name', 'id'))
                             ->nullable(),
-                        \Filament\Forms\Components\Toggle::make('all_matches')
+                        Toggle::make('all_matches')
                             ->label('Všechny zápasy')
                             ->helperText('Pokud je zapnuto, přepočítá i již odehrané zápasy. Jinak jen budoucí.')
                             ->default(false),
@@ -526,10 +541,10 @@ class DebugOperations extends Page
                         $matches = $query->get();
                         $seasonName = $seasonId ? Season::find($seasonId)?->name : 'všech sezónách';
 
-                        ConsoleService::log("Spouštím hromadný přepočet predikcí pro " . ($allMatches ? 'VŠECHNY' : 'BUDOUCÍ') . " zápasy v {$seasonName} (celkem: " . $matches->count() . " zápasů).");
+                        ConsoleService::log('Spouštím hromadný přepočet predikcí pro '.($allMatches ? 'VŠECHNY' : 'BUDOUCÍ')." zápasy v {$seasonName} (celkem: ".$matches->count().' zápasů).');
 
                         foreach ($matches as $match) {
-                            \App\Jobs\ComputeMatchPredictionJob::dispatch($match->id);
+                            ComputeMatchPredictionJob::dispatch($match->id);
                         }
 
                         ConsoleService::log("Přepočet predikcí byl naplánován do fronty pro {$matches->count()} zápasů.", 'success');
@@ -577,17 +592,17 @@ class DebugOperations extends Page
 
         if (is_string($lastHeartbeat)) {
             try {
-                $lastHeartbeat = \Illuminate\Support\Carbon::parse($lastHeartbeat);
+                $lastHeartbeat = Carbon::parse($lastHeartbeat);
             } catch (\Exception $e) {
                 $lastHeartbeat = null;
             }
         }
 
-        $isOk = $lastHeartbeat && $lastHeartbeat instanceof \Illuminate\Support\Carbon && $lastHeartbeat->diffInMinutes(now()) < 5;
+        $isOk = $lastHeartbeat && $lastHeartbeat instanceof Carbon && $lastHeartbeat->diffInMinutes(now()) < 5;
         $status['scheduler'] = [
             'label' => 'Scheduler',
             'ok' => $isOk,
-            'msg' => ($lastHeartbeat instanceof \Illuminate\Support\Carbon) ? 'Last run: '.$lastHeartbeat->diffForHumans() : 'No heartbeat detected',
+            'msg' => ($lastHeartbeat instanceof Carbon) ? 'Last run: '.$lastHeartbeat->diffForHumans() : 'No heartbeat detected',
         ];
 
         // Storage
@@ -646,7 +661,7 @@ class DebugOperations extends Page
                 ->where('team_id', $team->id)
                 ->where('season_id', $activeSeason->id)
                 ->get()
-                ->filter(fn($m) => isset($m->metadata['external_id']) || isset($m->metadata['season_external_match_id']))
+                ->filter(fn ($m) => isset($m->metadata['external_id']) || isset($m->metadata['season_external_match_id']))
                 ->count();
 
             $statRowsCount = $boxscoreSet ? StatisticRow::where('statistic_set_id', $boxscoreSet->id)
@@ -662,9 +677,9 @@ class DebugOperations extends Page
                 ->where('external_entity_mappings.source_key', 'czbasketball')
                 ->where('external_entity_mappings.season_id', $activeSeason->id)
                 ->where('external_entity_mappings.entity_type', 'player')
-                ->where(function($q) use ($team) {
+                ->where(function ($q) use ($team) {
                     $q->where('player_profile_team.team_id', $team->id)
-                      ->orWhereNull('external_entity_mappings.internal_id');
+                        ->orWhereNull('external_entity_mappings.internal_id');
                 })
                 ->where(function ($q) {
                     $q->whereNull('external_entity_mappings.internal_id')
@@ -702,8 +717,8 @@ class DebugOperations extends Page
             ->where('entity_type', 'player')
             ->count();
 
-        $syncedPlayers = \App\Models\PlayerProfile::all()
-            ->filter(fn($p) => isset($p->metadata['last_sync_at']))
+        $syncedPlayers = PlayerProfile::all()
+            ->filter(fn ($p) => isset($p->metadata['last_sync_at']))
             ->count();
 
         $lastSync = ExternalImportRun::where('run_type', 'player_detail')
@@ -736,7 +751,7 @@ class DebugOperations extends Page
         ];
     }
 
-    protected function getAuditLogs(): \Illuminate\Support\Collection
+    protected function getAuditLogs(): Collection
     {
         return ExternalImportRun::with(['team', 'season'])
             ->withCount('logs')
@@ -750,7 +765,7 @@ class DebugOperations extends Page
         $emptyCount = 0;
         $teams = Team::whereHas('externalMappings')->get();
         $seasons = Season::all();
-        $statusService = app(\App\Services\Stats\Sync\SeasonDataStatusService::class);
+        $statusService = app(SeasonDataStatusService::class);
 
         foreach ($teams as $team) {
             foreach ($seasons as $season) {
@@ -795,7 +810,7 @@ class DebugOperations extends Page
             ->delete();
 
         Notification::make()
-            ->title("Historie chyb pro tým smazána")
+            ->title('Historie chyb pro tým smazána')
             ->body("Bylo odstraněno {$deletedCount} neúspěšných záznamů z databáze.")
             ->success()
             ->send();
@@ -838,7 +853,7 @@ class DebugOperations extends Page
 
     public function forceMatchSync(string $externalMatchId): void
     {
-        $match = BasketballMatch::all()->first(fn($m) => ($m->metadata['external_id'] ?? null) == $externalMatchId);
+        $match = BasketballMatch::all()->first(fn ($m) => ($m->metadata['external_id'] ?? null) == $externalMatchId);
 
         if (! $match) {
             Notification::make()->title('Zápas s externím ID '.$externalMatchId.' nebyl nalezen.')->danger()->send();
@@ -852,15 +867,16 @@ class DebugOperations extends Page
 
     public function downloadDebugHtml(int $runId): mixed
     {
-        $run = \App\Models\ExternalImportRun::find($runId);
+        $run = ExternalImportRun::find($runId);
         if ($run && isset($run->metadata['debug_html_file'])) {
             $path = $run->metadata['debug_html_file'];
-            if (\Illuminate\Support\Facades\Storage::disk('local')->exists($path)) {
-                return \Illuminate\Support\Facades\Storage::disk('local')->download($path, "run_{$runId}_debug.html");
+            if (Storage::disk('local')->exists($path)) {
+                return Storage::disk('local')->download($path, "run_{$runId}_debug.html");
             }
         }
 
         Notification::make()->title('Soubor nenalezen')->danger()->send();
+
         return null;
     }
 }

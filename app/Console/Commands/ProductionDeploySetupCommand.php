@@ -230,7 +230,7 @@ class ProductionDeploySetupCommand extends Command
             $choice = select(
                 label: 'Jak chcete naložit s heslem k produkčnímu SMTP?',
                 options: [
-                    'keep' => 'Použít uložené heslo (' . str_repeat('*', 8) . ')',
+                    'keep' => 'Použít uložené heslo ('.str_repeat('*', 8).')',
                     'new' => 'Zadat nové heslo',
                 ],
                 default: 'keep'
@@ -500,7 +500,7 @@ class ProductionDeploySetupCommand extends Command
                     continue;
                 }
 
-                $process = \Illuminate\Support\Facades\Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
+                $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
                 if ($process->successful() && ! empty($process->output())) {
                     preg_match('/PHP ([\d\.]+)/', $process->output(), $matches);
                     if (version_compare($matches[1] ?? '0', '8.4', '>=')) {
@@ -522,7 +522,7 @@ class ProductionDeploySetupCommand extends Command
                     continue;
                 }
 
-                $process = \Illuminate\Support\Facades\Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
+                $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
                 if ($process->successful() && ! empty($process->output())) {
                     preg_match('/v([\d\.]+)/', $process->output(), $matches);
                     if (version_compare($matches[1] ?? '0', '18.0', '>=')) {
@@ -544,7 +544,7 @@ class ProductionDeploySetupCommand extends Command
                                 continue;
                             }
 
-                            $npmProc = \Illuminate\Support\Facades\Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$npmCandidate} -v 2>/dev/null'");
+                            $npmProc = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$npmCandidate} -v 2>/dev/null'");
                             if ($npmProc->successful()) {
                                 $npm = $npmCandidate;
                                 break;
@@ -604,7 +604,7 @@ class ProductionDeploySetupCommand extends Command
                     continue;
                 }
 
-                $process = \Illuminate\Support\Facades\Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
+                $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
                 if ($process->successful() && ! empty($process->output())) {
                     preg_match('/PHP ([\d\.]+)/', $process->output(), $matches);
                     $version = $matches[1] ?? '0';
@@ -629,7 +629,7 @@ class ProductionDeploySetupCommand extends Command
             }
 
             // 2. Git Check
-            $process = \Illuminate\Support\Facades\Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} 'git --version 2>/dev/null'");
+            $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} 'git --version 2>/dev/null'");
             if ($process->successful() && ! empty($process->output())) {
                 preg_match('/git version ([\d\.]+)/', $process->output(), $matches);
                 $results[] = '<fg=green>✓</> Git: Verze '.($matches[1] ?? 'neznámá');
@@ -639,7 +639,7 @@ class ProductionDeploySetupCommand extends Command
             }
 
             // 3. Composer Check
-            $process = \Illuminate\Support\Facades\Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} 'composer --version 2>/dev/null'");
+            $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} 'composer --version 2>/dev/null'");
             if ($process->successful() && ! empty($process->output())) {
                 preg_match('/Composer version ([\d\.]+)/', $process->output(), $matches);
                 $results[] = '<fg=green>✓</> Composer: Verze '.($matches[1] ?? 'neznámá');
@@ -660,7 +660,7 @@ class ProductionDeploySetupCommand extends Command
                     continue;
                 }
 
-                $process = \Illuminate\Support\Facades\Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
+                $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
                 if ($process->successful() && ! empty($process->output())) {
                     preg_match('/v([\d\.]+)/', $process->output(), $matches);
                     $version = $matches[1] ?? '0';
@@ -700,7 +700,7 @@ class ProductionDeploySetupCommand extends Command
                     continue;
                 }
 
-                $process = \Illuminate\Support\Facades\Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
+                $process = Process::run("ssh -p {$port} -o StrictHostKeyChecking=no -o ConnectTimeout=5 {$user}@{$host} '{$candidate} -v 2>/dev/null'");
                 if ($process->successful() && ! empty($process->output())) {
                     $bestNpm = $candidate;
                     $npmBinary = $candidate;
@@ -813,34 +813,34 @@ class ProductionDeploySetupCommand extends Command
             info("🚀 Spouštím Envoy setup na {$user}@{$host}:{$port}...");
 
             $params = [
-                '--host=' . escapeshellarg($host),
-                '--port=' . escapeshellarg($port),
-                '--user=' . escapeshellarg($user),
-                '--php=' . escapeshellarg($phpBinary),
-                '--node=' . escapeshellarg($nodeBinary),
-                '--npm=' . escapeshellarg($npmBinary),
-                '--path=' . escapeshellarg($path),
-                '--token=' . escapeshellarg($token),
-                '--repository=' . escapeshellarg($repository),
+                '--host='.escapeshellarg($host),
+                '--port='.escapeshellarg($port),
+                '--user='.escapeshellarg($user),
+                '--php='.escapeshellarg($phpBinary),
+                '--node='.escapeshellarg($nodeBinary),
+                '--npm='.escapeshellarg($npmBinary),
+                '--path='.escapeshellarg($path),
+                '--token='.escapeshellarg($token),
+                '--repository='.escapeshellarg($repository),
             ];
 
             if ($publicPath) {
-                $params[] = '--public_path=' . escapeshellarg($publicPath);
+                $params[] = '--public_path='.escapeshellarg($publicPath);
             }
 
             if (file_exists(base_path('.env.production'))) {
-                $params[] = '--env_contents=' . escapeshellarg(base64_encode(file_get_contents(base_path('.env.production'))));
+                $params[] = '--env_contents='.escapeshellarg(base64_encode(file_get_contents(base_path('.env.production'))));
             }
 
             foreach ($dbConfig as $key => $value) {
                 if ($value !== null) {
-                    $params[] = "--{$key}=" . escapeshellarg($value);
+                    $params[] = "--{$key}=".escapeshellarg($value);
                 }
             }
 
             foreach ($mailConfig as $key => $value) {
                 if ($value !== null) {
-                    $params[] = "--{$key}=" . escapeshellarg($value);
+                    $params[] = "--{$key}=".escapeshellarg($value);
                 }
             }
 

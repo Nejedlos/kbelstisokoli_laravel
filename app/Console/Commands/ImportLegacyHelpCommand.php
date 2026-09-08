@@ -30,11 +30,12 @@ class ImportLegacyHelpCommand extends Command
     public function handle(): int
     {
         $basePath = base_path('docs/help');
-        $csPath = $basePath . '/cs';
-        $enPath = $basePath . '/en';
+        $csPath = $basePath.'/cs';
+        $enPath = $basePath.'/en';
 
-        if (!File::isDirectory($csPath)) {
+        if (! File::isDirectory($csPath)) {
             $this->error("Adresář s českou nápovědou nebyl nalezen: {$csPath}");
+
             return Command::FAILURE;
         }
 
@@ -52,7 +53,7 @@ class ImportLegacyHelpCommand extends Command
             $this->info("Importuji kategorii: {$slug}");
 
             // Metadata kategorie
-            $readmePath = $directory . '/README.md';
+            $readmePath = $directory.'/README.md';
             $names = ['cs' => $this->formatName($dirName)];
             $descriptions = ['cs' => ''];
 
@@ -63,9 +64,9 @@ class ImportLegacyHelpCommand extends Command
             }
 
             // Anglická verze kategorie
-            $enDir = $enPath . '/' . $dirName;
+            $enDir = $enPath.'/'.$dirName;
             if (File::isDirectory($enDir)) {
-                $enReadmePath = $enDir . '/README.md';
+                $enReadmePath = $enDir.'/README.md';
                 if (File::exists($enReadmePath)) {
                     $enReadmeContent = File::get($enReadmePath);
                     $names['en'] = $this->extractTitle($enReadmeContent, $slug);
@@ -92,7 +93,7 @@ class ImportLegacyHelpCommand extends Command
             $files = File::files($directory);
             foreach ($files as $file) {
                 $fileName = $file->getFilename();
-                if ($fileName === 'README.md' || !Str::endsWith($fileName, '.md')) {
+                if ($fileName === 'README.md' || ! Str::endsWith($fileName, '.md')) {
                     continue;
                 }
 
@@ -114,7 +115,7 @@ class ImportLegacyHelpCommand extends Command
                 ];
 
                 // Anglická verze článku
-                $enFile = $enDir . '/' . $fileName;
+                $enFile = $enDir.'/'.$fileName;
                 if (File::exists($enFile)) {
                     $enContent = File::get($enFile);
                     $titles['en'] = $this->extractTitle($enContent, $articleSlug);
@@ -128,8 +129,9 @@ class ImportLegacyHelpCommand extends Command
 
                 $article = HelpArticle::where('slug', $articleSlug)->where('category_id', $category->id)->first();
 
-                if ($article && $article->is_customized && !$this->option('force')) {
+                if ($article && $article->is_customized && ! $this->option('force')) {
                     $this->warn("    Článek {$articleSlug} byl upraven ručně, přeskakuji (použijte --force pro přepsání)");
+
                     continue;
                 }
 
@@ -175,7 +177,9 @@ class ImportLegacyHelpCommand extends Command
 
             foreach ($rootFiles as $file) {
                 $fileName = $file->getFilename();
-                if (!Str::endsWith($fileName, '.md')) continue;
+                if (! Str::endsWith($fileName, '.md')) {
+                    continue;
+                }
 
                 $articleSlug = $this->extractSlug($fileName);
                 $csContent = File::get($file->getPathname());
@@ -204,6 +208,7 @@ class ImportLegacyHelpCommand extends Command
     protected function extractSlug(string $name): string
     {
         $name = Str::replaceLast('.md', '', $name);
+
         return preg_replace('/^\d+-/', '', $name);
     }
 
@@ -212,6 +217,7 @@ class ImportLegacyHelpCommand extends Command
         if (preg_match('/^(\d+)-/', $name, $matches)) {
             return (int) $matches[1];
         }
+
         return 50;
     }
 
@@ -219,6 +225,7 @@ class ImportLegacyHelpCommand extends Command
     {
         $name = $this->extractSlug($name);
         $name = str_replace('-', ' ', $name);
+
         return Str::ucfirst($name);
     }
 
@@ -227,6 +234,7 @@ class ImportLegacyHelpCommand extends Command
         if (preg_match('/^#\s+(.+)$/m', $content, $matches)) {
             return trim($matches[1]);
         }
+
         return $fallback;
     }
 
@@ -242,6 +250,7 @@ class ImportLegacyHelpCommand extends Command
         if (isset($paragraphs[0])) {
             return Str::limit(strip_tags(Str::markdown($paragraphs[0])), 200);
         }
+
         return '';
     }
 
@@ -274,10 +283,18 @@ class ImportLegacyHelpCommand extends Command
         $roles = [];
         if (preg_match('/Pro koho je sekce určena\s*(.+?)(?=###|$)/si', $content, $matches)) {
             $section = Str::lower($matches[1]);
-            if (Str::contains($section, 'admin')) $roles[] = 'admin';
-            if (Str::contains($section, 'trenér') || Str::contains($section, 'kouč') || Str::contains($section, 'coach')) $roles[] = 'coach';
-            if (Str::contains($section, 'editor')) $roles[] = 'editor';
-            if (Str::contains($section, 'ekonom')) $roles[] = 'economist';
+            if (Str::contains($section, 'admin')) {
+                $roles[] = 'admin';
+            }
+            if (Str::contains($section, 'trenér') || Str::contains($section, 'kouč') || Str::contains($section, 'coach')) {
+                $roles[] = 'coach';
+            }
+            if (Str::contains($section, 'editor')) {
+                $roles[] = 'editor';
+            }
+            if (Str::contains($section, 'ekonom')) {
+                $roles[] = 'economist';
+            }
         }
 
         return count($roles) > 0 ? $roles : null;

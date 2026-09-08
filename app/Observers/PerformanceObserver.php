@@ -2,6 +2,15 @@
 
 namespace App\Observers;
 
+use App\Models\BasketballMatch;
+use App\Models\ExternalPlayerMatch;
+use App\Models\Page;
+use App\Models\Partner;
+use App\Models\PhotoPool;
+use App\Models\Post;
+use App\Models\PostCategory;
+use App\Models\StatisticRow;
+use App\Models\Team;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
@@ -13,7 +22,7 @@ class PerformanceObserver
     public function saved($model): void
     {
         // Pokud je to technická změna PhotoPoolu, ignorujeme
-        if ($model instanceof \App\Models\PhotoPool) {
+        if ($model instanceof PhotoPool) {
             $technicalFields = ['is_processing_import', 'pending_import_queue', 'updated_at'];
             $dirtyFields = array_keys($model->getDirty());
 
@@ -44,7 +53,7 @@ class PerformanceObserver
             Cache::forget('global_branding_settings_en');
 
             // Selektivní mazání podle typu modelu
-            if ($model instanceof \App\Models\Partner) {
+            if ($model instanceof Partner) {
                 Cache::forget('partners_homepage_strip');
                 Cache::forget('partners_footer');
                 Cache::forget('partners_match');
@@ -54,16 +63,16 @@ class PerformanceObserver
 
             // Statistiky mažeme pouze pokud se změní zápasy nebo statistiky
             $shouldClearStats = ! $model ||
-                $model instanceof \App\Models\BasketballMatch ||
-                $model instanceof \App\Models\StatisticRow ||
-                $model instanceof \App\Models\ExternalPlayerMatch;
+                $model instanceof BasketballMatch ||
+                $model instanceof StatisticRow ||
+                $model instanceof ExternalPlayerMatch;
 
             // Fragmenty mažeme u obsahu
             $shouldClearFragments = ! $model ||
-                $model instanceof \App\Models\Post ||
-                $model instanceof \App\Models\Page ||
-                $model instanceof \App\Models\Team ||
-                $model instanceof \App\Models\PostCategory;
+                $model instanceof Post ||
+                $model instanceof Page ||
+                $model instanceof Team ||
+                $model instanceof PostCategory;
 
             // 2. Pro fragmenty a full-page cache
             if (config('cache.default') === 'database') {
@@ -74,12 +83,12 @@ class PerformanceObserver
 
                 if ($shouldClearFragments) {
                     $query->orWhere('key', 'like', $prefix.'fragment_%')
-                          ->orWhere('key', 'like', $prefix.'help_%');
+                        ->orWhere('key', 'like', $prefix.'help_%');
                 }
 
                 if ($shouldClearStats) {
                     $query->orWhere('key', 'like', $prefix.'team_stats_%')
-                          ->orWhere('key', 'like', $prefix.'player_stats_%');
+                        ->orWhere('key', 'like', $prefix.'player_stats_%');
                 }
 
                 $query->delete();

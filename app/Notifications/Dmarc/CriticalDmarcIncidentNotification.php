@@ -12,9 +12,7 @@ class CriticalDmarcIncidentNotification extends Notification implements ShouldQu
 {
     use Queueable;
 
-    public function __construct(public $incident)
-    {
-    }
+    public function __construct(public $incident) {}
 
     public function via(object $notifiable): array
     {
@@ -24,13 +22,13 @@ class CriticalDmarcIncidentNotification extends Notification implements ShouldQu
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('DMARC ALERT: ' . $this->incident->domain . ' [' . $this->incident->source_ip . ']')
+            ->subject('DMARC ALERT: '.$this->incident->domain.' ['.$this->incident->source_ip.']')
             ->greeting('Dobrý den,')
             ->line('Byl detekován kritický problém s doručitelností e-mailů (DMARC fail).')
-            ->line('**Doména:** ' . $this->incident->domain)
-            ->line('**Zdrojová IP:** ' . $this->incident->source_ip)
-            ->line('**Popis:** ' . $this->incident->description)
-            ->line('**Doporučená akce:** ' . $this->incident->recommended_action)
+            ->line('**Doména:** '.$this->incident->domain)
+            ->line('**Zdrojová IP:** '.$this->incident->source_ip)
+            ->line('**Popis:** '.$this->incident->description)
+            ->line('**Doporučená akce:** '.$this->incident->recommended_action)
             ->action('Zobrazit incident v administraci', DmarcIncidentResource::getUrl('edit', ['record' => $this->incident]))
             ->line('Tento incident byl automaticky vygenerován na základě DMARC aggregate reportů.');
     }

@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Post;
 use App\Models\PostCategory;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 class PostSeeder extends Seeder
@@ -132,7 +133,7 @@ class PostSeeder extends Seeder
         ];
 
         foreach ($newsData as $item) {
-            $publishDate = \Illuminate\Support\Carbon::parse($item['date'])->setHour(10)->setMinute(0);
+            $publishDate = Carbon::parse($item['date'])->setHour(10)->setMinute(0);
 
             Post::updateOrCreate(
                 ['slug' => Str::slug($item['title']['cs'])],

@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands\InternalAnalytics;
 
-use App\Models\InternalAnalyticsEvent;
 use App\Models\InternalAnalyticsDailySummary;
+use App\Models\InternalAnalyticsEvent;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class AggregateCommand extends Command
 {
@@ -40,6 +40,7 @@ class AggregateCommand extends Command
 
         if ($results->isEmpty()) {
             $this->warn("Pro datum {$date->toDateString()} nebyla nalezena žádná data.");
+
             return;
         }
 

@@ -2,13 +2,11 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Schema;
 use Symfony\Component\HttpFoundation\Response;
 
 class PerformanceProfilingMiddleware
@@ -16,7 +14,7 @@ class PerformanceProfilingMiddleware
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -26,7 +24,7 @@ class PerformanceProfilingMiddleware
         // Zapnutí query logu co nejdříve (pouze pokud nejsme na produkci nebo jsme v profilačním módu)
         $shouldProfile = $this->shouldProfile($request);
         try {
-            if ($shouldProfile && !DB::getQueryLog()) {
+            if ($shouldProfile && ! DB::getQueryLog()) {
                 DB::enableQueryLog();
             }
         } catch (\Throwable $e) {
@@ -43,7 +41,8 @@ class PerformanceProfilingMiddleware
         if ($shouldProfile) {
             try {
                 $queries = DB::getQueryLog();
-            } catch (\Throwable $e) {}
+            } catch (\Throwable $e) {
+            }
         }
 
         $queryCount = count($queries);
@@ -74,16 +73,16 @@ class PerformanceProfilingMiddleware
         $shouldLog = $shouldProfile || $totalTime > 1000 || $queryCount > 50;
 
         if ($shouldLog) {
-            $prefix = "[PERF] ";
+            $prefix = '[PERF] ';
             if ($totalTime > 2000 || $queryCount > 100) {
-                $prefix = "[SLOW] ";
+                $prefix = '[SLOW] ';
                 $duplicatedQueries = $this->getDuplicatedQueries($queries);
                 if ($duplicatedQueries) {
                     $logData['duplicated_queries'] = $duplicatedQueries;
                 }
-                Log::warning($prefix . "Request: {$request->method()} {$request->path()}, Duration: " . round($totalTime, 2) . "ms, Queries: {$queryCount}", $logData);
+                Log::warning($prefix."Request: {$request->method()} {$request->path()}, Duration: ".round($totalTime, 2)."ms, Queries: {$queryCount}", $logData);
             } else {
-                Log::info($prefix . "Request: {$request->method()} {$request->path()}, Duration: " . round($totalTime, 2) . "ms", $logData);
+                Log::info($prefix."Request: {$request->method()} {$request->path()}, Duration: ".round($totalTime, 2).'ms', $logData);
             }
         }
 
@@ -99,7 +98,7 @@ class PerformanceProfilingMiddleware
             $response->headers->set('X-Perf-OPcache', $opcacheEnabled ? 'On' : 'Off');
 
             $duplicatedQueries = $this->getDuplicatedQueries($queries);
-            if (!empty($duplicatedQueries)) {
+            if (! empty($duplicatedQueries)) {
                 $response->headers->set('X-Perf-Queries-Duplicated', count($duplicatedQueries));
             }
         }

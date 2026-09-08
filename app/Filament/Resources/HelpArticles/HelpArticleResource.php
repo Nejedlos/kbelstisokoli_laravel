@@ -8,11 +8,12 @@ use App\Filament\Resources\HelpArticles\Pages\ListHelpArticles;
 use App\Filament\Resources\HelpArticles\Schemas\HelpArticleForm;
 use App\Filament\Resources\HelpArticles\Tables\HelpArticlesTable;
 use App\Models\HelpArticle;
-use BackedEnum;
+use App\Support\IconHelper;
+use App\Support\Icons\AppIcon;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 
 class HelpArticleResource extends Resource
 {
@@ -23,9 +24,9 @@ class HelpArticleResource extends Resource
         return __('admin.navigation.groups.system');
     }
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
-        return \App\Support\IconHelper::get(\App\Support\Icons\AppIcon::DOCUMENTATION);
+        return IconHelper::get(AppIcon::DOCUMENTATION);
     }
 
     public static function getModelLabel(): string

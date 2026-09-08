@@ -2,20 +2,21 @@
 
 namespace App\Console\Commands;
 
-use App\Models\BasketballMatch;
 use App\Jobs\ComputeMatchPredictionJob;
+use App\Models\BasketballMatch;
 use Illuminate\Console\Command;
 
 class RecomputePredictions extends Command
 {
     protected $signature = 'stats:predictions:recompute {--all : Recompute for all matches, not just future ones}';
+
     protected $description = 'Recompute match predictions';
 
     public function handle(): int
     {
         $query = BasketballMatch::query();
 
-        if (!$this->option('all')) {
+        if (! $this->option('all')) {
             $query->whereIn('status', ['planned', 'scheduled']);
         }
 

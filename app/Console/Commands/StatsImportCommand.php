@@ -2,8 +2,15 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\Stats\SyncTeamSeasonJob;
+use App\Models\ExternalImportRun;
+use App\Models\ExternalTeamSeasonConfig;
+use App\Models\Season;
+use App\Models\Team;
 use App\Services\Stats\Sync\ExternalStatsSyncService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\Console\Helper\ProgressBar;
 
 class StatsImportCommand extends Command
@@ -31,19 +38,21 @@ class StatsImportCommand extends Command
      */
     public function handle(ExternalStatsSyncService $syncService): int
     {
-        if (! \Illuminate\Support\Facades\Config::get('external_sources.enabled')) {
+        if (! Config::get('external_sources.enabled')) {
             $this->warn('Synchronizace externích zdrojů je globálně zakázána v konfiguraci.');
+
             return self::FAILURE;
         }
 
-        $activeSeason = \App\Models\Season::where('is_active', true)->first();
+        $activeSeason = Season::where('is_active', true)->first();
         if (! $activeSeason) {
             $this->error('Nebyla nalezena žádná aktivní sezóna.');
+
             return self::FAILURE;
         }
 
         // 1. Prioritně bereme týmy z ExternalTeamSeasonConfig (databázové nastavení)
-        $configs = \App\Models\ExternalTeamSeasonConfig::where('season_id', $activeSeason->id)
+        $configs = ExternalTeamSeasonConfig::where('season_id', $activeSeason->id)
             ->where('is_enabled', true)
             ->with('team')
             ->get();
@@ -52,12 +61,13 @@ class StatsImportCommand extends Command
 
         // 2. Fallback na hardcoded slugy z konfigurace (pokud nic v DB není)
         if ($teams->isEmpty()) {
-            $teamSlugs = \Illuminate\Support\Facades\Config::get('external_sources.czbasketball.teams', []);
-            $teams = \App\Models\Team::whereIn('slug', $teamSlugs)->get();
+            $teamSlugs = Config::get('external_sources.czbasketball.teams', []);
+            $teams = Team::whereIn('slug', $teamSlugs)->get();
         }
 
         if ($teams->isEmpty()) {
             $this->warn('Nejsou definovány žádné týmy k synchronizaci (ani v DB, ani v configu).');
+
             return self::SUCCESS;
         }
 
@@ -72,7 +82,7 @@ class StatsImportCommand extends Command
         ];
 
         if ($recent) {
-            $options['maxMatchDetails'] = \Illuminate\Support\Facades\Config::get('external_sources.czbasketball.limits.max_match_details_per_run', 10);
+            $options['maxMatchDetails'] = Config::get('external_sources.czbasketball.limits.max_match_details_per_run', 10);
         }
 
         if ($this->option('queue')) {
@@ -82,10 +92,11 @@ class StatsImportCommand extends Command
             );
 
             foreach ($teams as $team) {
-                \App\Jobs\Stats\SyncTeamSeasonJob::dispatch($team->id, $activeSeason->id, $options);
+                SyncTeamSeasonJob::dispatch($team->id, $activeSeason->id, $options);
             }
 
             $this->info('Všechny úlohy byly zařazeny do fronty.');
+
             return self::SUCCESS;
         }
 
@@ -98,7 +109,7 @@ class StatsImportCommand extends Command
         $this->info("Zahajuji synchronizaci pro {$totalWork} týmů v sezóně {$activeSeason->name}.");
 
         // Vytvoření hlavního běhu pro UI/Progress
-        $mainRun = \App\Models\ExternalImportRun::start(
+        $mainRun = ExternalImportRun::start(
             'czbasketball',
             $activeSeason->id,
             null,
@@ -145,7 +156,7 @@ class StatsImportCommand extends Command
                     $syncService->syncTeamSeason($team->id, $activeSeason->id, array_merge($options, ['parent_run_id' => $mainRun->id]));
                 } catch (\Exception $e) {
                     $logSection->writeln("<fg=red>Chyba u týmu {$team->name}: {$e->getMessage()}</>");
-                    \Illuminate\Support\Facades\Log::error("StatsImportCommand: Chyba u týmu {$team->name}: ".$e->getMessage());
+                    Log::error("StatsImportCommand: Chyba u týmu {$team->name}: ".$e->getMessage());
                 }
 
                 $bar->advance();

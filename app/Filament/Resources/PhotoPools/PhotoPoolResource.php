@@ -6,9 +6,11 @@ use App\Filament\Forms\CmsForms;
 use App\Filament\Resources\PhotoPools\Pages\CreatePhotoPool;
 use App\Filament\Resources\PhotoPools\Pages\EditPhotoPool;
 use App\Filament\Resources\PhotoPools\Pages\ListPhotoPools;
+use App\Filament\Resources\PhotoPools\RelationManagers\MediaAssetsRelationManager;
 use App\Models\PhotoPool;
 use App\Services\AiTextEnhancer;
 use App\Support\IconHelper;
+use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -21,6 +23,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Grid;
@@ -28,10 +31,14 @@ use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class PhotoPoolResource extends Resource
 {
@@ -52,9 +59,9 @@ class PhotoPoolResource extends Resource
         return __('admin.resources.photo_pool.plural_label');
     }
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
-        return \App\Support\IconHelper::get(\App\Support\IconHelper::PHOTO_FILM);
+        return IconHelper::get(IconHelper::PHOTO_FILM);
     }
 
     public static function getNavigationSort(): ?int
@@ -304,7 +311,7 @@ class PhotoPoolResource extends Resource
                                             $set('seo.og_title.en', $result['en']['seo']['og_title']);
                                             $set('seo.og_description.en', $result['en']['seo']['og_description']);
 
-                                            \Filament\Notifications\Notification::make()
+                                            Notification::make()
                                                 ->title(__('admin.resources.photo_pool.notifications.ai_regenerated'))
                                                 ->success()
                                                 ->send();
@@ -354,7 +361,7 @@ class PhotoPoolResource extends Resource
                                     ->reorderable()
                                     ->disk(config('filesystems.uploads.disk'))
                                     ->directory(trim(config('filesystems.uploads.dir', 'uploads'), '/').'/photo_pools/incoming')
-                                    ->getUploadedFileNameForStorageUsing(fn (\Livewire\Features\SupportFileUploads\TemporaryUploadedFile $file): string => Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)).'.'.strtolower($file->getClientOriginalExtension()))
+                                    ->getUploadedFileNameForStorageUsing(fn (TemporaryUploadedFile $file): string => Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)).'.'.strtolower($file->getClientOriginalExtension()))
                                     ->downloadable()
                                     ->openable()
                                     ->maxFiles(200)
@@ -411,8 +418,9 @@ class PhotoPoolResource extends Resource
                 TextColumn::make('title')
                     ->label('Název akce')
                     ->formatStateUsing(fn ($state, PhotoPool $record) => (string) $record->getTranslation('title', app()->getLocale()))
-                    ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
+                    ->searchable(query: function ($query, string $search): Builder {
                         $locale = app()->getLocale();
+
                         return $query->where("title->{$locale}", 'LIKE', "%{$search}%");
                     })
                     ->limit(50),
@@ -438,8 +446,9 @@ class PhotoPoolResource extends Resource
                     ->label(__('admin.resources.team.plural_label'))
                     ->badge()
                     ->state(fn ($record) => $record->teams->reject(fn ($team) => $team->category === 'all')->pluck('name'))
-                    ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
+                    ->searchable(query: function ($query, string $search): Builder {
                         $locale = app()->getLocale();
+
                         return $query->whereHas('teams', fn ($q) => $q->where("name->{$locale}", 'LIKE', "%{$search}%"));
                     }),
                 TextColumn::make('event_date')
@@ -448,7 +457,7 @@ class PhotoPoolResource extends Resource
                         if (! $state) {
                             return null;
                         }
-                        $date = \Carbon\Carbon::parse($state);
+                        $date = Carbon::parse($state);
                         if ($date->day === 1 && $date->month === 1) {
                             return $date->format('Y');
                         }
@@ -473,12 +482,12 @@ class PhotoPoolResource extends Resource
             ])
             ->defaultSort('event_date', 'desc')
             ->filters([
-                \Filament\Tables\Filters\SelectFilter::make('teams')
+                SelectFilter::make('teams')
                     ->label(__('admin.resources.team.label'))
                     ->relationship('teams', 'name', fn ($query) => $query->where('category', '!=', 'all'))
                     ->multiple()
                     ->preload(),
-                \Filament\Tables\Filters\SelectFilter::make('event_type')
+                SelectFilter::make('event_type')
                     ->label('Typ akce')
                     ->options([
                         'tournament' => 'Turnaj',
@@ -502,7 +511,7 @@ class PhotoPoolResource extends Resource
     public static function getRelations(): array
     {
         return [
-            \App\Filament\Resources\PhotoPools\RelationManagers\MediaAssetsRelationManager::class,
+            MediaAssetsRelationManager::class,
         ];
     }
 

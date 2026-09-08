@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Mail\ContactFormMail;
 use App\Services\RecaptchaV3;
 use App\Support\EmailObfuscator;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
@@ -40,7 +41,6 @@ class ContactForm extends Component
     public bool $success = false;
 
     public ?string $errorMessage = null;
-
 
     public function mount(string $to = ''): void
     {
@@ -104,7 +104,7 @@ class ContactForm extends Component
             $this->reset(['name', 'email', 'message', 'attachment', 'recaptchaToken']);
 
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Chyba při odesílání kontaktního formuláře: '.$e->getMessage());
+            Log::error('Chyba při odesílání kontaktního formuláře: '.$e->getMessage());
             $this->errorMessage = __('contact.error_sending_failed');
         }
     }

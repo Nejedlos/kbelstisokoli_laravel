@@ -36,7 +36,7 @@ class FinancialTariffForm
                             ->required()
                             ->live(),
                         TextInput::make('base_amount')
-                            ->label(fn ($get) => match($get('type')) {
+                            ->label(fn ($get) => match ($get('type')) {
                                 'per_event' => __('admin.resources.financial_tariff.fields.amount_per_event'),
                                 'prepaid' => __('admin.resources.financial_tariff.fields.amount_per_package'),
                                 default => __('admin.resources.financial_tariff.fields.base_amount')

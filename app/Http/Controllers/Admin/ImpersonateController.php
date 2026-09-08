@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class ImpersonateController extends Controller
 {
@@ -64,7 +65,7 @@ class ImpersonateController extends Controller
         // 1. Zapamatovat si ID admina pro návrat
         $adminId = $admin->id;
 
-        \Illuminate\Support\Facades\Log::info('Impersonate.start.attempt', [
+        Log::info('Impersonate.start.attempt', [
             'admin_id' => $adminId,
             'user_to_impersonate_id' => $userId,
             'session_id' => $request->session()->getId(),
@@ -72,7 +73,8 @@ class ImpersonateController extends Controller
 
         // Kontrola oprávnění
         if (! $admin->can('impersonate_users')) {
-            \Illuminate\Support\Facades\Log::warning('Impersonate.start.unauthorized', ['admin_id' => $admin->id]);
+            Log::warning('Impersonate.start.unauthorized', ['admin_id' => $admin->id]);
+
             return redirect()->back()->with('error', 'Nemáte oprávnění k impersonaci.');
         }
 
@@ -117,7 +119,7 @@ class ImpersonateController extends Controller
         // Vynutíme uložení session do storage před redirectem
         $request->session()->save();
 
-        \Illuminate\Support\Facades\Log::info('Impersonate.start.success', [
+        Log::info('Impersonate.start.success', [
             'new_user_id' => Auth::id(),
             'new_session_id' => $request->session()->getId(),
             'impersonated_by' => $request->session()->get('impersonated_by'),

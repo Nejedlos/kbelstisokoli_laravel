@@ -2,6 +2,8 @@
 
 namespace App\Services\Cms;
 
+use App\Models\PostCategory;
+use App\Models\StatisticSet;
 use Filament\Forms\Components\Builder\Block;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Placeholder;
@@ -333,7 +335,7 @@ class BlockRegistry
                             ->default(3),
                         Select::make('category_id')
                             ->label('Filtrovat podle kategorie')
-                            ->options(\App\Models\PostCategory::pluck('name', 'id'))
+                            ->options(PostCategory::pluck('name', 'id'))
                             ->placeholder('Všechny kategorie')
                             ->searchable(),
                         Select::make('layout')
@@ -483,7 +485,7 @@ class BlockRegistry
                     ->default('Statistiky'),
                 Select::make('statistic_set_id')
                     ->label('Vyberte sadu statistik')
-                    ->options(\App\Models\StatisticSet::where('status', 'published')->pluck('name', 'id'))
+                    ->options(StatisticSet::where('status', 'published')->pluck('name', 'id'))
                     ->searchable()
                     ->required(),
                 Grid::make(2)

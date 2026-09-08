@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use Illuminate\Support\Facades\Route;
+
 class EmailObfuscator
 {
     /**
@@ -34,7 +36,7 @@ class EmailObfuscator
      */
     public static function getContactUrl(string $email): string
     {
-        if (\Illuminate\Support\Facades\Route::has('public.contact-form')) {
+        if (Route::has('public.contact-form')) {
             return route('public.contact-form', ['to' => self::encode($email)]);
         }
 

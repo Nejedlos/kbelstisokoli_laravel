@@ -4,8 +4,9 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Process;
-use function Laravel\Prompts\info;
+
 use function Laravel\Prompts\error;
+use function Laravel\Prompts\info;
 use function Laravel\Prompts\note;
 use function Laravel\Prompts\spin;
 use function Laravel\Prompts\warning;
@@ -36,7 +37,7 @@ class AssetsDeployCommand extends Command
     public function handle(): int
     {
         // 1. Lokální build
-        if (!$this->option('no-build')) {
+        if (! $this->option('no-build')) {
             info('🚀 Spouštím lokální build assetů (npm run build)...');
 
             $buildResult = spin(
@@ -44,7 +45,7 @@ class AssetsDeployCommand extends Command
                 'Sestavuji produkční assety...'
             );
 
-            if (!$buildResult->successful()) {
+            if (! $buildResult->successful()) {
                 error('❌ Build selhal:');
                 note($buildResult->errorOutput());
 
@@ -80,17 +81,19 @@ class AssetsDeployCommand extends Command
         $prodPublicPath = env('PROD_PUBLIC_PATH');
         $publicFolder = env('PUBLIC_FOLDER', 'public');
 
-        if (!$host || !$user) {
+        if (! $host || ! $user) {
             error('❌ Chybí SSH konfigurace v .env (PROD_HOST, PROD_USER).');
             note('Ujistěte se, že máte nastaveny údaje pro připojení k produkci.');
+
             return self::FAILURE;
         }
 
         // Cílová složka na produkci (kde je index.php a build/)
-        $remoteTarget = $prodPublicPath ?: (rtrim($prodPath, '/') . '/' . $publicFolder);
+        $remoteTarget = $prodPublicPath ?: (rtrim($prodPath, '/').'/'.$publicFolder);
 
-        if (!$remoteTarget) {
+        if (! $remoteTarget) {
             error('❌ Nelze určit cílovou cestu na produkci (PROD_PUBLIC_PATH nebo PROD_PATH chybí).');
+
             return self::FAILURE;
         }
 
@@ -105,10 +108,11 @@ class AssetsDeployCommand extends Command
         }
 
         foreach ($dirsToUpload as $dir) {
-            $localDir = base_path($publicFolder . '/' . $dir);
+            $localDir = base_path($publicFolder.'/'.$dir);
 
-            if (!is_dir($localDir)) {
+            if (! is_dir($localDir)) {
                 warning("⚠️ Lokální složka {$localDir} neexistuje, přeskakuji.");
+
                 continue;
             }
 
@@ -120,7 +124,7 @@ class AssetsDeployCommand extends Command
                 escapeshellarg($port),
                 escapeshellarg($user),
                 escapeshellarg($host),
-                escapeshellarg(rtrim($remoteTarget, '/') . '/' . $dir)
+                escapeshellarg(rtrim($remoteTarget, '/').'/'.$dir)
             );
             Process::run($rmCommand);
 
@@ -134,7 +138,7 @@ class AssetsDeployCommand extends Command
                 escapeshellarg($localDir),
                 escapeshellarg($user),
                 escapeshellarg($host),
-                escapeshellarg(rtrim($remoteTarget, '/') . '/')
+                escapeshellarg(rtrim($remoteTarget, '/').'/')
             );
 
             $uploadResult = spin(
@@ -142,11 +146,11 @@ class AssetsDeployCommand extends Command
                 "Synchronizuji {$dir} přes SCP..."
             );
 
-            if (!$uploadResult->successful()) {
+            if (! $uploadResult->successful()) {
                 error("❌ Nahrávání složky {$dir} selhalo:");
                 note($uploadResult->errorOutput());
 
-                info("💡 Tip: Ujistěte se, že máte nahraný SSH klíč na serveru a funkční připojení.");
+                info('💡 Tip: Ujistěte se, že máte nahraný SSH klíč na serveru a funkční připojení.');
 
                 return self::FAILURE;
             }
@@ -165,7 +169,9 @@ class AssetsDeployCommand extends Command
      */
     protected function clearRemoteCache($host, $port, $user, $prodPath): void
     {
-        if (!$prodPath) return;
+        if (! $prodPath) {
+            return;
+        }
 
         info('🧹 Čistím cache na produkci (route, view, config)...');
 

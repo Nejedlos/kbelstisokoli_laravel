@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ExternalImportRun extends Model
 {
@@ -49,7 +50,7 @@ class ExternalImportRun extends Model
         return $this->belongsTo(User::class, 'created_by_user_id');
     }
 
-    public function logs(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function logs(): HasMany
     {
         return $this->hasMany(ExternalImportLog::class);
     }
@@ -101,7 +102,8 @@ class ExternalImportRun extends Model
 
     /**
      * Zjistí, zda se běh nehýbe (stuck detection).
-     * @param int $minutes Po kolika minutách bez aktualizace je považován za zaseknutý.
+     *
+     * @param  int  $minutes  Po kolika minutách bez aktualizace je považován za zaseknutý.
      */
     public function isStale(int $minutes = 15): bool
     {

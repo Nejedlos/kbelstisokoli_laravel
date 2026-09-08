@@ -2,18 +2,19 @@
 
 namespace App\Filament\Resources\HelpArticles\Schemas;
 
+use App\Models\Role;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 
 class HelpArticleForm
 {
@@ -46,7 +47,7 @@ class HelpArticleForm
                                             ->label(__('admin.resources.help_article.fields.title_cs'))
                                             ->required()
                                             ->live(onBlur: true)
-                                            ->afterStateUpdated(fn ($state, callable $set, $record) => !($record?->is_customized ?? false) && $set('slug', \Illuminate\Support\Str::slug($state))),
+                                            ->afterStateUpdated(fn ($state, callable $set, $record) => ! ($record?->is_customized ?? false) && $set('slug', Str::slug($state))),
                                         TextInput::make('title.en')
                                             ->label(__('admin.resources.help_article.fields.title_en'))
                                             ->required(),
@@ -102,7 +103,7 @@ class HelpArticleForm
                                         Select::make('audience_roles')
                                             ->label(__('admin.resources.help_article.fields.audience_roles'))
                                             ->multiple()
-                                            ->options(\App\Models\Role::all()->pluck('display_name', 'name'))
+                                            ->options(Role::all()->pluck('display_name', 'name'))
                                             ->searchable(),
                                     ]),
 
@@ -136,11 +137,11 @@ class HelpArticleForm
                                 Grid::make(2)
                                     ->components([
                                         Textarea::make('metadata.cs')
-                                            ->label(__('admin.resources.help_article.fields.metadata') . ' (CS)')
+                                            ->label(__('admin.resources.help_article.fields.metadata').' (CS)')
                                             ->rows(8)
                                             ->helperText('Strukturovaná metadata článku v češtině (JSON).'),
                                         Textarea::make('metadata.en')
-                                            ->label(__('admin.resources.help_article.fields.metadata') . ' (EN)')
+                                            ->label(__('admin.resources.help_article.fields.metadata').' (EN)')
                                             ->rows(8)
                                             ->helperText('Strukturovaná metadata článku v angličtině (JSON).'),
                                     ]),

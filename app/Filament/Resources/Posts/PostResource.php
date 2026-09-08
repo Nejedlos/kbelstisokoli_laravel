@@ -8,9 +8,12 @@ use App\Filament\Resources\Posts\Pages\ListPosts;
 use App\Filament\Resources\Posts\Schemas\PostForm;
 use App\Filament\Resources\Posts\Tables\PostsTable;
 use App\Models\Post;
+use App\Support\IconHelper;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Builder;
 
 class PostResource extends Resource
 {
@@ -21,9 +24,9 @@ class PostResource extends Resource
         return __('admin.navigation.groups.content_and_media');
     }
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
-        return \App\Support\IconHelper::get(\App\Support\IconHelper::POSTS);
+        return IconHelper::get(IconHelper::POSTS);
     }
 
     public static function getModelLabel(): string
@@ -46,7 +49,7 @@ class PostResource extends Resource
         return []; // Vypnuto kvůli translatable polím a kompatibilitě s Webglobe (json_unquote)
     }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
             ->with(['category']);

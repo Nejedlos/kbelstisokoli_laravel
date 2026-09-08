@@ -2,15 +2,13 @@
 
 namespace App\Support;
 
+use App\Filament\Pages\Help;
 use Illuminate\Support\Facades\Route;
 
 class HelpUrlHelper
 {
     /**
      * Generuje URL pro nápovědu podle kontextu.
-     *
-     * @param array $params
-     * @return string
      */
     public static function getUrl(array $params = []): string
     {
@@ -21,7 +19,7 @@ class HelpUrlHelper
 
         // Výchozí je Filament nápověda
         try {
-            return \App\Filament\Pages\Help::getUrl($params);
+            return Help::getUrl($params);
         } catch (\Throwable $e) {
             // Fallback pro případy, kdy Filament není dostupný nebo route neexistuje
             return route('member.help', $params);

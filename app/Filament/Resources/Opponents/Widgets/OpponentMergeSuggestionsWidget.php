@@ -2,14 +2,14 @@
 
 namespace App\Filament\Resources\Opponents\Widgets;
 
-use App\Models\OpponentMergeSuggestion;
 use App\Filament\Resources\OpponentMergeSuggestions\Tables\OpponentMergeSuggestionsTable;
-use Filament\Widgets\TableWidget as BaseWidget;
+use App\Models\OpponentMergeSuggestion;
 use Filament\Tables\Table;
+use Filament\Widgets\TableWidget as BaseWidget;
 
 class OpponentMergeSuggestionsWidget extends BaseWidget
 {
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     public function table(Table $table): Table
     {

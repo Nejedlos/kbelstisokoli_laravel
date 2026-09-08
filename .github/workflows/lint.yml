@@ -1,4 +1,4 @@
-name: Lint
+name: Validate and deploy
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  laravel-pint:
+  validate:
     runs-on: ubuntu-latest
 
     steps:
@@ -35,3 +35,107 @@ jobs:
 
       - name: Run Pint
         run: ./vendor/bin/pint --test
+
+      - name: Run tests
+        run: composer test
+
+  deployment-configuration:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment: production
+    outputs:
+      is_configured: ${{ steps.configuration.outputs.is_configured }}
+
+    steps:
+      - id: configuration
+        env:
+          PRODUCTION_SSH_HOST: ${{ secrets.PRODUCTION_SSH_HOST }}
+          PRODUCTION_SSH_PORT: ${{ secrets.PRODUCTION_SSH_PORT }}
+          PRODUCTION_SSH_USER: ${{ secrets.PRODUCTION_SSH_USER }}
+          PRODUCTION_PATH: ${{ secrets.PRODUCTION_PATH }}
+          PRODUCTION_SSH_PRIVATE_KEY: ${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}
+          PRODUCTION_SSH_KNOWN_HOSTS: ${{ secrets.PRODUCTION_SSH_KNOWN_HOSTS }}
+          FONTAWESOME_TOKEN: ${{ secrets.FONTAWESOME_TOKEN }}
+        run: |
+          if [ -n "$PRODUCTION_SSH_HOST" ] \
+            && [ -n "$PRODUCTION_SSH_PORT" ] \
+            && [ -n "$PRODUCTION_SSH_USER" ] \
+            && [ -n "$PRODUCTION_PATH" ] \
+            && [ -n "$PRODUCTION_SSH_PRIVATE_KEY" ] \
+            && [ -n "$PRODUCTION_SSH_KNOWN_HOSTS" ] \
+            && [ -n "$FONTAWESOME_TOKEN" ]; then
+            echo "is_configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_configured=false" >> "$GITHUB_OUTPUT"
+            echo "Production deployment is skipped because its GitHub Environment secrets are incomplete."
+          fi
+
+  deploy:
+    if: needs.deployment-configuration.outputs.is_configured == 'true'
+    needs: [validate, deployment-configuration]
+    runs-on: ubuntu-latest
+    environment: production
+    concurrency:
+      group: production-deploy
+      cancel-in-progress: false
+
+    steps:
+      - name: Configure SSH
+        env:
+          PRODUCTION_SSH_PRIVATE_KEY: ${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}
+          PRODUCTION_SSH_KNOWN_HOSTS: ${{ secrets.PRODUCTION_SSH_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$PRODUCTION_SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$PRODUCTION_SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Deploy the validated revision
+        env:
+          PRODUCTION_SSH_HOST: ${{ secrets.PRODUCTION_SSH_HOST }}
+          PRODUCTION_SSH_PORT: ${{ secrets.PRODUCTION_SSH_PORT }}
+          PRODUCTION_SSH_USER: ${{ secrets.PRODUCTION_SSH_USER }}
+          PRODUCTION_PATH: ${{ secrets.PRODUCTION_PATH }}
+          FONTAWESOME_TOKEN: ${{ secrets.FONTAWESOME_TOKEN }}
+        run: |
+          ssh -p "$PRODUCTION_SSH_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes "$PRODUCTION_SSH_USER@$PRODUCTION_SSH_HOST" \
+            "PRODUCTION_PATH=$(printf '%q' "$PRODUCTION_PATH") GITHUB_SHA=$(printf '%q' "$GITHUB_SHA") FONTAWESOME_TOKEN=$(printf '%q' "$FONTAWESOME_TOKEN") bash -se" <<'EOF'
+          set -euo pipefail
+
+          cd "$PRODUCTION_PATH"
+          git fetch --prune origin main
+          git reset --hard "$GITHUB_SHA"
+          git clean -df
+
+          php8.4 "$(command -v composer)" install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+
+          node_binary=""
+          for candidate in node22 node20; do
+            if command -v "$candidate" >/dev/null 2>&1; then
+              node_binary="$(command -v "$candidate")"
+              break
+            fi
+          done
+
+          if [ -z "$node_binary" ]; then
+            echo "Node.js 20 or newer is required to build Vite 7 assets."
+            exit 1
+          fi
+
+          npm_binary="$(dirname "$node_binary")/npm"
+          if [ ! -x "$npm_binary" ]; then
+            npm_binary="$(command -v npm)"
+          fi
+
+          export FONTAWESOME_TOKEN
+          "$npm_binary" ci
+          "$npm_binary" run build
+
+          php8.4 artisan migrate --force --no-interaction
+          php8.4 artisan app:sync --force --no-interaction
+          php8.4 artisan filament:optimize
+          php8.4 artisan livewire:publish --assets --force
+          php8.4 artisan optimize:cache
+          php8.4 artisan system:cleanup
+          EOF

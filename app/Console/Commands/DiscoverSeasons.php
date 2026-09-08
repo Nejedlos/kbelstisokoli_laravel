@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\Stats\Sync\SeasonDiscoveryService;
 use Illuminate\Console\Command;
 
 class DiscoverSeasons extends Command
@@ -22,7 +23,7 @@ class DiscoverSeasons extends Command
 
     protected $description = 'Vyhledá a doplní chybějící konfigurace sezón z cz.basketball';
 
-    public function handle(\App\Services\Stats\Sync\SeasonDiscoveryService $discoveryService)
+    public function handle(SeasonDiscoveryService $discoveryService)
     {
         $teamSlug = $this->argument('team');
         $seasonName = $this->argument('season');

@@ -2,12 +2,12 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Dmarc\DmarcMailbox;
+use App\Services\Dmarc\DmarcImapService;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
-
-use App\Models\Dmarc\DmarcMailbox;
-use App\Services\Dmarc\DmarcImapService;
+use Illuminate\Support\Facades\Mail;
 
 #[Signature('dmarc:ingest {--mailbox= : Specifické ID mailboxu} {--prod : Použít produkční SMTP pro notifikace}')]
 #[Description('Stáhne a zpracuje DMARC aggregate reporty z IMAP mailboxů.')]
@@ -19,7 +19,7 @@ class DmarcIngestCommand extends Command
     public function handle(DmarcImapService $service)
     {
         if ($this->option('prod') && env('PROD_MAIL_HOST')) {
-            $this->info("Konfiguruji produkční SMTP pro notifikace...");
+            $this->info('Konfiguruji produkční SMTP pro notifikace...');
             config([
                 'mail.mailers.smtp.host' => env('PROD_MAIL_HOST'),
                 'mail.mailers.smtp.port' => env('PROD_MAIL_PORT'),
@@ -29,7 +29,7 @@ class DmarcIngestCommand extends Command
                 'mail.from.address' => env('PROD_MAIL_FROM_ADDRESS'),
                 'mail.from.name' => env('PROD_MAIL_FROM_NAME'),
             ]);
-            \Illuminate\Support\Facades\Mail::purge();
+            Mail::purge();
         }
 
         $mailboxId = $this->option('mailbox');
@@ -43,6 +43,7 @@ class DmarcIngestCommand extends Command
 
         if ($mailboxes->isEmpty()) {
             $this->warn('Nebyly nalezeny žádné aktivní DMARC mailboxy.');
+
             return;
         }
 

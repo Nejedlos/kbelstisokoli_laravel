@@ -295,6 +295,19 @@ Tato chyba znamená, že se k sestavení assetů (Vite) používá příliš sta
 
 
 ## GitHub Workflow
-Na GitHub se nahrává pouze zdrojový kód. Soubory jako `.env`, `vendor/`, `node_modules/` a buildované soubory v `public/build/` jsou ignorovány (dle standardu). 
-Všechny instalace a buildy probíhají až na produkčním serveru, což zaručuje, že prostředí je konzistentní.
+Na GitHub se nahrává pouze zdrojový kód. Soubory jako `.env`, `vendor/`, `node_modules/` a buildované soubory v `public/build/` jsou ignorovány (dle standardu).
+
+Workflow `.github/workflows/lint.yml` při pull requestu a pushi do `main` spustí Pint a celou PHP testovací sadu. Po úspěšném pushi do `main` následně nasadí přes SSH přesně ověřený commit do GitHub Environment `production`. Soubory `.env` na produkci nemění; její konfigurace zůstává spravovaná mimo CI.
+
+Před prvním automatickým nasazením uložte v Environment `production` tyto Secrets:
+
+- `PRODUCTION_SSH_HOST`
+- `PRODUCTION_SSH_PORT`
+- `PRODUCTION_SSH_USER`
+- `PRODUCTION_PATH`
+- `PRODUCTION_SSH_PRIVATE_KEY`
+- `PRODUCTION_SSH_KNOWN_HOSTS` (výstup `ssh-keyscan` pro produkční hostitel)
+- `FONTAWESOME_TOKEN`
+
+Dokud některé z nich chybí, validace zůstane zelená a nasazovací úloha se záměrně přeskočí. Po jejich doplnění provede další push do `main` úplné produkční nasazení včetně instalace závislostí, sestavení Vite assetů, migrací a optimalizace cache.
 

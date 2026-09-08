@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class ClubCompetitionEntry extends Model
 {
@@ -35,7 +36,7 @@ class ClubCompetitionEntry extends Model
         return $this->belongsTo(User::class, 'player_id');
     }
 
-    public function teams(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function teams(): BelongsToMany
     {
         return $this->belongsToMany(Team::class, 'club_competition_entry_team', 'entry_id', 'team_id');
     }

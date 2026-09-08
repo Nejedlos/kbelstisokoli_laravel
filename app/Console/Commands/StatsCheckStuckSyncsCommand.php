@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\ExternalImportRun;
 use Illuminate\Console\Command;
 
 class StatsCheckStuckSyncsCommand extends Command
@@ -28,12 +29,13 @@ class StatsCheckStuckSyncsCommand extends Command
         $minutes = (int) $this->option('minutes');
         $this->info("Kontroluji synchronizace, které se nepohnuly déle než {$minutes} minut...");
 
-        $staleRuns = \App\Models\ExternalImportRun::where('status', 'running')
+        $staleRuns = ExternalImportRun::where('status', 'running')
             ->where('updated_at', '<', now()->subMinutes($minutes))
             ->get();
 
         if ($staleRuns->isEmpty()) {
             $this->info('Nenalezeny žádné zaseknuté synchronizace.');
+
             return self::SUCCESS;
         }
 

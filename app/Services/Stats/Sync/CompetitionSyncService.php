@@ -36,7 +36,7 @@ class CompetitionSyncService
             return ['synced' => 0, 'total' => 0];
         }
 
-        ConsoleService::log("Zahajuji synchronizaci tabulek pro " . $urls->count() . " soutěží (Sezóna: {$season->name}).", 'info');
+        ConsoleService::log('Zahajuji synchronizaci tabulek pro '.$urls->count()." soutěží (Sezóna: {$season->name}).", 'info');
 
         $synced = 0;
         foreach ($urls as $url) {
@@ -44,11 +44,11 @@ class CompetitionSyncService
                 $this->syncStandingsOnly($url, $season);
                 $synced++;
             } catch (\Exception $e) {
-                ConsoleService::log("  Chyba při synchronizaci tabulky z {$url}: " . $e->getMessage(), 'error');
+                ConsoleService::log("  Chyba při synchronizaci tabulky z {$url}: ".$e->getMessage(), 'error');
             }
         }
 
-        ConsoleService::log("Synchronizace tabulek pro sezónu {$season->name} dokončena. Úspěšně: {$synced}/" . $urls->count() . ".");
+        ConsoleService::log("Synchronizace tabulek pro sezónu {$season->name} dokončena. Úspěšně: {$synced}/".$urls->count().'.');
 
         return ['synced' => $synced, 'total' => $urls->count()];
     }
@@ -72,7 +72,7 @@ class CompetitionSyncService
             $run->finish(['status' => 'success']);
         } catch (\Exception $e) {
             $run->fail($e);
-            Log::error("Chyba při synchronizaci tabulek z $url: " . $e->getMessage());
+            Log::error("Chyba při synchronizaci tabulek z $url: ".$e->getMessage());
             throw $e;
         }
     }
@@ -84,10 +84,11 @@ class CompetitionSyncService
     {
         if (empty($config->competition_url)) {
             Log::info("Competition URL not set for team {$team->slug}, skipping competition sync.");
+
             return;
         }
 
-        ConsoleService::log("- Synchronizace dat soutěže...");
+        ConsoleService::log('- Synchronizace dat soutěže...');
 
         $run = ExternalImportRun::start('czbasketball', $season->id, $team->id, 'competition_page', $config->external_team_id);
         $run->updateMetadata(['url' => $config->competition_url]);
@@ -112,16 +113,16 @@ class CompetitionSyncService
             $allMatches = [];
             if ($config->external_team_id) {
                 $separator = str_contains($config->competition_url, '?') ? '&' : '?';
-                $teamSpecificUrl = $config->competition_url . $separator . 't=' . $config->external_team_id;
+                $teamSpecificUrl = $config->competition_url.$separator.'t='.$config->external_team_id;
 
                 ConsoleService::log("    - Stahuji kompletní rozpis týmu ({$teamSpecificUrl})", 'debug');
                 try {
                     $teamHtml = $this->fetcher->fetch($teamSpecificUrl, $run);
                     $teamScheduleResult = $scheduleExtractor->extract($teamHtml);
                     $allMatches = $teamScheduleResult['data']->rows;
-                    ConsoleService::log("    - Z týmového rozpisu získáno " . count($allMatches) . " zápasů.", 'debug');
+                    ConsoleService::log('    - Z týmového rozpisu získáno '.count($allMatches).' zápasů.', 'debug');
                 } catch (\Exception $e) {
-                    Log::warning("Nepodařilo se stáhnout týmový rozpis soutěže: " . $e->getMessage());
+                    Log::warning('Nepodařilo se stáhnout týmový rozpis soutěže: '.$e->getMessage());
                 }
             }
 
@@ -152,7 +153,7 @@ class CompetitionSyncService
                         }
                     } else {
                         // Pokud nemáme suffix v názvu, tak stačí že to jsou Kbely (pro A tým)
-                        if (!preg_match('/\b([a-gA-G])\b/', $sourceTeamName)) {
+                        if (! preg_match('/\b([a-gA-G])\b/', $sourceTeamName)) {
                             $found = true;
                         }
                     }
@@ -226,7 +227,7 @@ class CompetitionSyncService
 
         } catch (\Exception $e) {
             $run->fail($e);
-            Log::error("Chyba při synchronizaci soutěže pro tým {$team->slug}: " . $e->getMessage());
+            Log::error("Chyba při synchronizaci soutěže pro tým {$team->slug}: ".$e->getMessage());
             // Při chybě soutěže nezastavujeme celou synchronizaci, jen zalogujeme
         }
     }
@@ -238,12 +239,12 @@ class CompetitionSyncService
     {
         $competitionName = $extractedCompetitionName;
 
-        if (!$competitionName || $competitionName === 'Competition Standing') {
+        if (! $competitionName || $competitionName === 'Competition Standing') {
             $competitionName = $config ? ($config->competition_label ?: ($config->metadata['competition'] ?? null)) : null;
         }
 
         // Pokud stále nemáme název nebo je to ten defaultní "Základní informace", zkusíme najít jakýkoliv jiný config pro tuto URL
-        if (!$competitionName || $competitionName === 'Základní informace') {
+        if (! $competitionName || $competitionName === 'Základní informace') {
             $otherConfig = ExternalTeamSeasonConfig::where('competition_url', $url)
                 ->whereNotNull('competition_label')
                 ->where('competition_label', '!=', 'Základní informace')

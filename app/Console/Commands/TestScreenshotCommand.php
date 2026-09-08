@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 class TestScreenshotCommand extends Command
 {
     protected $signature = 'test:screenshot {url=https://kbelstisokoli.cz}';
+
     protected $description = 'Test the remote screenshot service';
 
     public function handle(ScreenshotService $service)
@@ -23,7 +24,7 @@ class TestScreenshotCommand extends Command
             Storage::disk('public')->put($path, $result);
             $this->info("Screenshot saved to: storage/app/public/{$path}");
         } else {
-            $this->error("Screenshot failed - check logs.");
+            $this->error('Screenshot failed - check logs.');
         }
     }
 }

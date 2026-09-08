@@ -119,76 +119,220 @@
 <?php $port = isset($port) ? $port : null; ?>
 <?php $host = isset($host) ? $host : null; ?>
 <?php $user = isset($user) ? $user : null; ?>
-<?php $__container->servers(['web' => $user . '@' . $host . ($port ? ' -p ' . $port : '') . ' -o StrictHostKeyChecking=no']); ?>
+<?php $__container->servers(['web' => $user.'@'.$host.($port ? ' -p '.$port : '').' -o StrictHostKeyChecking=no']); ?>
 
 <?php
-    if (isset($repository)) { $v_repository = $repository; } else { $v_repository = 'https://' . $token . '@github.com/Nejedlos/kbelstisokoli_laravel.git'; }
-    if (isset($path)) { $v_path = $path; } else { $v_path = '/www/kbelstisokoli'; }
-    if (isset($php)) { $v_php = $php; } else { $v_php = 'php'; }
-    if (isset($node)) { $v_node = $node; } else { $v_node = 'node'; }
-    if (isset($npm)) { $v_npm = $npm; } else { $v_npm = 'npm'; }
+    if (isset($repository)) {
+        $v_repository = $repository;
+    } else {
+        $v_repository = 'https://'.$token.'@github.com/Nejedlos/kbelstisokoli_laravel.git';
+    }
+if (isset($path)) {
+    $v_path = $path;
+} else {
+    $v_path = '/www/kbelstisokoli';
+}
+if (isset($php)) {
+    $v_php = $php;
+} else {
+    $v_php = 'php';
+}
+if (isset($node)) {
+    $v_node = $node;
+} else {
+    $v_node = 'node';
+}
+if (isset($npm)) {
+    $v_npm = $npm;
+} else {
+    $v_npm = 'npm';
+}
 
-    if (isset($db_connection)) { $v_conn = $db_connection; } else { $v_conn = 'mysql'; }
-    $db_connection_b64 = base64_encode($v_conn);
-    if (isset($db_host)) { $v_host = $db_host; } else { $v_host = '127.0.0.1'; }
-    $db_host_b64 = base64_encode($v_host);
-    if (isset($db_port)) { $v_port = $db_port; } else { $v_port = '3306'; }
-    $db_port_b64 = base64_encode($v_port);
-    if (isset($db_database)) { $v_db = $db_database; } else { $v_db = ''; }
-    $db_database_b64 = base64_encode($v_db);
-    if (isset($db_username)) { $v_user = $db_username; } else { $v_user = ''; }
-    $db_username_b64 = base64_encode($v_user);
-    if (isset($db_password)) { $v_pass = $db_password; } else { $v_pass = ''; }
-    $db_password_b64 = base64_encode($v_pass);
-    if (isset($db_prefix)) { $v_pref = $db_prefix; } else { $v_pref = ''; }
-    $db_prefix_b64 = base64_encode($v_pref);
+if (isset($db_connection)) {
+    $v_conn = $db_connection;
+} else {
+    $v_conn = 'mysql';
+}
+$db_connection_b64 = base64_encode($v_conn);
+if (isset($db_host)) {
+    $v_host = $db_host;
+} else {
+    $v_host = '127.0.0.1';
+}
+$db_host_b64 = base64_encode($v_host);
+if (isset($db_port)) {
+    $v_port = $db_port;
+} else {
+    $v_port = '3306';
+}
+$db_port_b64 = base64_encode($v_port);
+if (isset($db_database)) {
+    $v_db = $db_database;
+} else {
+    $v_db = '';
+}
+$db_database_b64 = base64_encode($v_db);
+if (isset($db_username)) {
+    $v_user = $db_username;
+} else {
+    $v_user = '';
+}
+$db_username_b64 = base64_encode($v_user);
+if (isset($db_password)) {
+    $v_pass = $db_password;
+} else {
+    $v_pass = '';
+}
+$db_password_b64 = base64_encode($v_pass);
+if (isset($db_prefix)) {
+    $v_pref = $db_prefix;
+} else {
+    $v_pref = '';
+}
+$db_prefix_b64 = base64_encode($v_pref);
 
-    if (isset($db_version)) { $v_dbver = $db_version; } else { $v_dbver = ''; }
-    $db_version_b64 = base64_encode($v_dbver);
-    if (isset($db_mariadb)) { $v_dbmaria = $db_mariadb; } else { $v_dbmaria = ''; }
-    $db_mariadb_b64 = base64_encode($v_dbmaria);
+if (isset($db_version)) {
+    $v_dbver = $db_version;
+} else {
+    $v_dbver = '';
+}
+$db_version_b64 = base64_encode($v_dbver);
+if (isset($db_mariadb)) {
+    $v_dbmaria = $db_mariadb;
+} else {
+    $v_dbmaria = '';
+}
+$db_mariadb_b64 = base64_encode($v_dbmaria);
 
-    if (isset($public_path)) { $v_pub = $public_path; } else { $v_pub = ''; }
-    $public_path_b64 = base64_encode($v_pub);
+if (isset($public_path)) {
+    $v_pub = $public_path;
+} else {
+    $v_pub = '';
+}
+$public_path_b64 = base64_encode($v_pub);
 
-    if (isset($mail_mailer)) { $v_mail_mailer = $mail_mailer; } else { $v_mail_mailer = ''; }
-    $mail_mailer_b64 = base64_encode($v_mail_mailer);
-    if (isset($mail_host)) { $v_mail_host = $mail_host; } else { $v_mail_host = ''; }
-    $mail_host_b64 = base64_encode($v_mail_host);
-    if (isset($mail_port)) { $v_mail_port = $mail_port; } else { $v_mail_port = ''; }
-    $mail_port_b64 = base64_encode($v_mail_port);
-    if (isset($mail_username)) { $v_mail_username = $mail_username; } else { $v_mail_username = ''; }
-    $mail_username_b64 = base64_encode($v_mail_username);
-    if (isset($mail_password)) { $v_mail_password = $mail_password; } else { $v_mail_password = ''; }
-    $mail_password_b64 = base64_encode($v_mail_password);
-    if (isset($mail_encryption)) { $v_mail_encryption = $mail_encryption; } else { $v_mail_encryption = ''; }
-    $mail_encryption_b64 = base64_encode($v_mail_encryption);
-    if (isset($mail_from_address)) { $v_mail_from_address = $mail_from_address; } else { $v_mail_from_address = ''; }
-    $mail_from_address_b64 = base64_encode($v_mail_from_address);
-    if (isset($mail_from_name)) { $v_mail_from_name = $mail_from_name; } else { $v_mail_from_name = ''; }
-    $mail_from_name_b64 = base64_encode($v_mail_from_name);
+if (isset($mail_mailer)) {
+    $v_mail_mailer = $mail_mailer;
+} else {
+    $v_mail_mailer = '';
+}
+$mail_mailer_b64 = base64_encode($v_mail_mailer);
+if (isset($mail_host)) {
+    $v_mail_host = $mail_host;
+} else {
+    $v_mail_host = '';
+}
+$mail_host_b64 = base64_encode($v_mail_host);
+if (isset($mail_port)) {
+    $v_mail_port = $mail_port;
+} else {
+    $v_mail_port = '';
+}
+$mail_port_b64 = base64_encode($v_mail_port);
+if (isset($mail_username)) {
+    $v_mail_username = $mail_username;
+} else {
+    $v_mail_username = '';
+}
+$mail_username_b64 = base64_encode($v_mail_username);
+if (isset($mail_password)) {
+    $v_mail_password = $mail_password;
+} else {
+    $v_mail_password = '';
+}
+$mail_password_b64 = base64_encode($v_mail_password);
+if (isset($mail_encryption)) {
+    $v_mail_encryption = $mail_encryption;
+} else {
+    $v_mail_encryption = '';
+}
+$mail_encryption_b64 = base64_encode($v_mail_encryption);
+if (isset($mail_from_address)) {
+    $v_mail_from_address = $mail_from_address;
+} else {
+    $v_mail_from_address = '';
+}
+$mail_from_address_b64 = base64_encode($v_mail_from_address);
+if (isset($mail_from_name)) {
+    $v_mail_from_name = $mail_from_name;
+} else {
+    $v_mail_from_name = '';
+}
+$mail_from_name_b64 = base64_encode($v_mail_from_name);
 
-    if (isset($telescope_enabled)) { $v_telescope = $telescope_enabled; } else { $v_telescope = 'false'; }
-    $telescope_enabled_b64 = base64_encode($v_telescope);
-    if (isset($perf_scenario)) { $v_perf_scenario = $perf_scenario; } else { $v_perf_scenario = 'ultra'; }
-    $perf_scenario_b64 = base64_encode($v_perf_scenario);
-    if (isset($perf_full_page_cache)) { $v_perf_fpc = $perf_full_page_cache; } else { $v_perf_fpc = 'true'; }
-    $perf_full_page_cache_b64 = base64_encode($v_perf_fpc);
-    if (isset($perf_fragment_cache)) { $v_perf_frag = $perf_fragment_cache; } else { $v_perf_frag = 'true'; }
-    $perf_fragment_cache_b64 = base64_encode($v_perf_frag);
-    if (isset($perf_html_minify)) { $v_perf_minify = $perf_html_minify; } else { $v_perf_minify = 'true'; }
-    $perf_html_minify_b64 = base64_encode($v_perf_minify);
-    if (isset($perf_lw_navigate)) { $v_perf_nav = $perf_lw_navigate; } else { $v_perf_nav = 'true'; }
-    $perf_lw_navigate_b64 = base64_encode($v_perf_nav);
-    if (isset($log_level)) { $v_log_level = $log_level; } else { $v_log_level = 'warning'; }
-    $log_level_b64 = base64_encode($v_log_level);
+if (isset($telescope_enabled)) {
+    $v_telescope = $telescope_enabled;
+} else {
+    $v_telescope = 'false';
+}
+$telescope_enabled_b64 = base64_encode($v_telescope);
+if (isset($perf_scenario)) {
+    $v_perf_scenario = $perf_scenario;
+} else {
+    $v_perf_scenario = 'ultra';
+}
+$perf_scenario_b64 = base64_encode($v_perf_scenario);
+if (isset($perf_full_page_cache)) {
+    $v_perf_fpc = $perf_full_page_cache;
+} else {
+    $v_perf_fpc = 'true';
+}
+$perf_full_page_cache_b64 = base64_encode($v_perf_fpc);
+if (isset($perf_fragment_cache)) {
+    $v_perf_frag = $perf_fragment_cache;
+} else {
+    $v_perf_frag = 'true';
+}
+$perf_fragment_cache_b64 = base64_encode($v_perf_frag);
+if (isset($perf_html_minify)) {
+    $v_perf_minify = $perf_html_minify;
+} else {
+    $v_perf_minify = 'true';
+}
+$perf_html_minify_b64 = base64_encode($v_perf_minify);
+if (isset($perf_lw_navigate)) {
+    $v_perf_nav = $perf_lw_navigate;
+} else {
+    $v_perf_nav = 'true';
+}
+$perf_lw_navigate_b64 = base64_encode($v_perf_nav);
+if (isset($log_level)) {
+    $v_log_level = $log_level;
+} else {
+    $v_log_level = 'warning';
+}
+$log_level_b64 = base64_encode($v_log_level);
 
-    if (isset($freshseed) && $freshseed) { $v_freshseed_opt = '--freshseed'; } else { $v_freshseed_opt = ''; }
-    if (isset($usersync) && $usersync == "1") { $v_usersync_opt = '--usersync'; } else { $v_usersync_opt = ''; }
-    if (isset($stats) && $stats == "1") { $v_stats_opt = '--stats'; } else { $v_stats_opt = ''; }
-    if (isset($noai)) { $v_noai = $noai; } else { $v_noai = false; }
-    if (isset($fontawesome_token)) { $v_fontawesome_token = $fontawesome_token; } else { $v_fontawesome_token = ''; }
-    if (isset($public_path)) { $target_public = $public_path; } else { $target_public = $v_path . '/public'; }
+if (isset($freshseed) && $freshseed) {
+    $v_freshseed_opt = '--freshseed';
+} else {
+    $v_freshseed_opt = '';
+}
+if (isset($usersync) && $usersync == '1') {
+    $v_usersync_opt = '--usersync';
+} else {
+    $v_usersync_opt = '';
+}
+if (isset($stats) && $stats == '1') {
+    $v_stats_opt = '--stats';
+} else {
+    $v_stats_opt = '';
+}
+if (isset($noai)) {
+    $v_noai = $noai;
+} else {
+    $v_noai = false;
+}
+if (isset($fontawesome_token)) {
+    $v_fontawesome_token = $fontawesome_token;
+} else {
+    $v_fontawesome_token = '';
+}
+if (isset($public_path)) {
+    $target_public = $public_path;
+} else {
+    $target_public = $v_path.'/public';
+}
 ?>
 
 <?php $__container->startTask('setup', ['on' => 'web']); ?>
@@ -453,7 +597,7 @@
 
     # Reset OpCache for Web (via temporary file) - Provedeno po všech změnách a synchronizaci
     echo "Resetting OpCache (final)..."
-    echo "<?php if (function_exists('opcache_reset')) { opcache_reset(); echo 'OK'; } else { echo 'N/A'; }" > public/opcache_reset.php
+    echo "PD9waHAgaWYgKGZ1bmN0aW9uX2V4aXN0cygnb3BjYWNoZV9yZXNldCcpKSB7IG9wY2FjaGVfcmVzZXQoKTsgZWNobyAnT0snOyB9IGVsc2UgeyBlY2hvICdOL0EnOyB9" | base64 -d > public/opcache_reset.php
     # Pokud máme externí public_path, zkopírujeme soubor i tam
     if [ "<?php echo $v_pub; ?>" != "" ] && [ "<?php echo $target_public; ?>" != "<?php echo $v_path; ?>/public" ]; then
         cp -f public/opcache_reset.php "<?php echo $public_path; ?>/opcache_reset.php"
@@ -575,7 +719,7 @@
 
     # Reset OpCache for Web (via temporary file) - Provedeno po všech změnách a synchronizaci
     echo "Resetting OpCache (final)..."
-    echo "<?php if (function_exists('opcache_reset')) { opcache_reset(); echo 'OK'; } else { echo 'N/A'; }" > public/opcache_reset.php
+    echo "PD9waHAgaWYgKGZ1bmN0aW9uX2V4aXN0cygnb3BjYWNoZV9yZXNldCcpKSB7IG9wY2FjaGVfcmVzZXQoKTsgZWNobyAnT0snOyB9IGVsc2UgeyBlY2hvICdOL0EnOyB9" | base64 -d > public/opcache_reset.php
     # Pokud máme externí public_path, zkopírujeme soubor i tam
     if [ "<?php echo $v_pub; ?>" != "" ] && [ "<?php echo $target_public; ?>" != "<?php echo $v_path; ?>/public" ]; then
         cp -f public/opcache_reset.php "<?php echo $public_path; ?>/opcache_reset.php"
@@ -738,7 +882,7 @@
 
     # Reset OpCache for Web (via temporary file)
     echo "Resetting OpCache (final)..."
-    echo "<?php if (function_exists('opcache_reset')) { opcache_reset(); echo 'OK'; } else { echo 'N/A'; }" > public/opcache_reset.php
+    echo "PD9waHAgaWYgKGZ1bmN0aW9uX2V4aXN0cygnb3BjYWNoZV9yZXNldCcpKSB7IG9wY2FjaGVfcmVzZXQoKTsgZWNobyAnT0snOyB9IGVsc2UgeyBlY2hvICdOL0EnOyB9" | base64 -d > public/opcache_reset.php
     # Pokud máme externí public_path, zkopírujeme soubor i tam
     if [ "<?php echo $v_pub; ?>" != "" ] && [ "<?php echo $target_public; ?>" != "<?php echo $v_path; ?>/public" ]; then
         cp -f public/opcache_reset.php "<?php echo $public_path; ?>/opcache_reset.php"

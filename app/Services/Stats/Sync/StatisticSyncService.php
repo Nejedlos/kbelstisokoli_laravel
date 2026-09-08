@@ -5,13 +5,19 @@ namespace App\Services\Stats\Sync;
 use App\Models\BasketballMatch;
 use App\Models\ExternalEntityMapping;
 use App\Models\ExternalImportRun;
+use App\Models\ExternalPlayerMatch;
+use App\Models\ExternalTeamSeasonConfig;
 use App\Models\StatisticRow;
 use App\Models\StatisticSet;
 use App\Models\User;
+use App\Services\Finance\FinanceAutomationService;
+use App\Services\Stats\DTO\NormalizedRowDTO;
 use App\Services\Stats\DTO\NormalizedTableDTO;
 use App\Services\Support\ConsoleService;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class StatisticSyncService
 {
@@ -22,7 +28,7 @@ class StatisticSyncService
     /**
      * Uloží jeden řádek statistiky (vhodné pro legacy import nebo manuální vklad).
      */
-    public function saveRow(StatisticSet $set, \App\Services\Stats\DTO\NormalizedRowDTO $row, array $context = [], ?ExternalImportRun $run = null): StatisticRow
+    public function saveRow(StatisticSet $set, NormalizedRowDTO $row, array $context = [], ?ExternalImportRun $run = null): StatisticRow
     {
         $playerId = $context['player_id'] ?? null;
         $matchId = $context['basketball_match_id'] ?? null;
@@ -62,12 +68,12 @@ class StatisticSyncService
             $oldValues = $statRow->only(['values']);
             $statRow->update($values);
             if ($run && $statRow->wasChanged('values')) {
-                $run->addLog('updated', $statRow, $oldValues, $statRow->only(['values']), "Updated stats for " . ($playerId ? "player ID $playerId" : $row->rowLabel));
+                $run->addLog('updated', $statRow, $oldValues, $statRow->only(['values']), 'Updated stats for '.($playerId ? "player ID $playerId" : $row->rowLabel));
             }
         } else {
             $statRow = StatisticRow::create(array_merge($attributes, $values));
             if ($run) {
-                $run->addLog('created', $statRow, null, $statRow->only(['values']), "Created stats for " . ($playerId ? "player ID $playerId" : $row->rowLabel));
+                $run->addLog('created', $statRow, null, $statRow->only(['values']), 'Created stats for '.($playerId ? "player ID $playerId" : $row->rowLabel));
             }
         }
 
@@ -92,8 +98,9 @@ class StatisticSyncService
                 ->where('basketball_match_id', $match->id)
                 ->delete();
         }, 200, function ($e) {
-            Log::warning("clearMatchBoxscore retry due to error 1615 (or other): " . $e->getMessage());
-            return $e instanceof \Illuminate\Database\QueryException;
+            Log::warning('clearMatchBoxscore retry due to error 1615 (or other): '.$e->getMessage());
+
+            return $e instanceof QueryException;
         });
 
         if ($run && $count > 0) {
@@ -142,7 +149,7 @@ class StatisticSyncService
 
             if ($metaChanged) {
                 DB::table('matches')->where('id', $match->id)->update([
-                    'metadata' => json_encode($matchMetadata)
+                    'metadata' => json_encode($matchMetadata),
                 ]);
             }
         });
@@ -158,7 +165,7 @@ class StatisticSyncService
             $this->normalizeForComparison($teamNameValue),
         ];
 
-        $externalName = \App\Models\ExternalTeamSeasonConfig::where('team_id', $match->team_id)
+        $externalName = ExternalTeamSeasonConfig::where('team_id', $match->team_id)
             ->where('season_id', $match->season_id)
             ->value('team_name_in_source');
 
@@ -191,15 +198,16 @@ class StatisticSyncService
                 $matchMetadata['opponent_boxscore'] = $data->toArray();
 
                 DB::table('matches')->where('id', $match->id)->update([
-                    'metadata' => json_encode($matchMetadata)
+                    'metadata' => json_encode($matchMetadata),
                 ]);
             });
+
             return;
         }
 
         // Pro náš tým synchronizujeme řádky - každý řádek v samostatné transakci pro odolnost
         foreach ($data->rows as $row) {
-            DB::transaction(function () use ($match, $row, $set, $run, $isOurTeam) {
+            DB::transaction(function () use ($match, $row, $set, $run) {
                 $externalPlayerId = $row->metadata['external_player_id'] ?? $row->playerId;
                 $playerName = $row->rowLabel;
 
@@ -208,7 +216,7 @@ class StatisticSyncService
 
                 // Ghost hráč creation logic
                 if (! $playerId && $externalPlayerId && $playerName) {
-                    $config = \App\Models\ExternalTeamSeasonConfig::where('team_id', $match->team_id)
+                    $config = ExternalTeamSeasonConfig::where('team_id', $match->team_id)
                         ->where('season_id', $match->season_id)
                         ->first();
 
@@ -226,7 +234,7 @@ class StatisticSyncService
                 ];
 
                 $rowValues = $row->values;
-                if (!isset($rowValues['efficiency']) && !isset($rowValues['valuation'])) {
+                if (! isset($rowValues['efficiency']) && ! isset($rowValues['valuation'])) {
                     $rowValues['efficiency'] = $this->calculateEfficiencyFromValues($rowValues);
                 }
 
@@ -252,22 +260,22 @@ class StatisticSyncService
                     $oldValues = $statRow->only(['values']);
                     $statRow->update($values);
                     if ($run && $statRow->wasChanged('values')) {
-                        $run->addLog('updated', $statRow, $oldValues, $statRow->only(['values']), "Boxscore update: " . ($playerId ? "Player ID $playerId" : $playerName));
+                        $run->addLog('updated', $statRow, $oldValues, $statRow->only(['values']), 'Boxscore update: '.($playerId ? "Player ID $playerId" : $playerName));
                     }
                 } else {
                     $statRow = StatisticRow::create(array_merge($attributes, $values));
                     if ($run) {
-                        $run->addLog('created', $statRow, null, $statRow->only(['values']), "Boxscore create: " . ($playerId ? "Player ID $playerId" : $playerName));
+                        $run->addLog('created', $statRow, null, $statRow->only(['values']), 'Boxscore create: '.($playerId ? "Player ID $playerId" : $playerName));
                     }
                 }
 
                 if ($playerId) {
                     // Generování automatických pokut za TH
                     try {
-                        app(\App\Services\Finance\FinanceAutomationService::class)->processThFines($statRow);
+                        app(FinanceAutomationService::class)->processThFines($statRow);
                     } catch (\Exception $e) {
                         if ($run) {
-                            $run->addLog('error', $statRow, null, null, "Chyba při generování pokut za TH: " . $e->getMessage());
+                            $run->addLog('error', $statRow, null, null, 'Chyba při generování pokut za TH: '.$e->getMessage());
                         }
                     }
 
@@ -295,7 +303,7 @@ class StatisticSyncService
     /**
      * Zajistí existenci uživatele pro externí ID (včetně vytvoření ghosta).
      */
-    protected function ensureUserExists(string $externalId, string $name, \App\Models\ExternalTeamSeasonConfig $config): User
+    protected function ensureUserExists(string $externalId, string $name, ExternalTeamSeasonConfig $config): User
     {
         // Zkusíme najít mapping
         $mapping = ExternalEntityMapping::where([
@@ -309,7 +317,7 @@ class StatisticSyncService
         }
 
         // Použijeme RosterSyncService pro vytvoření (původně přes reflexi, nyní public)
-        return app(\App\Services\Stats\Sync\RosterSyncService::class)
+        return app(RosterSyncService::class)
             ->findOrCreateUserForExternalPlayer($externalId, $name, $config);
     }
 
@@ -341,7 +349,8 @@ class StatisticSyncService
         $summarySet = StatisticSet::where('slug', StatisticSetService::PLAYER_SEASON_SUMMARY_SET)->first();
 
         if (! $boxscoreSet || ! $summarySet) {
-            ConsoleService::log("Přepočet hráčů zrušen: Chybí definice statistik (boxscore nebo summary).", 'warning');
+            ConsoleService::log('Přepočet hráčů zrušen: Chybí definice statistik (boxscore nebo summary).', 'warning');
+
             return;
         }
 
@@ -352,8 +361,9 @@ class StatisticSyncService
                 ->where('season_id', $seasonId)
                 ->delete();
         }, 200, function ($e) {
-            Log::warning("recomputePlayerSummaries delete retry due to error 1615 (or other): " . $e->getMessage());
-            return $e instanceof \Illuminate\Database\QueryException;
+            Log::warning('recomputePlayerSummaries delete retry due to error 1615 (or other): '.$e->getMessage());
+
+            return $e instanceof QueryException;
         });
 
         // Najdeme všechny hráče, kteří mají záznam v boxscoru pro tuto sezónu
@@ -366,6 +376,7 @@ class StatisticSyncService
         $count = $playerIds->count();
         if ($count === 0) {
             ConsoleService::log("  - Žádní spárovaní hráči se statistikami pro sezónu ID $seasonId nenalezeni.", 'info');
+
             return;
         }
 
@@ -435,7 +446,8 @@ class StatisticSyncService
         $teamSummarySet = StatisticSet::where('slug', StatisticSetService::TEAM_SEASON_SUMMARY_SET)->first();
 
         if (! $teamSummarySet) {
-            ConsoleService::log("Přepočet týmu zrušen: Chybí definice TEAM_SEASON_SUMMARY_SET.", 'warning');
+            ConsoleService::log('Přepočet týmu zrušen: Chybí definice TEAM_SEASON_SUMMARY_SET.', 'warning');
+
             return;
         }
 
@@ -529,7 +541,7 @@ class StatisticSyncService
                 $rawVal = $row->values[$key] ?? 0;
 
                 // Fallback pro efektivitu (valuation vs efficiency) a manuální výpočet
-                if ($key === 'efficiency' && (float)$rawVal === 0.0) {
+                if ($key === 'efficiency' && (float) $rawVal === 0.0) {
                     $rawVal = $row->values['valuation'] ?? $this->calculateEfficiencyFromValues($row->values);
                 }
 
@@ -539,10 +551,18 @@ class StatisticSyncService
                     $made = (float) trim($parts[0]);
                     $att = (float) trim($parts[1]);
 
-                    if ($key === 'fg2_made') { $totals['fg2_made'] += $made; $totals['fg2_att'] += $att; }
-                    elseif ($key === 'fg3_made') { $totals['fg3_made'] += $made; $totals['fg3_att'] += $att; }
-                    elseif ($key === 'ft_made') { $totals['ft_made'] += $made; $totals['ft_att'] += $att; }
-                    else { $totals[$key] += $made; }
+                    if ($key === 'fg2_made') {
+                        $totals['fg2_made'] += $made;
+                        $totals['fg2_att'] += $att;
+                    } elseif ($key === 'fg3_made') {
+                        $totals['fg3_made'] += $made;
+                        $totals['fg3_att'] += $att;
+                    } elseif ($key === 'ft_made') {
+                        $totals['ft_made'] += $made;
+                        $totals['ft_att'] += $att;
+                    } else {
+                        $totals[$key] += $made;
+                    }
                 } else {
                     $totals[$key] += (float) $rawVal;
                 }
@@ -609,8 +629,8 @@ class StatisticSyncService
             // Aktualizace řádků statistik pro tento externí ID a sezónu (pokud je sezónní)
             // nebo globálně (pokud je hráč stabilní).
             $query = StatisticRow::where(function ($q) use ($mapping) {
-                $q->where('source_metadata', 'like', '%"player_external_id":"' . (string) $mapping->external_id . '"%')
-                    ->orWhere('source_metadata', 'like', '%"player_external_id":' . (string) $mapping->external_id . '%');
+                $q->where('source_metadata', 'like', '%"player_external_id":"'.(string) $mapping->external_id.'"%')
+                    ->orWhere('source_metadata', 'like', '%"player_external_id":'.(string) $mapping->external_id.'%');
             });
 
             if ($mapping->season_id) {
@@ -656,7 +676,7 @@ class StatisticSyncService
     public function normalizeForComparison(string $text): string
     {
         $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
-        $text = \Illuminate\Support\Str::ascii($text);
+        $text = Str::ascii($text);
         $text = strtolower($text);
         $text = preg_replace('/[^a-z0-9]/', '', $text);
 
@@ -673,10 +693,10 @@ class StatisticSyncService
         array $rowValues,
         array $rowMetadata,
         array $matchInfo = []
-    ): \App\Models\ExternalPlayerMatch {
+    ): ExternalPlayerMatch {
         $sourceKey = $matchInfo['source_key'] ?? 'czbasketball';
 
-        return \App\Models\ExternalPlayerMatch::updateOrCreate(
+        return ExternalPlayerMatch::updateOrCreate(
             [
                 'user_id' => $userId,
                 'source_key' => $sourceKey,
@@ -742,11 +762,17 @@ class StatisticSyncService
 
         // Neproměněné střely (pokud známe pokusy)
         $missed_fg = 0;
-        if ($fg2_att > 0) $missed_fg += ($fg2_att - $fg2_made);
-        if ($fg3_att > 0) $missed_fg += ($fg3_att - $fg3_made);
+        if ($fg2_att > 0) {
+            $missed_fg += ($fg2_att - $fg2_made);
+        }
+        if ($fg3_att > 0) {
+            $missed_fg += ($fg3_att - $fg3_made);
+        }
 
         $missed_ft = 0;
-        if ($ft_att > 0) $missed_ft += ($ft_att - $ft_made);
+        if ($ft_att > 0) {
+            $missed_ft += ($ft_att - $ft_made);
+        }
 
         // Výpočet VAL
         // Pokud nemáme doskoky, asistence atd. (v nižších ligách), aspoň zohledníme Body - Fauly - Neproměněné hody.

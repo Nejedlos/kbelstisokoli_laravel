@@ -5,17 +5,17 @@ namespace Tests\Feature\Stats\Sync;
 use App\Models\ExternalTeamSeasonConfig;
 use App\Models\Season;
 use App\Models\Team;
-use App\Services\Stats\Sync\ExternalStatsSyncService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
-use Mockery;
 use App\Services\Stats\Contracts\StatFetcherInterface;
-use App\Services\Stats\Sync\RosterSyncService;
-use App\Services\Stats\Sync\MatchSyncService;
-use App\Services\Stats\Sync\StatisticSyncService;
-use App\Services\Stats\Sync\PlayerSyncService;
-use App\Services\Stats\Sync\CompetitionSyncService;
 use App\Services\Stats\Contracts\StatNormalizerInterface;
+use App\Services\Stats\Sync\CompetitionSyncService;
+use App\Services\Stats\Sync\ExternalStatsSyncService;
+use App\Services\Stats\Sync\MatchSyncService;
+use App\Services\Stats\Sync\PlayerSyncService;
+use App\Services\Stats\Sync\RosterSyncService;
+use App\Services\Stats\Sync\StatisticSyncService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Mockery;
+use Tests\TestCase;
 
 class LastSyncedUpdateTest extends TestCase
 {
@@ -55,7 +55,7 @@ class LastSyncedUpdateTest extends TestCase
             $statisticSyncService,
             $normalizer,
             $playerSyncService,
-            $competitionSyncService
+            $competitionSyncService,
         ])->makePartial()->shouldAllowMockingProtectedMethods();
 
         $partialService->shouldReceive('syncRoster')->once();
@@ -103,7 +103,7 @@ class LastSyncedUpdateTest extends TestCase
             $statisticSyncService,
             $normalizer,
             $playerSyncService,
-            $competitionSyncService
+            $competitionSyncService,
         ])->makePartial()->shouldAllowMockingProtectedMethods();
 
         $partialService->shouldReceive('syncRoster')->once()->andThrow(new \Exception('Test Error Roster'));

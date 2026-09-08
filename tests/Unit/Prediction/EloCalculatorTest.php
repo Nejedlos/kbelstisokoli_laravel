@@ -12,7 +12,7 @@ class EloCalculatorTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->calculator = new EloCalculator();
+        $this->calculator = new EloCalculator;
     }
 
     public function test_expected_probability_is_50_for_equal_ratings_without_home_adv(): void

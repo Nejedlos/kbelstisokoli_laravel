@@ -4,8 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class MediaAsset extends Model implements HasMedia
 {
@@ -37,7 +40,7 @@ class MediaAsset extends Model implements HasMedia
         static::updating(function (MediaAsset $asset) {
             if ($asset->isDirty('title') && $asset->title) {
                 foreach ($asset->getMedia('default') as $media) {
-                    $newFileName = \Illuminate\Support\Str::slug($asset->title).'.'.$media->extension;
+                    $newFileName = Str::slug($asset->title).'.'.$media->extension;
                     if ($media->file_name !== $newFileName) {
                         $media->file_name = $newFileName;
                         $media->save();
@@ -47,7 +50,7 @@ class MediaAsset extends Model implements HasMedia
         });
     }
 
-    public function photoPools(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function photoPools(): BelongsToMany
     {
         return $this->belongsToMany(PhotoPool::class, 'photo_pool_media_asset')
             ->withPivot(['sort_order', 'caption_override', 'is_visible'])
@@ -82,7 +85,7 @@ class MediaAsset extends Model implements HasMedia
     /**
      * Zaregistruje konverze médií.
      */
-    public function registerMediaConversions(?\Spatie\MediaLibrary\MediaCollections\Models\Media $media = null): void
+    public function registerMediaConversions(?Media $media = null): void
     {
         if (static::$skipConversions || config('app.importing_legacy_photos', false)) {
             return;

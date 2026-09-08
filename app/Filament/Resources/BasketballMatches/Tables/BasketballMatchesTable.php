@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources\BasketballMatches\Tables;
 
+use App\Jobs\Stats\SyncMatchDetailJob;
 use App\Support\FilamentIcon;
 use App\Support\Icons\AppIcon;
+use App\Support\MatchResultHelper;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -13,6 +15,8 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\HtmlString;
 
 class BasketballMatchesTable
@@ -27,15 +31,16 @@ class BasketballMatchesTable
                     ->label(__('admin.resources.basketball_match.fields.scheduled_at'))
                     ->formatStateUsing(fn ($state, $record) => new HtmlString(
                         ((! empty($record->metadata['external_id']) || ! empty($record->metadata['season_external_match_id']))
-                            ? '<i class="fa-light fa-cloud-arrow-down fa-fw text-info mr-1" title="' . __('admin.resources.basketball_match.tooltips.external_sync') . '"></i> '
+                            ? '<i class="fa-light fa-cloud-arrow-down fa-fw text-info mr-1" title="'.__('admin.resources.basketball_match.tooltips.external_sync').'"></i> '
                             : '').$state->format('d.m.Y H:i')
                     ))
                     ->sortable(),
                 TextColumn::make('teams.name')
                     ->label(__('admin.resources.basketball_match.fields.teams'))
                     ->badge()
-                    ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
+                    ->searchable(query: function ($query, string $search): Builder {
                         $locale = app()->getLocale();
+
                         return $query->whereHas('teams', function ($q) use ($search, $locale) {
                             $q->where("name->{$locale}", 'LIKE', "%{$search}%");
                         });
@@ -52,7 +57,7 @@ class BasketballMatchesTable
                     ->sortable(),
                 TextColumn::make('score')
                     ->label(__('admin.resources.basketball_match.fields.score'))
-                    ->state(fn ($record) => in_array($record->status, ['finished', 'completed', 'played']) ? \App\Support\MatchResultHelper::formatScore("{$record->score_home}:{$record->score_away}") : '-')
+                    ->state(fn ($record) => in_array($record->status, ['finished', 'completed', 'played']) ? MatchResultHelper::formatScore("{$record->score_home}:{$record->score_away}") : '-')
                     ->badge()
                     ->color(fn ($record): string => match (true) {
                         ! in_array($record->status, ['finished', 'completed', 'played']) => 'gray',
@@ -130,9 +135,9 @@ class BasketballMatchesTable
                         ->label(__('admin.resources.basketball_match.actions.ai_sync'))
                         ->icon(FilamentIcon::get(AppIcon::AI))
                         ->color('info')
-                        ->action(function (\Illuminate\Support\Collection $records) {
+                        ->action(function (Collection $records) {
                             $records->each(function ($record) {
-                                \App\Jobs\Stats\SyncMatchDetailJob::dispatch($record->id, [
+                                SyncMatchDetailJob::dispatch($record->id, [
                                     'force' => true,
                                     'fresh' => true,
                                     'ai' => true,

@@ -35,8 +35,9 @@ class FinanceMarkPastSeasonsPaid extends Command
         $force = $this->option('force');
 
         $activeSeason = Season::where('is_active', true)->first();
-        if (!$activeSeason) {
+        if (! $activeSeason) {
             $this->error('Nebyla nalezena žádná aktivní sezóna.');
+
             return 1;
         }
 
@@ -51,13 +52,15 @@ class FinanceMarkPastSeasonsPaid extends Command
 
         if ($pastSeasons->isEmpty()) {
             $this->warn('Nebyly nalezeny žádné minulé sezóny.');
+
             return 0;
         }
 
-        $this->info("Nalezeno " . $pastSeasons->count() . " minulých sezón: " . $pastSeasons->pluck('name')->implode(', '));
+        $this->info('Nalezeno '.$pastSeasons->count().' minulých sezón: '.$pastSeasons->pluck('name')->implode(', '));
 
-        if (!$force && !$dryRun && !$this->confirm('Opravdu chcete označit všechny předpisy v těchto sezónách jako zaplacené?')) {
+        if (! $force && ! $dryRun && ! $this->confirm('Opravdu chcete označit všechny předpisy v těchto sezónách jako zaplacené?')) {
             $this->info('Akce zrušena.');
+
             return 0;
         }
 
@@ -73,6 +76,7 @@ class FinanceMarkPastSeasonsPaid extends Command
 
         $membershipChargeIdsToUpdate = $allUnpaidMembershipCharges->filter(function ($charge) use ($configIds) {
             $chargeConfigId = $charge->metadata['season_config_id'] ?? null;
+
             return $chargeConfigId && in_array($chargeConfigId, $configIds);
         })->pluck('id')->toArray();
 
@@ -88,7 +92,9 @@ class FinanceMarkPastSeasonsPaid extends Command
 
         foreach ($pastSeasons as $season) {
             $normalized = Season::normalizeName($season->name);
-            if (!str_contains($normalized, '/')) continue;
+            if (! str_contains($normalized, '/')) {
+                continue;
+            }
             [$startYear, $endYear] = explode('/', $normalized);
 
             // Sezóna začíná 1.8. a končí 31.7. následujícího roku (dle containsDate v Season.php)
@@ -112,6 +118,7 @@ class FinanceMarkPastSeasonsPaid extends Command
 
         if ($totalCount === 0) {
             $this->info('Žádné předpisy k aktualizaci.');
+
             return 0;
         }
 
@@ -123,22 +130,22 @@ class FinanceMarkPastSeasonsPaid extends Command
             DB::transaction(function () use ($membershipChargeIdsToUpdate, $otherChargesToUpdate) {
                 $note = "\n[ARCHIVACE] Automaticky zaplaceno - archivace staré sezóny (Junie)";
 
-                if (!empty($membershipChargeIdsToUpdate)) {
+                if (! empty($membershipChargeIdsToUpdate)) {
                     FinanceCharge::whereIn('id', $membershipChargeIdsToUpdate)->update([
                         'status' => 'paid',
-                        'notes_internal' => DB::raw("CONCAT(COALESCE(notes_internal, ''), '$note')")
+                        'notes_internal' => DB::raw("CONCAT(COALESCE(notes_internal, ''), '$note')"),
                     ]);
                 }
 
                 foreach ($otherChargesToUpdate as $charge) {
                     $charge->update([
                         'status' => 'paid',
-                        'notes_internal' => ($charge->notes_internal ?? '') . $note
+                        'notes_internal' => ($charge->notes_internal ?? '').$note,
                     ]);
                 }
             });
 
-            $this->info("Hotovo. Všechny předpisy v minulých sezónách byly označeny jako zaplacené.");
+            $this->info('Hotovo. Všechny předpisy v minulých sezónách byly označeny jako zaplacené.');
         }
 
         return 0;

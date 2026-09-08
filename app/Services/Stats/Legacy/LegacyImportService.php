@@ -2,6 +2,7 @@
 
 namespace App\Services\Stats\Legacy;
 
+use App\Jobs\Stats\Legacy\ProcessLegacyImportBatchJob;
 use App\Models\LegacyImportBatch;
 use App\Models\LegacyImportFile;
 use Illuminate\Support\Facades\Storage;
@@ -53,6 +54,6 @@ class LegacyImportService
             'failed_files' => 0,
         ]);
 
-        \App\Jobs\Stats\Legacy\ProcessLegacyImportBatchJob::dispatch($batch->id);
+        ProcessLegacyImportBatchJob::dispatch($batch->id);
     }
 }

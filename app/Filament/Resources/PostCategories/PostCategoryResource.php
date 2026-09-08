@@ -4,6 +4,7 @@ namespace App\Filament\Resources\PostCategories;
 
 use App\Filament\Resources\PostCategories\Pages\ManagePostCategories;
 use App\Models\PostCategory;
+use App\Support\IconHelper;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -14,6 +15,8 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Builder;
 
 class PostCategoryResource extends Resource
 {
@@ -24,9 +27,9 @@ class PostCategoryResource extends Resource
         return __('admin.navigation.groups.content_and_media');
     }
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
-        return \App\Support\IconHelper::get(\App\Support\IconHelper::CATEGORIES);
+        return IconHelper::get(IconHelper::CATEGORIES);
     }
 
     public static function getModelLabel(): string
@@ -75,7 +78,7 @@ class PostCategoryResource extends Resource
             ->columns([
                 TextColumn::make('name')
                     ->label('Název')
-                    ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
+                    ->searchable(query: function ($query, string $search): Builder {
                         $locale = app()->getLocale();
 
                         return $query->where("name->{$locale}", 'LIKE', "%{$search}%");

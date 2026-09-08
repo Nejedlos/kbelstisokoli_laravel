@@ -6,6 +6,7 @@ use App\Models\ClubCompetition;
 use App\Models\ClubCompetitionEntry;
 use App\Models\Season;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -37,7 +38,7 @@ class TrophyMigrationSeeder extends Seeder
 
             foreach ($oldTrophies as $ot) {
                 // Odhad sezóny podle data
-                $date = \Carbon\Carbon::parse($ot->kdy);
+                $date = Carbon::parse($ot->kdy);
                 $year = $date->year;
                 $month = $date->month;
                 $seasonName = ($month >= 9) ? "$year/".($year + 1) : ($year - 1)."/$year";

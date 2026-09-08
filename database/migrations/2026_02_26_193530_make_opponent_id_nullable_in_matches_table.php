@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -11,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (\Illuminate\Support\Facades\DB::getDriverName() === 'sqlite') {
+        if (DB::getDriverName() === 'sqlite') {
             Schema::table('matches', function (Blueprint $table) {
                 $table->foreignId('opponent_id')->nullable()->change();
             });
@@ -19,12 +20,12 @@ return new class extends Migration
             return;
         }
 
-        $prefix = \Illuminate\Support\Facades\DB::getTablePrefix();
+        $prefix = DB::getTablePrefix();
         $table = $prefix.'matches';
 
         try {
-            \Illuminate\Support\Facades\DB::statement("ALTER TABLE {$table} MODIFY opponent_id BIGINT UNSIGNED NULL");
-        } catch (\Throwable $e) {
+            DB::statement("ALTER TABLE {$table} MODIFY opponent_id BIGINT UNSIGNED NULL");
+        } catch (Throwable $e) {
             // Ignore
         }
     }
@@ -34,7 +35,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        if (\Illuminate\Support\Facades\DB::getDriverName() === 'sqlite') {
+        if (DB::getDriverName() === 'sqlite') {
             Schema::table('matches', function (Blueprint $table) {
                 $table->foreignId('opponent_id')->nullable(false)->change();
             });
@@ -42,12 +43,12 @@ return new class extends Migration
             return;
         }
 
-        $prefix = \Illuminate\Support\Facades\DB::getTablePrefix();
+        $prefix = DB::getTablePrefix();
         $table = $prefix.'matches';
 
         try {
-            \Illuminate\Support\Facades\DB::statement("ALTER TABLE {$table} MODIFY opponent_id BIGINT UNSIGNED NOT NULL");
-        } catch (\Throwable $e) {
+            DB::statement("ALTER TABLE {$table} MODIFY opponent_id BIGINT UNSIGNED NOT NULL");
+        } catch (Throwable $e) {
             // Ignore
         }
     }

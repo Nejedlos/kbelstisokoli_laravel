@@ -5,9 +5,9 @@ namespace App\Console\Commands;
 use App\Models\MediaAsset;
 use App\Models\PhotoPool;
 use Illuminate\Console\Command;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
@@ -66,7 +66,7 @@ class LegacyPhotoImportCommand extends Command
 
         // Fix pro public_path na produkci v CLI prostředí
         $prodPublicPath = env('PROD_PUBLIC_PATH') ?: env('APP_PUBLIC_PATH');
-        if (app()->environment('production') || ($prodPublicPath && !str_contains(public_path(), 'www'))) {
+        if (app()->environment('production') || ($prodPublicPath && ! str_contains(public_path(), 'www'))) {
             if ($prodPublicPath && is_dir($prodPublicPath)) {
                 $this->info("Fixuji public_path na: {$prodPublicPath}");
                 app()->usePublicPath($prodPublicPath);
@@ -74,8 +74,9 @@ class LegacyPhotoImportCommand extends Command
             }
         }
 
-        if (!File::exists($this->oldFotoPath) && !app()->environment('local')) {
+        if (! File::exists($this->oldFotoPath) && ! app()->environment('local')) {
             $this->error("Složka s fotografiemi neexistuje: {$this->oldFotoPath}");
+
             return self::FAILURE;
         }
 
@@ -84,13 +85,14 @@ class LegacyPhotoImportCommand extends Command
             // Uživatel specifikoval složku 'fotogalerie', ale v projektu je 'fotoalbum'
             // Zkusíme obojí
             $localFotoPath = base_path('../kbelstisokoli_old/fotogalerie');
-            if (!File::exists($localFotoPath)) {
+            if (! File::exists($localFotoPath)) {
                 $localFotoPath = base_path('../kbelstisokoli_old/fotoalbum');
             }
             $this->oldFotoPath = $localFotoPath;
 
-            if (!File::exists($this->oldFotoPath)) {
+            if (! File::exists($this->oldFotoPath)) {
                 $this->error("Lokální složka neexistuje: {$this->oldFotoPath}");
+
                 return self::FAILURE;
             }
         }
@@ -107,7 +109,7 @@ class LegacyPhotoImportCommand extends Command
             $query->where('id', $this->option('pool-id'));
         }
         if ($this->option('limit')) {
-            $query->limit((int)$this->option('limit'));
+            $query->limit((int) $this->option('limit'));
         }
 
         $oldGalleries = $query->get();
@@ -140,6 +142,7 @@ class LegacyPhotoImportCommand extends Command
 
         if ($photoEntries->isEmpty()) {
             $this->warn("Žádné fotky pro galerii ID: {$oldGallery->id} v databázi");
+
             return;
         }
 
@@ -149,13 +152,15 @@ class LegacyPhotoImportCommand extends Command
 
         if (in_array($folderName, $this->ignoreFolders)) {
             $this->line(" - Ignoruji složku {$folderName} (již je v systému)");
+
             return;
         }
 
-        $folderPath = $this->oldFotoPath . '/' . $folderName;
+        $folderPath = $this->oldFotoPath.'/'.$folderName;
 
-        if (!File::isDirectory($folderPath)) {
+        if (! File::isDirectory($folderPath)) {
             $this->warn("Složka {$folderName} nalezena v DB, ale na disku chybí: {$folderPath}");
+
             return;
         }
 
@@ -164,13 +169,15 @@ class LegacyPhotoImportCommand extends Command
         // Najdeme nebo vytvoříme PhotoPool
         $pool = $this->findOrCreatePool($oldGallery, $title);
 
-        if (!$pool && !$this->option('dry-run')) {
+        if (! $pool && ! $this->option('dry-run')) {
             $this->error("Nepodařilo se najít ani vytvořit PhotoPool pro: {$title}");
+
             return;
         }
 
         if ($this->option('dry-run')) {
             $this->line(" - [Dry-run] Naimportoval bych {$photoEntries->count()} fotografií z DB záznamů.");
+
             return;
         }
 
@@ -190,21 +197,23 @@ class LegacyPhotoImportCommand extends Command
 
         if ($pool) {
             $this->line(" - Nalezen existující pool: {$pool->id} (slug: {$slug})");
+
             return $pool;
         }
 
         if ($this->option('dry-run')) {
             $this->line(" - [Dry-run] Vytvořil bych nový pool: {$title}");
+
             return null; // V dry-runu nevracíme model pokud neexistuje
         }
 
         // Vytvoříme nový pool
-        $pool = new PhotoPool();
+        $pool = new PhotoPool;
         $pool->setTranslation('title', 'cs', $title);
         $pool->setTranslation('title', 'en', $title); // Zatím stejné
         $pool->slug = $slug;
         $pool->description = ['cs' => $this->decode($oldGallery->popis), 'en' => ''];
-        $pool->event_date = $oldGallery->datum ? date('Y-m-d', (int)$oldGallery->datum) : null;
+        $pool->event_date = $oldGallery->datum ? date('Y-m-d', (int) $oldGallery->datum) : null;
         $pool->is_public = true;
         $pool->is_visible = true;
         $pool->save();
@@ -217,7 +226,7 @@ class LegacyPhotoImportCommand extends Command
     /**
      * Zpracuje fotografie na základě záznamů z databáze.
      */
-    protected function processPhotosFromEntries(PhotoPool $pool, \Illuminate\Support\Collection $entries): void
+    protected function processPhotosFromEntries(PhotoPool $pool, Collection $entries): void
     {
         $count = $entries->count();
         $this->line(" - Celkem k importu: {$count} záznamů z DB");
@@ -228,26 +237,28 @@ class LegacyPhotoImportCommand extends Command
         foreach ($entries as $entry) {
             $folderName = $entry->slozka;
             $filename = $entry->soubor;
-            $filePath = $this->oldFotoPath . '/' . $folderName . '/' . $filename;
+            $filePath = $this->oldFotoPath.'/'.$folderName.'/'.$filename;
 
-            if (!File::exists($filePath)) {
+            if (! File::exists($filePath)) {
                 $bar->advance();
+
                 continue;
             }
 
             // Kontrola duplicity: má už tento pool tuto fotku?
             $exists = $pool->mediaAssets()
-                ->whereHas('media', function($query) use ($filename) {
+                ->whereHas('media', function ($query) use ($filename) {
                     $query->where('file_name', $filename);
                 })->exists();
 
             if ($exists) {
                 $bar->advance();
+
                 continue;
             }
 
             try {
-                DB::transaction(function() use ($pool, $entry, $filename, $filePath) {
+                DB::transaction(function () use ($pool, $entry, $filename, $filePath) {
                     $asset = MediaAsset::create([
                         'title' => $this->decode($entry->nadpis) ?: pathinfo($filename, PATHINFO_FILENAME),
                         'description' => $this->decode($entry->popis),
@@ -257,7 +268,7 @@ class LegacyPhotoImportCommand extends Command
                         'uploaded_by_id' => $this->uploadedById,
                     ]);
 
-                    if (!$asset || !$asset->exists) {
+                    if (! $asset || ! $asset->exists) {
                         throw new \Exception("Nepodařilo se vytvořit MediaAsset pro {$filename}");
                     }
 
@@ -267,7 +278,7 @@ class LegacyPhotoImportCommand extends Command
 
                     $pool->mediaAssets()->attach($asset->id, [
                         'sort_order' => $lastSort + 1,
-                        'is_visible' => (bool)$entry->videt,
+                        'is_visible' => (bool) $entry->videt,
                     ]);
 
                     // Přidáme fyzický soubor
@@ -276,14 +287,14 @@ class LegacyPhotoImportCommand extends Command
                         ->toMediaCollection('default');
                 });
             } catch (\Exception $e) {
-                $this->error("\nChyba při importu souboru {$filename}: " . $e->getMessage());
+                $this->error("\nChyba při importu souboru {$filename}: ".$e->getMessage());
             }
 
             $bar->advance();
         }
 
         $bar->finish();
-        $this->info("");
+        $this->info('');
     }
 
     /**
@@ -300,6 +311,7 @@ class LegacyPhotoImportCommand extends Command
         foreach ($files as $file) {
             if ($this->isNahled($file)) {
                 $bar->advance();
+
                 continue;
             }
 
@@ -308,22 +320,24 @@ class LegacyPhotoImportCommand extends Command
             // Kontrola duplicity: má už tento pool tuto fotku?
             // Můžeme kontrolovat podle názvu souboru v media library
             $exists = $pool->mediaAssets()
-                ->whereHas('media', function($query) use ($filename) {
+                ->whereHas('media', function ($query) use ($filename) {
                     $query->where('name', pathinfo($filename, PATHINFO_FILENAME));
                 })->exists();
 
             if ($exists) {
                 $bar->advance();
+
                 continue;
             }
 
             if ($this->option('dry-run')) {
                 $bar->advance();
+
                 continue;
             }
 
             try {
-                DB::transaction(function() use ($pool, $file, $filename) {
+                DB::transaction(function () use ($pool, $file, $filename) {
                     $asset = MediaAsset::create([
                         'title' => pathinfo($filename, PATHINFO_FILENAME),
                         'type' => 'image',
@@ -332,7 +346,7 @@ class LegacyPhotoImportCommand extends Command
                         'uploaded_by_id' => $this->uploadedById,
                     ]);
 
-                    if (!$asset || !$asset->exists) {
+                    if (! $asset || ! $asset->exists) {
                         throw new \Exception("Nepodařilo se vytvořit MediaAsset pro {$filename}");
                     }
 
@@ -351,14 +365,14 @@ class LegacyPhotoImportCommand extends Command
                         ->toMediaCollection('default');
                 });
             } catch (\Exception $e) {
-                $this->error("\nChyba při importu {$filename}: " . $e->getMessage());
+                $this->error("\nChyba při importu {$filename}: ".$e->getMessage());
             }
 
             $bar->advance();
         }
 
         $bar->finish();
-        $this->line("");
+        $this->line('');
     }
 
     /**
@@ -367,12 +381,14 @@ class LegacyPhotoImportCommand extends Command
     protected function importRootPhotos(): void
     {
         $files = File::files($this->oldFotoPath);
-        if (empty($files)) return;
+        if (empty($files)) {
+            return;
+        }
 
-        $this->info("Zpracovávám fotografie v rootu fotoalba...");
+        $this->info('Zpracovávám fotografie v rootu fotoalba...');
 
         $poolTitle = 'Fotografie z archivu';
-        $pool = $this->findOrCreatePool((object)['popis' => '', 'datum' => null], $poolTitle);
+        $pool = $this->findOrCreatePool((object) ['popis' => '', 'datum' => null], $poolTitle);
 
         if ($pool) {
             $this->processPhotos($pool, $files);
@@ -384,10 +400,12 @@ class LegacyPhotoImportCommand extends Command
      */
     protected function decode($text): string
     {
-        if (!$text) return '';
+        if (! $text) {
+            return '';
+        }
 
         // 1. Nejprve převedeme na UTF-8 pokud je to potřeba
-        if (!mb_check_encoding($text, 'UTF-8')) {
+        if (! mb_check_encoding($text, 'UTF-8')) {
             $text = iconv('CP1250', 'UTF-8//IGNORE', $text) ?: $text;
         } elseif (str_contains($text, 'Ă')) {
             // Detekce double encodingu UTF-8 (častý problém při špatném exportu)
@@ -437,8 +455,8 @@ class LegacyPhotoImportCommand extends Command
         // 1. Smazání všech MediaAssetů nahraných importem (uživatel s ID 3)
         $assets = MediaAsset::where('uploaded_by_id', $this->uploadedById)->get();
         if ($assets->isNotEmpty()) {
-            $this->info(($dryRun ? '[Dry-run] Smazal bych ' : 'Mažu ') . "{$assets->count()} MediaAssetů a jejich soubory...");
-            if (!$dryRun) {
+            $this->info(($dryRun ? '[Dry-run] Smazal bych ' : 'Mažu ')."{$assets->count()} MediaAssetů a jejich soubory...");
+            if (! $dryRun) {
                 foreach ($assets as $asset) {
                     $asset->delete(); // SML smaže soubory z disku
                 }
@@ -448,8 +466,8 @@ class LegacyPhotoImportCommand extends Command
         // 2. Smazání poolů, které jsou prázdné a mohly vzniknout importem
         $pools = PhotoPool::whereDoesntHave('mediaAssets')->get();
         if ($pools->isNotEmpty()) {
-            $this->info(($dryRun ? '[Dry-run] Smazal bych ' : 'Mažu ') . "{$pools->count()} prázdných poolů...");
-            if (!$dryRun) {
+            $this->info(($dryRun ? '[Dry-run] Smazal bych ' : 'Mažu ')."{$pools->count()} prázdných poolů...");
+            if (! $dryRun) {
                 foreach ($pools as $pool) {
                     $pool->delete();
                 }
@@ -459,15 +477,15 @@ class LegacyPhotoImportCommand extends Command
         // 3. Smazání obsahu složky public/uploads/photo_pools/ (pokud zbyl)
         $uploadsRoot = trim(config('filesystems.uploads.dir', 'uploads'), '/');
         // Zkusíme nejprve přes public_path, ale pro jistotu zkontrolujeme i cestu subdomény
-        $photoPoolsDir = public_path($uploadsRoot . '/photo_pools');
+        $photoPoolsDir = public_path($uploadsRoot.'/photo_pools');
 
-        if (!File::isDirectory($photoPoolsDir) && str_contains($photoPoolsDir, 'secret/public')) {
+        if (! File::isDirectory($photoPoolsDir) && str_contains($photoPoolsDir, 'secret/public')) {
             $photoPoolsDir = str_replace('secret/public', 'www', $photoPoolsDir);
         }
 
         if (File::isDirectory($photoPoolsDir)) {
-            $this->info(($dryRun ? '[Dry-run] Vymazal bych obsah složky: ' : 'Mažu obsah složky: ') . $photoPoolsDir);
-            if (!$dryRun) {
+            $this->info(($dryRun ? '[Dry-run] Vymazal bych obsah složky: ' : 'Mažu obsah složky: ').$photoPoolsDir);
+            if (! $dryRun) {
                 // Smažeme všechny podsložky v photo_pools, ale složku samotnou ponecháme
                 $directories = File::directories($photoPoolsDir);
                 foreach ($directories as $dir) {
@@ -481,7 +499,7 @@ class LegacyPhotoImportCommand extends Command
             }
         }
 
-        if (!$dryRun) {
+        if (! $dryRun) {
             $this->info('Čištění dokončeno.');
         }
     }

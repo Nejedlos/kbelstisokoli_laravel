@@ -2,10 +2,18 @@
 
 namespace App\Console\Commands;
 
+use App\Models\ExternalTeamSeasonConfig;
+use App\Models\Season;
+use App\Models\Team;
+use Filament\Facades\Filament;
 use Illuminate\Console\Command;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Permission\PermissionServiceProvider;
+use Symfony\Component\DomCrawler\Crawler;
 
 class QAPreflight extends Command
 {
@@ -122,14 +130,14 @@ class QAPreflight extends Command
 
     private function checkScheduler(): bool
     {
-        $lastRun = \Illuminate\Support\Facades\Cache::get('scheduler_last_heartbeat');
+        $lastRun = Cache::get('scheduler_last_heartbeat');
         if (! $lastRun) {
             $this->warn('⚠️ Scheduler: Heartbeat nenalezen. Ujistěte se, že cron běží.');
 
             return true; // Jen varování
         }
 
-        $diff = now()->diffInMinutes(\Illuminate\Support\Carbon::createFromTimestamp($lastRun));
+        $diff = now()->diffInMinutes(Carbon::createFromTimestamp($lastRun));
         if ($diff > 10) {
             $this->error("❌ Scheduler: Poslední běh před {$diff} minutami (příliš dlouho).");
 
@@ -143,7 +151,7 @@ class QAPreflight extends Command
 
     private function checkTeamConfigs(): bool
     {
-        $season = \App\Models\Season::where('is_active', true)->first();
+        $season = Season::where('is_active', true)->first();
         if (! $season) {
             $this->error('❌ Sezóny: Žádná aktivní sezóna nalezena.');
 
@@ -152,13 +160,13 @@ class QAPreflight extends Command
 
         $this->line("ℹ️ Aktivní sezóna: {$season->name}");
 
-        $teams = \App\Models\Team::whereIn('slug', ['muzi-c', 'muzi-e'])->get();
+        $teams = Team::whereIn('slug', ['muzi-c', 'muzi-e'])->get();
         if ($teams->count() < 2) {
             $this->warn('⚠️ Týmy: Muži C nebo Muži E v DB chybí.');
         }
 
         foreach ($teams as $team) {
-            $config = \App\Models\ExternalTeamSeasonConfig::where('team_id', $team->id)
+            $config = ExternalTeamSeasonConfig::where('team_id', $team->id)
                 ->where('season_id', $season->id)
                 ->first();
 
@@ -223,9 +231,9 @@ class QAPreflight extends Command
     private function checkDependencies(): bool
     {
         $packages = [
-            'symfony/dom-crawler' => \Symfony\Component\DomCrawler\Crawler::class,
-            'filament' => \Filament\Facades\Filament::class,
-            'spatie/laravel-permission' => \Spatie\Permission\PermissionServiceProvider::class,
+            'symfony/dom-crawler' => Crawler::class,
+            'filament' => Filament::class,
+            'spatie/laravel-permission' => PermissionServiceProvider::class,
         ];
 
         $allOk = true;

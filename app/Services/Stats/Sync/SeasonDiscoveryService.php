@@ -58,6 +58,7 @@ class SeasonDiscoveryService
                     // Pokud je sezóna "prázdná", ale konfiguraci máme, taky ji standardně neřešíme (není "missing")
                     // Ale pokud uživatel chce zkusit, jestli neexistuje lepší 'y', tak by musel dát force.
                     ConsoleService::log("Sezóna {$season->name} pro tým {$team->slug} již má konfiguraci (y={$config->external_season_year}), přeskakuji discovery.", 'debug');
+
                     continue;
                 }
 
@@ -98,7 +99,7 @@ class SeasonDiscoveryService
                         }
 
                         if ($syncAfter) {
-                            ConsoleService::log("  Spouštím synchronizaci dat...", 'info');
+                            ConsoleService::log('  Spouštím synchronizaci dat...', 'info');
                             SyncTeamSeasonJob::dispatch($team->id, $season->id);
                         }
                     }
@@ -110,7 +111,7 @@ class SeasonDiscoveryService
                         'confidence' => $winner['confidence'],
                     ];
                 } else {
-                    ConsoleService::log("  Pro sezónu {$season->name} nebyl nalezen žádný validní rok (zkoušeno: ".implode(', ', $candidates).").", 'warning');
+                    ConsoleService::log("  Pro sezónu {$season->name} nebyl nalezen žádný validní rok (zkoušeno: ".implode(', ', $candidates).').', 'warning');
                     $results[] = [
                         'team' => $team->slug,
                         'season' => $season->name,

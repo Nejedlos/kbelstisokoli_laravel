@@ -8,9 +8,11 @@ use App\Filament\Resources\Redirects\Pages\ListRedirects;
 use App\Filament\Resources\Redirects\Schemas\RedirectForm;
 use App\Filament\Resources\Redirects\Tables\RedirectsTable;
 use App\Models\Redirect;
+use App\Support\IconHelper;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 
 class RedirectResource extends Resource
 {
@@ -26,9 +28,9 @@ class RedirectResource extends Resource
         return __('admin.resources.redirect.plural_label');
     }
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
-        return \App\Support\IconHelper::get(\App\Support\IconHelper::REDIRECTS);
+        return IconHelper::get(IconHelper::REDIRECTS);
     }
 
     public static function getPluralModelLabel(): string

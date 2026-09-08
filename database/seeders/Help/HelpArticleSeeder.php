@@ -14,8 +14,6 @@ class HelpArticleSeeder extends Seeder
 
     /**
      * Seed articles.
-     *
-     * @return void
      */
     public function run(): void
     {
@@ -2599,7 +2597,7 @@ class HelpArticleSeeder extends Seeder
 
         foreach ($articles as $article) {
             $category = HelpCategory::where('slug', $article['category_slug'])->first();
-            if (!$category) {
+            if (! $category) {
                 continue;
             }
 
@@ -2625,7 +2623,7 @@ class HelpArticleSeeder extends Seeder
             $helpArticle = $this->upsertHelpItem(HelpArticle::class, $articleData, $translations, true);
 
             // Synchronizace FAQ (pokud není článek customizován)
-            if (!$helpArticle->is_customized) {
+            if (! $helpArticle->is_customized) {
                 $this->syncFaqs($helpArticle, $article['faqs'] ?? []);
                 $this->syncQuickActions($helpArticle, $article['quick_actions'] ?? []);
             }

@@ -7,9 +7,11 @@ use App\Filament\Resources\AuditLogs\Pages\ViewAuditLog;
 use App\Filament\Resources\AuditLogs\Schemas\AuditLogForm;
 use App\Filament\Resources\AuditLogs\Tables\AuditLogsTable;
 use App\Models\AuditLog;
+use App\Support\IconHelper;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 
 class AuditLogResource extends Resource
 {
@@ -20,9 +22,9 @@ class AuditLogResource extends Resource
         return __('admin.resources.audit_log.plural_label');
     }
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
-        return \App\Support\IconHelper::get(\App\Support\IconHelper::AUDIT_LOGS);
+        return IconHelper::get(IconHelper::AUDIT_LOGS);
     }
 
     public static function getNavigationSort(): ?int

@@ -2,10 +2,12 @@
 
 namespace App\Services\Stats\Sync;
 
+use App\Enums\BasketballPosition;
 use App\Models\BasketballMatch;
 use App\Models\ExternalEntityMapping;
 use App\Models\ExternalImportRun;
 use App\Models\ExternalPlayerMatch;
+use App\Models\ExternalPlayerStat;
 use App\Models\Opponent;
 use App\Models\PlayerProfile;
 use App\Models\Season;
@@ -13,10 +15,14 @@ use App\Models\Team;
 use App\Models\User;
 use App\Models\Venue;
 use App\Services\Stats\Contracts\StatFetcherInterface;
+use App\Services\Stats\Extractors\CzBasketball\MatchDetailBoxscoreExtractor;
 use App\Services\Stats\Extractors\CzBasketball\PlayerDetailExtractor;
+use App\Services\Support\ConsoleService;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
@@ -26,7 +32,7 @@ class PlayerSyncService
         protected StatFetcherInterface $fetcher,
         protected PlayerDetailExtractor $extractor,
         protected StatisticSyncService $statisticSyncService,
-        protected \App\Services\Stats\Extractors\CzBasketball\MatchDetailBoxscoreExtractor $matchExtractor
+        protected MatchDetailBoxscoreExtractor $matchExtractor
     ) {}
 
     /**
@@ -46,8 +52,9 @@ class PlayerSyncService
             ->where('source_key', 'czbasketball')
             ->first();
 
-        if (!$mapping || !$mapping->external_id) {
+        if (! $mapping || ! $mapping->external_id) {
             Log::warning("PlayerSyncService: User {$user->display_name} has no czbasketball external_id.");
+
             return 0;
         }
 
@@ -55,8 +62,8 @@ class PlayerSyncService
         $url = "https://cz.basketball/hrac/{$extId}";
 
         // Vytvoříme běh importu pro logování
-        $seasonId = \App\Models\Season::where('is_active', true)->first()?->id ?? 0;
-        $run = \App\Models\ExternalImportRun::start('czbasketball', $seasonId, null, 'player_detail', $extId);
+        $seasonId = Season::where('is_active', true)->first()?->id ?? 0;
+        $run = ExternalImportRun::start('czbasketball', $seasonId, null, 'player_detail', $extId);
 
         try {
             if (method_exists($this->fetcher, 'setCurrentRun')) {
@@ -78,7 +85,7 @@ class PlayerSyncService
             $data = $result['data'];
 
             // 1. Aktualizace PlayerProfile (Základní info)
-            $profile = $user->playerProfiles()->first() ?: new \App\Models\PlayerProfile(['user_id' => $user->id]);
+            $profile = $user->playerProfiles()->first() ?: new PlayerProfile(['user_id' => $user->id]);
 
             $position = $this->normalizePosition($data['position'] ?? null);
             if ($position) {
@@ -95,7 +102,7 @@ class PlayerSyncService
             $metadata['last_sync_at'] = now()->toDateTimeString();
 
             // Rekordy do metadat profilu pro "excesivní" uložení
-            if (!empty($data['records'])) {
+            if (! empty($data['records'])) {
                 $metadata['records'] = $data['records'];
             }
 
@@ -104,23 +111,23 @@ class PlayerSyncService
             $profile->save();
 
             // 2. Fotografie
-            if (!empty($data['photo_url'])) {
+            if (! empty($data['photo_url'])) {
                 if ($parentRun) {
                     $parentRun->updateProgress($options['current_index'] ?? 0, $options['total_count'] ?? 0, "Hráč: {$user->display_name} (Stahování fotografie)");
                 }
                 $this->syncPhoto($user, $data['photo_url'], false, [
                     'season_id' => $seasonId,
-                    'added_from' => 'player_detail_sync'
+                    'added_from' => 'player_detail_sync',
                 ]);
             }
 
             // 3. Detailní statistiky do nové tabulky external_player_stats
-            if (!empty($data['stats'])) {
+            if (! empty($data['stats'])) {
                 if ($parentRun) {
                     $parentRun->updateProgress($options['current_index'] ?? 0, $options['total_count'] ?? 0, "Hráč: {$user->display_name} (Ukládání statistik)");
                 }
                 foreach ($data['stats'] as $statData) {
-                    \App\Models\ExternalPlayerStat::updateOrCreate(
+                    ExternalPlayerStat::updateOrCreate(
                         [
                             'user_id' => $user->id,
                             'source_key' => 'czbasketball',
@@ -137,9 +144,9 @@ class PlayerSyncService
             }
 
             // 4. Historie zápasů do nové tabulky external_player_matches
-            if (!empty($data['matches'])) {
+            if (! empty($data['matches'])) {
                 foreach ($data['matches'] as $matchData) {
-                    \App\Models\ExternalPlayerMatch::updateOrCreate(
+                    ExternalPlayerMatch::updateOrCreate(
                         [
                             'user_id' => $user->id,
                             'source_key' => 'czbasketball',
@@ -162,28 +169,29 @@ class PlayerSyncService
 
             // 6. Přepočet souhrnů pro všechny dostupné sezóny
             try {
-                if (!empty($data['available_seasons'])) {
+                if (! empty($data['available_seasons'])) {
                     foreach ($data['available_seasons'] as $seasonLabel) {
-                        $season = \App\Models\Season::where('name', 'LIKE', "%{$seasonLabel}%")->first();
+                        $season = Season::where('name', 'LIKE', "%{$seasonLabel}%")->first();
                         if ($season) {
                             $this->statisticSyncService->recomputePlayerSummaries($season->id);
                         }
                     }
                 }
             } catch (\Exception $e) {
-                Log::warning("PlayerSyncService: Failed to recompute summaries for {$user->display_name}: " . $e->getMessage());
+                Log::warning("PlayerSyncService: Failed to recompute summaries for {$user->display_name}: ".$e->getMessage());
             }
 
             $run->finish([
                 'imported_count' => count($data['stats'] ?? []),
-                'matches_count' => count($data['matches'] ?? [])
+                'matches_count' => count($data['matches'] ?? []),
             ]);
-            Log::info("PlayerSyncService: Successfully synced player {$user->display_name} (ExtID: {$extId}), " . count($data['stats'] ?? []) . " stat rows and " . count($data['matches'] ?? []) . " matches.");
+            Log::info("PlayerSyncService: Successfully synced player {$user->display_name} (ExtID: {$extId}), ".count($data['stats'] ?? []).' stat rows and '.count($data['matches'] ?? []).' matches.');
 
             return $historyResult;
         } catch (\Exception $e) {
             $run->fail($e);
-            Log::error("PlayerSyncService: Failed to sync player {$user->display_name}: " . $e->getMessage());
+            Log::error("PlayerSyncService: Failed to sync player {$user->display_name}: ".$e->getMessage());
+
             return 0;
         }
     }
@@ -205,7 +213,7 @@ class PlayerSyncService
 
             $alreadyHas = $existingMedia->isNotEmpty();
 
-            if (!$alreadyHas || $force) {
+            if (! $alreadyHas || $force) {
                 // Pokud vynucujeme a už existuje, smažeme starou verzi se stejným URL
                 if ($force && $alreadyHas) {
                     $existingMedia->each->delete();
@@ -215,7 +223,7 @@ class PlayerSyncService
                 $directUrl = null;
                 if (str_contains($photoUrl, 'min.php') && str_contains($photoUrl, 'file=')) {
                     parse_str(parse_url($photoUrl, PHP_URL_QUERY), $query);
-                    if (!empty($query['file'])) {
+                    if (! empty($query['file'])) {
                         $directUrl = $query['file'];
                         if (str_starts_with($directUrl, 'http://cbf.cz')) {
                             $directUrl = str_replace('http://cbf.cz', 'https://cbf.cz', $directUrl);
@@ -223,7 +231,7 @@ class PlayerSyncService
                     }
                 }
 
-                $fileName = 'player_' . $user->id . '_' . md5($photoUrl) . '.jpg';
+                $fileName = 'player_'.$user->id.'_'.md5($photoUrl).'.jpg';
                 $urlsToTry = array_filter([$directUrl, $photoUrl]);
                 $success = false;
 
@@ -252,16 +260,16 @@ class PlayerSyncService
                             ])
                             ->get($url);
 
-                        if ($response->successful() && !empty($response->body())) {
+                        if ($response->successful() && ! empty($response->body())) {
                             $media = $user->addMediaFromString($response->body())
                                 ->usingFileName($fileName)
                                 ->withCustomProperties($customProperties)
                                 ->toMediaCollection('player_photos');
 
                             // Invalidace cache pro fotku hráče
-                            \Illuminate\Support\Facades\Cache::forget("user_{$user->id}_player_photo_url_latest");
+                            Cache::forget("user_{$user->id}_player_photo_url_latest");
                             if (isset($customProperties['season_id'])) {
-                                \Illuminate\Support\Facades\Cache::forget("user_{$user->id}_player_photo_url_" . $customProperties['season_id']);
+                                Cache::forget("user_{$user->id}_player_photo_url_".$customProperties['season_id']);
                             }
 
                             $success = true;
@@ -272,11 +280,11 @@ class PlayerSyncService
                             Log::debug("PlayerSyncService: Pokus o stažení z {$url} selhal (Status: {$response->status()})");
                         }
                     } catch (\Exception $e) {
-                        Log::debug("PlayerSyncService: Pokus o stažení z {$url} selhal: " . $e->getMessage());
+                        Log::debug("PlayerSyncService: Pokus o stažení z {$url} selhal: ".$e->getMessage());
                     }
                 }
 
-                if (!$success) {
+                if (! $success) {
                     // Poslední pokus: zkusit dotažení z detailu, pokud máme mapping
                     $mapping = $user->externalMappings()->where('source_key', 'czbasketball')->first();
                     if ($mapping && $mapping->external_id) {
@@ -285,7 +293,7 @@ class PlayerSyncService
                 }
             }
         } catch (\Exception $e) {
-            Log::warning("PlayerSyncService: Nepodařilo se synchronizovat fotografii pro {$user->display_name} ({$photoUrl}): " . $e->getMessage());
+            Log::warning("PlayerSyncService: Nepodařilo se synchronizovat fotografii pro {$user->display_name} ({$photoUrl}): ".$e->getMessage());
         }
     }
 
@@ -302,12 +310,12 @@ class PlayerSyncService
 
             if ($photoUrl) {
                 $photoUrl = html_entity_decode($photoUrl);
-                $fileName = 'player_' . $user->id . '_' . md5($photoUrl) . '.jpg';
+                $fileName = 'player_'.$user->id.'_'.md5($photoUrl).'.jpg';
 
                 $customProperties = [
                     'source_url' => $photoUrl,
                     'added_from' => $context['added_from'] ?? 'player_detail_sync_fallback',
-                    'synced_at' => now()->toDateTimeString()
+                    'synced_at' => now()->toDateTimeString(),
                 ];
 
                 if (isset($context['season_id'])) {
@@ -326,16 +334,16 @@ class PlayerSyncService
                     ])
                     ->get($photoUrl);
 
-                if ($response->successful() && !empty($response->body())) {
+                if ($response->successful() && ! empty($response->body())) {
                     $media = $user->addMediaFromString($response->body())
                         ->usingFileName($fileName)
                         ->withCustomProperties($customProperties)
                         ->toMediaCollection('player_photos');
 
                     // Invalidace cache pro fotku hráče
-                    \Illuminate\Support\Facades\Cache::forget("user_{$user->id}_player_photo_url_latest");
+                    Cache::forget("user_{$user->id}_player_photo_url_latest");
                     if (isset($customProperties['season_id'])) {
-                        \Illuminate\Support\Facades\Cache::forget("user_{$user->id}_player_photo_url_" . $customProperties['season_id']);
+                        Cache::forget("user_{$user->id}_player_photo_url_".$customProperties['season_id']);
                     }
 
                     $savedPath = $media->getPath();
@@ -345,7 +353,7 @@ class PlayerSyncService
                 }
             }
         } catch (\Exception $e) {
-            Log::debug("PlayerSyncService: Selhal pokus o dotažení fotky hráče {$user->display_name} z detailu: " . $e->getMessage());
+            Log::debug("PlayerSyncService: Selhal pokus o dotažení fotky hráče {$user->display_name} z detailu: ".$e->getMessage());
         }
     }
 
@@ -361,7 +369,7 @@ class PlayerSyncService
             $directUrl = null;
             if (str_contains($photoUrl, 'min.php') && str_contains($photoUrl, 'file=')) {
                 parse_str(parse_url($photoUrl, PHP_URL_QUERY), $query);
-                if (!empty($query['file'])) {
+                if (! empty($query['file'])) {
                     $directUrl = $query['file'];
                     // Zajistíme HTTPS
                     if (str_starts_with($directUrl, 'http://cbf.cz')) {
@@ -371,11 +379,11 @@ class PlayerSyncService
             }
 
             // Konfigurace cesty
-            $diskName = config("filesystems.uploads.disk", "public_path");
-            $baseDir = config("filesystems.uploads.dir", "uploads");
-            $dir = $baseDir . "/opponents";
-            $fileName = $externalId . ".jpg";
-            $path = $dir . "/" . $fileName;
+            $diskName = config('filesystems.uploads.disk', 'public_path');
+            $baseDir = config('filesystems.uploads.dir', 'uploads');
+            $dir = $baseDir.'/opponents';
+            $fileName = $externalId.'.jpg';
+            $path = $dir.'/'.$fileName;
 
             if ($force || ! Storage::disk($diskName)->exists($path) || Storage::disk($diskName)->size($path) === 0) {
                 // Zkusíme nejprve přímou URL (pokud ji máme), bývá spolehlivější než min.php
@@ -386,7 +394,7 @@ class PlayerSyncService
                     $response = Http::timeout(12)
                         ->connectTimeout(5)
                         ->withHeaders([
-                            "User-Agent" => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                            'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                         ])->get($url);
 
                     if ($response->successful()) {
@@ -397,7 +405,7 @@ class PlayerSyncService
                     }
                 }
 
-                if (!$success) {
+                if (! $success) {
                     // Fallback na detail hráče
                     Log::debug("PlayerSyncService: Selhalo stahování pro ExtID: {$externalId}, zkouším detail hráče...");
                     $this->syncOpponentPhotoFromDetail($externalId, $force);
@@ -406,7 +414,7 @@ class PlayerSyncService
                 Log::debug("PlayerSyncService: Fotografie soupeře (ExtID: {$externalId}) již existuje v {$path}");
             }
         } catch (\Exception $e) {
-            Log::warning("PlayerSyncService: Chyba při stahování fotky soupeře (ExtID: {$externalId}): " . $e->getMessage());
+            Log::warning("PlayerSyncService: Chyba při stahování fotky soupeře (ExtID: {$externalId}): ".$e->getMessage());
         }
     }
 
@@ -423,14 +431,14 @@ class PlayerSyncService
 
             if ($photoUrl) {
                 $photoUrl = html_entity_decode($photoUrl);
-                $diskName = config("filesystems.uploads.disk", "public_path");
-                $baseDir = config("filesystems.uploads.dir", "uploads");
-                $path = $baseDir . "/opponents/" . $externalId . ".jpg";
+                $diskName = config('filesystems.uploads.disk', 'public_path');
+                $baseDir = config('filesystems.uploads.dir', 'uploads');
+                $path = $baseDir.'/opponents/'.$externalId.'.jpg';
 
                 $response = Http::timeout(12)
                     ->connectTimeout(5)
                     ->withHeaders([
-                        "User-Agent" => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                        'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                     ])->get($photoUrl);
 
                 if ($response->successful()) {
@@ -439,33 +447,35 @@ class PlayerSyncService
                 }
             }
         } catch (\Exception $e) {
-            Log::debug("PlayerSyncService: Selhal pokus o dotažení fotky soupeře z detailu (ExtID: {$externalId}): " . $e->getMessage());
+            Log::debug("PlayerSyncService: Selhal pokus o dotažení fotky soupeře z detailu (ExtID: {$externalId}): ".$e->getMessage());
         }
     }
 
     /**
      * Normalizuje pozici z cz.basketball na náš Enum.
      */
-    protected function normalizePosition(?string $rawPosition): ?\App\Enums\BasketballPosition
+    protected function normalizePosition(?string $rawPosition): ?BasketballPosition
     {
-        if (!$rawPosition) return null;
+        if (! $rawPosition) {
+            return null;
+        }
 
         $rawPosition = mb_strtoupper(trim($rawPosition));
 
         // Mapování čísel (často používané v basketbalu)
         $map = [
-            '1' => \App\Enums\BasketballPosition::PG,
-            '2' => \App\Enums\BasketballPosition::SG,
-            '3' => \App\Enums\BasketballPosition::SF,
-            '4' => \App\Enums\BasketballPosition::PF,
-            '5' => \App\Enums\BasketballPosition::C,
-            'PG' => \App\Enums\BasketballPosition::PG,
-            'SG' => \App\Enums\BasketballPosition::SG,
-            'SF' => \App\Enums\BasketballPosition::SF,
-            'PF' => \App\Enums\BasketballPosition::PF,
-            'C' => \App\Enums\BasketballPosition::C,
-            'G' => \App\Enums\BasketballPosition::PG, // Guard -> PG
-            'F' => \App\Enums\BasketballPosition::SF, // Forward -> SF
+            '1' => BasketballPosition::PG,
+            '2' => BasketballPosition::SG,
+            '3' => BasketballPosition::SF,
+            '4' => BasketballPosition::PF,
+            '5' => BasketballPosition::C,
+            'PG' => BasketballPosition::PG,
+            'SG' => BasketballPosition::SG,
+            'SF' => BasketballPosition::SF,
+            'PF' => BasketballPosition::PF,
+            'C' => BasketballPosition::C,
+            'G' => BasketballPosition::PG, // Guard -> PG
+            'F' => BasketballPosition::SF, // Forward -> SF
         ];
 
         return $map[$rawPosition] ?? null;
@@ -473,6 +483,7 @@ class PlayerSyncService
 
     /**
      * Excesivní synchronizace historie (všechny dostupné sezóny a detaily zápasů).
+     *
      * @return int 0 = selhalo, 1 = úspěch, 2 = přeskočeno (všechny sezóny přeskočeny)
      */
     public function syncExcesiveHistory(User $user, array $seasons, ?ExternalImportRun $run, array $options = []): int
@@ -481,7 +492,9 @@ class PlayerSyncService
         DB::connection()->disableQueryLog();
 
         $mapping = $user->externalMappings()->where('source_key', 'czbasketball')->first();
-        if (!$mapping) return 0;
+        if (! $mapping) {
+            return 0;
+        }
 
         $extId = $mapping->external_id;
         $parentRun = $options['parent_run'] ?? null;
@@ -491,8 +504,9 @@ class PlayerSyncService
 
         foreach ($seasons as $season) {
             // Validace formátu sezóny (musí být YYYY/YY nebo aspoň začínat číslem)
-            if (!preg_match('/^\d{4}/', $season)) {
-                \App\Services\Support\ConsoleService::log("  - Přeskakuji neplatný název sezóny: $season", 'warning');
+            if (! preg_match('/^\d{4}/', $season)) {
+                ConsoleService::log("  - Přeskakuji neplatný název sezóny: $season", 'warning');
+
                 continue;
             }
 
@@ -505,9 +519,9 @@ class PlayerSyncService
             // Pokud sezóna není aktivní (historická), a nemáme force mode,
             // podíváme se, zda ji už nemáme kompletně synchronizovanou.
             $seasonModel = Season::where('name', Season::normalizeName($season))->first();
-            $isHistorical = $seasonModel && !$seasonModel->is_active;
+            $isHistorical = $seasonModel && ! $seasonModel->is_active;
 
-            if ($isHistorical && !($options['force'] ?? false)) {
+            if ($isHistorical && ! ($options['force'] ?? false)) {
                 // Pokud máme aspoň jeden zápas s boxscore_synced_at pro tuto sezónu, považujeme ji za "už hotovou"
                 // (pro hromadnou synchronizaci historie to stačí jako indikátor, že jsme tam už byli)
                 $normalized = Season::normalizeName($season);
@@ -524,14 +538,15 @@ class PlayerSyncService
                 }
 
                 if ($hasAnyData) {
-                    \App\Services\Support\ConsoleService::log("  - Přeskakuji historickou sezónu $season pro hráče {$user->name} (již synchronizováno).", 'debug');
+                    ConsoleService::log("  - Přeskakuji historickou sezónu $season pro hráče {$user->name} (již synchronizováno).", 'debug');
                     $skippedSeasons++;
+
                     continue;
                 }
             }
 
             $year = substr($season, 0, 4);
-            $url = "https://cz.basketball/hrac/{$extId}?tab=matches&y=" . $year;
+            $url = "https://cz.basketball/hrac/{$extId}?tab=matches&y=".$year;
 
             // Při force módu nebo synchronizaci historické sezóny smažeme staré externí zápasy pro toto období,
             // abychom zabránili duplicitám při změně struktury dat nebo chybné předchozí synchronizaci.
@@ -548,14 +563,15 @@ class PlayerSyncService
                             ->whereBetween('match_date', ["{$startYear}-08-01", "{$endYear}-07-31"])
                             ->delete();
                     }, 100, function ($e) {
-                        Log::warning("PlayerSyncService delete retry due to error 1615 (or other): " . $e->getMessage());
-                        return $e instanceof \Illuminate\Database\QueryException;
+                        Log::warning('PlayerSyncService delete retry due to error 1615 (or other): '.$e->getMessage());
+
+                        return $e instanceof QueryException;
                     });
                 }
             }
 
             try {
-                if (\App\Services\Support\ConsoleService::isStopped()) {
+                if (ConsoleService::isStopped()) {
                     break;
                 }
                 if ($run) {
@@ -586,10 +602,12 @@ class PlayerSyncService
                     }
 
                     $extMatchId = $matchData['external_match_id'] ?? null;
-                    if (!$extMatchId) continue;
+                    if (! $extMatchId) {
+                        continue;
+                    }
 
                     // Uložíme základ
-                    \App\Models\ExternalPlayerMatch::updateOrCreate(
+                    ExternalPlayerMatch::updateOrCreate(
                         [
                             'user_id' => $user->id,
                             'source_key' => 'czbasketball',
@@ -601,7 +619,7 @@ class PlayerSyncService
                     // A nyní detailní boxscore "excesivně"
                     // Stahujeme pouze pokud ještě nemáme boxscore_synced_at (indikátor že jsme aspoň jednou stáhli detail)
                     // nebo u odehraných zápasů pokud nemáme asistence (indikátor statistik - pouze pro aktivní sezónu)
-                    $exists = \App\Models\ExternalPlayerMatch::where('user_id', $user->id)
+                    $exists = ExternalPlayerMatch::where('user_id', $user->id)
                         ->where('external_match_id', (string) $extMatchId)
                         ->first();
 
@@ -609,17 +627,17 @@ class PlayerSyncService
                     $hasStats = $exists && $exists->assists !== null;
                     $isPast = isset($matchData['match_date']) && $matchData['match_date'] <= now()->format('Y-m-d');
 
-                    $shouldSync = !$hasSyncedAt;
-                    if (!$shouldSync && !$isHistorical && $isPast && !$hasStats) {
+                    $shouldSync = ! $hasSyncedAt;
+                    if (! $shouldSync && ! $isHistorical && $isPast && ! $hasStats) {
                         $shouldSync = true;
                     }
 
                     if ($shouldSync || ($options['force'] ?? false)) {
-                        if (\App\Services\Support\ConsoleService::isStopped()) {
+                        if (ConsoleService::isStopped()) {
                             break 2;
                         }
                         if ($run) {
-                            $run->updateProgress((int) ($run->imported_count ?? 0), null, "Zápas: " . ($matchData['opponent_name'] ?? 'neznámý'));
+                            $run->updateProgress((int) ($run->imported_count ?? 0), null, 'Zápas: '.($matchData['opponent_name'] ?? 'neznámý'));
                         }
                         if ($parentRun) {
                             $matchLabel = ($matchData['opponent_name'] ?? 'neznámý');
@@ -630,7 +648,7 @@ class PlayerSyncService
                             \Log::info("PlayerSyncService: Syncing match detail $extMatchId for player {$user->display_name} (URL: https://cz.basketball/zapas/$extMatchId)");
                             $this->syncExternalMatchDetail($user, (string) $extMatchId, $run, $options);
                         } catch (\Exception $e) {
-                            Log::warning("PlayerSyncService: Failed to sync match detail $extMatchId for player {$user->display_name}: " . $e->getMessage());
+                            Log::warning("PlayerSyncService: Failed to sync match detail $extMatchId for player {$user->display_name}: ".$e->getMessage());
                         }
 
                         // Mikropauza mezi detaily zápasů (Throttling)
@@ -638,7 +656,7 @@ class PlayerSyncService
                     }
                 }
             } catch (\Exception $e) {
-                Log::warning("PlayerSyncService: Failed to sync history for season $season for player {$user->display_name}: " . $e->getMessage());
+                Log::warning("PlayerSyncService: Failed to sync history for season $season for player {$user->display_name}: ".$e->getMessage());
             }
         }
 
@@ -662,8 +680,8 @@ class PlayerSyncService
 
             $matchHeader = $boxscoreData['data']->metadata['header'] ?? [];
 
-            if ($parentRun && !empty($matchHeader['home_team'])) {
-                $matchLabel = ($matchHeader['home_team'] ?? '') . ' vs ' . ($matchHeader['away_team'] ?? '');
+            if ($parentRun && ! empty($matchHeader['home_team'])) {
+                $matchLabel = ($matchHeader['home_team'] ?? '').' vs '.($matchHeader['away_team'] ?? '');
                 $parentRun->updateProgress($options['current_index'] ?? 0, $options['total_count'] ?? 0, "Hráč: {$user->display_name} ($matchLabel)");
             }
             $matchDate = $this->parseMatchDate($matchHeader['date'] ?? null);
@@ -679,13 +697,13 @@ class PlayerSyncService
 
                 // Pokusíme se zjistit soupeře z hlavičky.
                 // Pokud nemáme tabulku, musíme se spolehnout na to, co už máme v DB nebo co je v hlavičce.
-                $existingMatch = \App\Models\ExternalPlayerMatch::where('user_id', $user->id)
+                $existingMatch = ExternalPlayerMatch::where('user_id', $user->id)
                     ->where('external_match_id', (string) $extMatchId)
                     ->first();
                 $opponentName = $existingMatch?->opponent_name;
 
                 // Pokud v DB soupeře nemáme, zkusíme ho detekovat z hlavičky (pokud známe tým hráče)
-                if (!$opponentName && !empty($matchHeader['home_team']) && !empty($matchHeader['away_team'])) {
+                if (! $opponentName && ! empty($matchHeader['home_team']) && ! empty($matchHeader['away_team'])) {
                     // Tady je to ošemetné, nevíme jistě za koho hraje, ale můžeme zkusit match_header
                     // Pro teď necháme to co je v DB nebo co se už uložilo ze seznamu.
                 }
@@ -715,7 +733,9 @@ class PlayerSyncService
             foreach ($boxscoreData['tables'] ?? [] as $table) {
                 foreach ($table->rows as $row) {
                     $extPlayerId = $row->metadata['external_player_id'] ?? $row->playerId;
-                    if (!$extPlayerId) continue;
+                    if (! $extPlayerId) {
+                        continue;
+                    }
 
                     // Zkusíme najít našeho hráče (podle externího ID)
                     $mapping = ExternalEntityMapping::where([
@@ -752,25 +772,28 @@ class PlayerSyncService
 
             // Pokud jsme nenašli našeho hráče v žádné tabulce, ale tabulky existují,
             // musíme i tak označit náš ExternalPlayerMatch jako synchronizovaný (hráč prostě nenastoupil)
-            $ourMatch = \App\Models\ExternalPlayerMatch::where('user_id', $user->id)
+            $ourMatch = ExternalPlayerMatch::where('user_id', $user->id)
                 ->where('external_match_id', (string) $extMatchId)
                 ->first();
 
-            if ($ourMatch && $ourMatch->boxscore_synced_at === null && !empty($boxscoreData['tables'] ?? [])) {
+            if ($ourMatch && $ourMatch->boxscore_synced_at === null && ! empty($boxscoreData['tables'] ?? [])) {
                 $ourMatch->update(['boxscore_synced_at' => now()]);
             }
         } catch (\Exception $e) {
-            Log::warning("PlayerSyncService: Failed to sync match detail $extMatchId: " . $e->getMessage());
+            Log::warning("PlayerSyncService: Failed to sync match detail $extMatchId: ".$e->getMessage());
         }
     }
 
     protected function parseMatchDate(?string $dateStr): ?string
     {
-        if (!$dateStr) return null;
+        if (! $dateStr) {
+            return null;
+        }
         // "26. 11. 2025" -> "2025-11-26"
         if (preg_match('/(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})/', $dateStr, $m)) {
             return sprintf('%04d-%02d-%02d', $m[3], $m[2], $m[1]);
         }
+
         return null;
     }
 
@@ -779,12 +802,15 @@ class PlayerSyncService
         $teamA = $header['home_team'] ?? null;
         $teamB = $header['away_team'] ?? null;
 
-        if (!$teamA || !$teamB) return null;
+        if (! $teamA || ! $teamB) {
+            return null;
+        }
 
         // Pokud je název tabulky (týmu) Team A, pak soupeř je Team B a naopak
         if (mb_stripos($tableName, $teamA) !== false) {
             return $teamB;
         }
+
         return $teamA;
     }
 
@@ -796,13 +822,17 @@ class PlayerSyncService
      */
     protected function ensureVenue(?string $name): ?Venue
     {
-        if (!$name || strlen(trim($name)) < 2) return null;
+        if (! $name || strlen(trim($name)) < 2) {
+            return null;
+        }
 
         $name = trim($name);
 
         // Zkusíme najít podle přesného názvu
         $venue = Venue::where('name', $name)->first();
-        if ($venue) return $venue;
+        if ($venue) {
+            return $venue;
+        }
 
         // Načteme haly do cache jednou za běh synchronizace, aby se šetřila paměť i DB
         if ($this->venuesCache === null) {
@@ -822,8 +852,8 @@ class PlayerSyncService
             'name' => $name,
             'metadata' => [
                 'original_names' => [$name],
-                'source' => 'czbasketball'
-            ]
+                'source' => 'czbasketball',
+            ],
         ]);
 
         // Přidáme do cache pro další použití
@@ -837,12 +867,16 @@ class PlayerSyncService
      */
     public function ensureBasketballMatch(?ExternalPlayerMatch $extMatch, array $header): ?BasketballMatch
     {
-        if (!$extMatch) return null;
+        if (! $extMatch) {
+            return null;
+        }
 
         // 1. Identifikace našeho týmu a soupeře
         $homeTeamName = $header['home_team'] ?? null;
         $awayTeamName = $header['away_team'] ?? null;
-        if (!$homeTeamName || !$awayTeamName) return null;
+        if (! $homeTeamName || ! $awayTeamName) {
+            return null;
+        }
 
         $ourTeam = null;
         $opponentName = null;
@@ -865,7 +899,9 @@ class PlayerSyncService
             }
         }
 
-        if (!$ourTeam) return null;
+        if (! $ourTeam) {
+            return null;
+        }
 
         // 2. Najdeme nebo vytvoříme oponenta
         $opponent = Opponent::firstOrCreate(['name' => $opponentName]);
@@ -874,10 +910,10 @@ class PlayerSyncService
         $matchDate = $extMatch->scheduled_at ?: ($extMatch->match_date ? $extMatch->match_date->startOfDay() : now());
         $season = Season::forDate($matchDate);
 
-        if (!$season) {
-            $year = (int)$matchDate->format('Y');
-            $month = (int)$matchDate->format('m');
-            $seasonName = ($month >= 8) ? "$year/" . ($year + 1) : ($year - 1) . "/$year";
+        if (! $season) {
+            $year = (int) $matchDate->format('Y');
+            $month = (int) $matchDate->format('m');
+            $seasonName = ($month >= 8) ? "$year/".($year + 1) : ($year - 1)."/$year";
             $season = Season::create(['name' => $seasonName]);
         }
 
@@ -902,15 +938,15 @@ class PlayerSyncService
                 });
         }
 
-        if (!$match) {
+        if (! $match) {
             $match = BasketballMatch::where('team_id', $ourTeam->id)
                 ->where('season_id', $season->id)
                 ->where('scheduled_at', $extMatch->scheduled_at)
                 ->first();
         }
 
-        if (!$match) {
-            $match = new BasketballMatch();
+        if (! $match) {
+            $match = new BasketballMatch;
             $match->team_id = $ourTeam->id;
             $match->opponent_id = $opponent->id;
             $match->season_id = $season->id;
@@ -927,21 +963,21 @@ class PlayerSyncService
         // Pokud máme halu a tým ji nemá, nastavíme ji jako primární pro domácí zápasy
         if ($venue) {
             if ($isHome) {
-                if (!$ourTeam->primary_venue_id) {
+                if (! $ourTeam->primary_venue_id) {
                     $ourTeam->primary_venue_id = $venue->id;
                     $ourTeam->save();
                 }
             } else {
-                if ($opponent && !$opponent->primary_venue_id) {
+                if ($opponent && ! $opponent->primary_venue_id) {
                     $opponent->primary_venue_id = $venue->id;
                     $opponent->save();
                 }
             }
         }
 
-        if (!empty($header['score']) && preg_match('/(\d+)\s*:\s*(\d+)/', $header['score'], $m)) {
-            $match->score_home = (int)$m[1];
-            $match->score_away = (int)$m[2];
+        if (! empty($header['score']) && preg_match('/(\d+)\s*:\s*(\d+)/', $header['score'], $m)) {
+            $match->score_home = (int) $m[1];
+            $match->score_away = (int) $m[2];
             $match->status = 'completed';
         }
 

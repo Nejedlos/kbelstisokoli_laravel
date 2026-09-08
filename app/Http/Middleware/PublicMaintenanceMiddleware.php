@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Services\BrandingService;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class PublicMaintenanceMiddleware
@@ -26,7 +27,7 @@ class PublicMaintenanceMiddleware
             $request->routeIs('public.*') &&
             ! $request->routeIs('public.home')) {
 
-            \Illuminate\Support\Facades\Log::info('PublicMaintenanceMiddleware.redirect', [
+            Log::info('PublicMaintenanceMiddleware.redirect', [
                 'path' => $request->path(),
                 'route' => optional($request->route())->getName(),
             ]);

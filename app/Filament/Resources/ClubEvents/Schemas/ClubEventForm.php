@@ -25,44 +25,44 @@ class ClubEventForm
             ->components([
                 Section::make('Základní informace')
                     ->schema([
-                                Grid::make(2)
-                                    ->schema([
-                                        TextInput::make('title.cs')
-                                            ->label('Název akce (CS)')
-                                            ->required()
-                                            ->placeholder('např. Valná hromada, Brigáda, Soustředění'),
-                                        TextInput::make('title.en')
-                                            ->label('Název akce (EN)')
-                                            ->placeholder('e.g. General Assembly, Camp, Tournament'),
-                                    ]),
-                                Grid::make(2)
-                                    ->schema([
-                                        Select::make('event_type')
-                                            ->label('Typ akce')
-                                            ->options([
-                                                'social' => 'Společenská akce',
-                                                'meeting' => 'Schůzka / Porada',
-                                                'camp' => 'Soustředění / Kemp',
-                                                'volunteer' => 'Dobrovolnická akce / Brigáda',
-                                                'tournament' => 'Turnaj',
-                                                'all' => 'Klubová akce / Pro všechny',
-                                                'other' => 'Ostatní',
-                                            ])
-                                            ->default('other')
-                                            ->required(),
-                                        Select::make('teams')
-                                            ->label('Určeno pro týmy')
-                                            ->helperText('Ponechte prázdné, pokud je akce pro celý klub.')
-                                            ->relationship('teams', 'name', fn ($query) => $query->where('category', '!=', 'all'))
-                                            ->multiple()
-                                            ->searchable()
-                                            ->preload(),
-                                    ]),
-                                TextInput::make('location')
-                                    ->label('Místo konání')
-                                    ->placeholder('např. Klubovna, Hala Kbely')
-                                    ->default(null),
+                        Grid::make(2)
+                            ->schema([
+                                TextInput::make('title.cs')
+                                    ->label('Název akce (CS)')
+                                    ->required()
+                                    ->placeholder('např. Valná hromada, Brigáda, Soustředění'),
+                                TextInput::make('title.en')
+                                    ->label('Název akce (EN)')
+                                    ->placeholder('e.g. General Assembly, Camp, Tournament'),
                             ]),
+                        Grid::make(2)
+                            ->schema([
+                                Select::make('event_type')
+                                    ->label('Typ akce')
+                                    ->options([
+                                        'social' => 'Společenská akce',
+                                        'meeting' => 'Schůzka / Porada',
+                                        'camp' => 'Soustředění / Kemp',
+                                        'volunteer' => 'Dobrovolnická akce / Brigáda',
+                                        'tournament' => 'Turnaj',
+                                        'all' => 'Klubová akce / Pro všechny',
+                                        'other' => 'Ostatní',
+                                    ])
+                                    ->default('other')
+                                    ->required(),
+                                Select::make('teams')
+                                    ->label('Určeno pro týmy')
+                                    ->helperText('Ponechte prázdné, pokud je akce pro celý klub.')
+                                    ->relationship('teams', 'name', fn ($query) => $query->where('category', '!=', 'all'))
+                                    ->multiple()
+                                    ->searchable()
+                                    ->preload(),
+                            ]),
+                        TextInput::make('location')
+                            ->label('Místo konání')
+                            ->placeholder('např. Klubovna, Hala Kbely')
+                            ->default(null),
+                    ]),
 
                 Section::make('Čas a dostupnost')
                     ->schema([

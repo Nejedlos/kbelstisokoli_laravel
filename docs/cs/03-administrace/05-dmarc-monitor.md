@@ -37,3 +37,9 @@ Sledování otevřených problémů. Incident seskupuje opakovaná selhání ze 
 - **FAIL u SPF:** IP adresa odesílatele není v SPF záznamu domény.
 - **FAIL u DKIM:** E-mail není podepsán nebo podpis neodpovídá doméně v `From` hlavičce.
 - **Alignment (Zarovnání):** I když SPF/DKIM projdou, mohou selhat na zarovnání, pokud odesílatel používá jinou doménu pro podpis/obálku než pro hlavičku `From`.
+
+### Dočasná chyba přihlášení k IMAP
+
+Odpověď `[UNAVAILABLE] Temporary authentication failure` znamená, že poštovní server v daném okamžiku nedokázal ověřit přihlášení. Samotná tato odpověď nepotvrzuje chybné heslo. Import uchová původní chybu v `DmarcMailbox.last_error` a v logu běhu s `errors_count = 1`; další naplánovaný import připojení zkusí znovu.
+
+Služba vždy uzavře otevřené IMAP spojení a v bloku `finally` vyprázdní zásobníky pomocí `imap_errors()` a `imap_alerts()`, i při předčasném návratu nebo výjimce. Samotné `imap_last_error()` zásobník nevyprázdní: bez úklidu může PHP při ukončení požadavku znovu vyvolat již zaznamenanou chybu jako `PHP Request Shutdown` notice. Globální zpracování aplikačních výjimek se kvůli tomu nemění.

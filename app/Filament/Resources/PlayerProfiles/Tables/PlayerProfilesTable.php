@@ -24,7 +24,7 @@ class PlayerProfilesTable
                     ->formatStateUsing(fn ($state, $record) => new HtmlString(
                         ($record->user?->externalMappings->isNotEmpty()
                             ? '<i class="fa-light fa-cloud-arrow-down fa-fw text-info mr-1" title="Synchronizováno z externího zdroje"></i> '
-                            : '') . e($state)
+                            : '').e($state)
                     ))
                     ->searchable()
                     ->sortable(),

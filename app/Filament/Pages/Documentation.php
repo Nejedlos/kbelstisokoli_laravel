@@ -6,8 +6,8 @@ use App\Services\DocumentationService;
 use App\Support\FilamentIcon;
 use App\Support\Icons\AppIcon;
 use Filament\Pages\Page;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Collection;
-use Illuminate\Support\HtmlString;
 use Livewire\Attributes\Url;
 
 class Documentation extends Page
@@ -45,6 +45,7 @@ class Documentation extends Page
     {
         return __('admin.navigation.pages.documentation');
     }
+
     public function getTree(): Collection
     {
         return app(DocumentationService::class)->getTree();
@@ -60,7 +61,7 @@ class Documentation extends Page
         return app(DocumentationService::class)->search($this->searchQuery);
     }
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
         return FilamentIcon::render(AppIcon::DOCUMENTATION);
     }

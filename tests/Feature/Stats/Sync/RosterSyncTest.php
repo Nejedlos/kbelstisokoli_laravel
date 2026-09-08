@@ -9,6 +9,7 @@ use App\Models\Season;
 use App\Models\Team;
 use App\Models\User;
 use App\Services\Stats\Contracts\StatFetcherInterface;
+use App\Services\Stats\Extractors\CzBasketball\TeamRosterExtractor;
 use App\Services\Stats\Sync\RosterSyncService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
@@ -89,7 +90,7 @@ class RosterSyncTest extends TestCase
         ]);
 
         $html = file_get_contents(base_path('tests/Fixtures/Stats/CzBasketball/team_page.html'));
-        $contentHash = hash('sha256', (new \App\Services\Stats\Extractors\CzBasketball\TeamRosterExtractor)->extract($html)['fragment_html']);
+        $contentHash = hash('sha256', (new TeamRosterExtractor)->extract($html)['fragment_html']);
 
         ExternalImportRun::create([
             'source_key' => 'czbasketball',

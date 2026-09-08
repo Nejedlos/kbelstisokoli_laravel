@@ -3,8 +3,10 @@
 namespace App\Livewire\Member;
 
 use App\Models\MediaAsset;
+use App\Models\User;
 use App\Support\Media\VirtualAvatarAsset;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -33,7 +35,6 @@ class AvatarModal extends Component
     public $uploadAsSystem = false;
 
     public $userId;
-
 
     public function mount($userId = null)
     {
@@ -69,7 +70,7 @@ class AvatarModal extends Component
 
         // 3. Logování, pokud je galerie stále prázdná
         if ($assets->isEmpty()) {
-            \Illuminate\Support\Facades\Log::warning('AvatarModal: Galerie je prázdná i po pokusu o načtení z disku i DB.');
+            Log::warning('AvatarModal: Galerie je prázdná i po pokusu o načtení z disku i DB.');
         }
 
         return $assets;
@@ -219,7 +220,7 @@ class AvatarModal extends Component
 
     public function deleteAvatar()
     {
-        $user = \App\Models\User::find($this->userId) ?: auth()->user();
+        $user = User::find($this->userId) ?: auth()->user();
         if (! $user || ($user->id !== auth()->id() && ! auth()->user()?->canAccessAdmin())) {
             abort(403);
         }
@@ -272,7 +273,7 @@ class AvatarModal extends Component
             return;
         }
 
-        $user = \App\Models\User::find($this->userId) ?: auth()->user();
+        $user = User::find($this->userId) ?: auth()->user();
         if (! $user || ($user->id !== auth()->id() && ! auth()->user()?->canAccessAdmin())) {
             abort(403);
         }

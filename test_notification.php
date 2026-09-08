@@ -1,14 +1,16 @@
 <?php
+
 require 'vendor/autoload.php';
 $app = require_once 'bootstrap/app.php';
-$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+$kernel = $app->make(Kernel::class);
 $kernel->bootstrap();
 
 use App\Models\Dmarc\DmarcIncident;
 use App\Notifications\Dmarc\CriticalDmarcIncidentNotification;
-use Illuminate\Support\Facades\Notification;
+use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 
 $email = 'nejedlymi@gmail.com';
 
@@ -24,7 +26,7 @@ Config::set('mail.from.name', env('PROD_MAIL_FROM_NAME', env('MAIL_FROM_NAME')))
 Mail::purge();
 
 $incident = DmarcIncident::latest()->first();
-if (!$incident) {
+if (! $incident) {
     echo "No incident found in DB to test with.\n";
     exit;
 }
@@ -34,6 +36,6 @@ echo "Sending test notification for incident #{$incident->id} to {$email}...\n";
 try {
     Notification::route('mail', $email)->notify(new CriticalDmarcIncidentNotification($incident));
     echo "Notification sent successfully (according to Laravel).\n";
-} catch (\Exception $e) {
-    echo "Error: " . $e->getMessage() . "\n";
+} catch (Exception $e) {
+    echo 'Error: '.$e->getMessage()."\n";
 }

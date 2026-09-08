@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use Database\Seeders\AttendanceMigrationSeeder;
+use Database\Seeders\EventMigrationSeeder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 
@@ -40,8 +42,8 @@ class LegacyAttendanceSyncCommand extends Command
         config(['app.seed_fresh' => $fresh]);
 
         $seeders = [
-            \Database\Seeders\EventMigrationSeeder::class,
-            \Database\Seeders\AttendanceMigrationSeeder::class,
+            EventMigrationSeeder::class,
+            AttendanceMigrationSeeder::class,
         ];
 
         foreach ($seeders as $seeder) {

@@ -3,8 +3,11 @@
 namespace App\Livewire\Member;
 
 use App\Models\Setting;
+use App\Services\Finance\FinanceService;
 use chillerlan\QRCode\QRCode;
 use chillerlan\QRCode\QROptions;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -47,7 +50,7 @@ class PaymentWidget extends Component
         $this->bankName = $dbSettings['bank_name'] ?? 'Partners banka a.s.';
 
         // Nastavíme dlužnou částku jako výchozí hodnotu
-        $summary = app(\App\Services\Finance\FinanceService::class)->getMemberSummary($user);
+        $summary = app(FinanceService::class)->getMemberSummary($user);
         if ($summary['total_to_pay'] > 0) {
             $this->amount = (string) $summary['total_to_pay'];
         }
@@ -83,7 +86,7 @@ class PaymentWidget extends Component
 
             $this->qrCodeDataUri = (new QRCode($options))->render($spayd);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('QR Code generation failed: '.$e->getMessage());
+            Log::error('QR Code generation failed: '.$e->getMessage());
             $this->qrCodeDataUri = '';
         }
     }
@@ -131,7 +134,7 @@ class PaymentWidget extends Component
         $msg = mb_substr($msg, 0, 60);
 
         // Odstranění diakritiky (pro lepší kompatibilitu s bankovními systémy)
-        $msg = \Illuminate\Support\Str::ascii($msg);
+        $msg = Str::ascii($msg);
 
         // Ponechat jen alfanumerické znaky, mezery, tečky a čárky
         $msg = preg_replace('/[^A-Za-z0-9 ,.]/', '', $msg);

@@ -7,14 +7,14 @@ class MatchResultHelper
     /**
      * Zjistí výsledek zápasu z pohledu konkrétního týmu (podle jména).
      *
-     * @param array $matchData Pole s klíči team_home, team_away, score_home, score_away
-     * @param string $teamName Název týmu, pro který chceme výsledek zjistit
+     * @param  array  $matchData  Pole s klíči team_home, team_away, score_home, score_away
+     * @param  string  $teamName  Název týmu, pro který chceme výsledek zjistit
      * @return array [isWin, isLoss, isDraw, resultLetter, textColor, bgColor, ourScore, opponentScore]
      */
     public function getResultForTeam(array $matchData, string $teamName): array
     {
-        $scoreHome = (int)($matchData['score_home'] ?? 0);
-        $scoreAway = (int)($matchData['score_away'] ?? 0);
+        $scoreHome = (int) ($matchData['score_home'] ?? 0);
+        $scoreAway = (int) ($matchData['score_away'] ?? 0);
         $teamHome = $matchData['team_home'] ?? '';
         $teamAway = $matchData['team_away'] ?? '';
 
@@ -66,7 +66,7 @@ class MatchResultHelper
 
         $isWin = $isHome ? $scoreHome > $scoreAway : $scoreAway > $scoreHome;
         $isDraw = $scoreHome === $scoreAway;
-        $isLoss = !$isWin && !$isDraw;
+        $isLoss = ! $isWin && ! $isDraw;
 
         return [
             'isWin' => $isWin,
@@ -85,7 +85,7 @@ class MatchResultHelper
      */
     public static function for(array $matchData, string $teamName): array
     {
-        return (new self())->getResultForTeam($matchData, $teamName);
+        return (new self)->getResultForTeam($matchData, $teamName);
     }
 
     /**
@@ -108,6 +108,7 @@ class MatchResultHelper
         if (str_contains($scoreStr, ':')) {
             $parts = explode(':', $scoreStr);
             $parts = array_map('trim', $parts);
+
             return implode(' : ', $parts);
         }
 

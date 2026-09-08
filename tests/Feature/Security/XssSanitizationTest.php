@@ -2,13 +2,13 @@
 
 namespace Tests\Feature\Security;
 
-use App\Models\User;
 use App\Models\FeedbackReport;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithoutMiddleware;
 
 class XssSanitizationTest extends TestCase
 {
@@ -26,15 +26,15 @@ class XssSanitizationTest extends TestCase
 
         $response = $this->actingAs($user)->postJson('/feedback', [
             'type' => 'bug',
-            'title' => 'XSS Test ' . Str::random(10),
-            'description' => 'Testing XSS sanitization ' . Str::random(10),
+            'title' => 'XSS Test '.Str::random(10),
+            'description' => 'Testing XSS sanitization '.Str::random(10),
             'context' => [
                 'url' => 'http://localhost/test',
-                'area' => 'public'
+                'area' => 'public',
             ],
             'capture' => [
-                'domLight' => $xssPayload
-            ]
+                'domLight' => $xssPayload,
+            ],
         ]);
 
         $response->assertStatus(200);
@@ -50,7 +50,7 @@ class XssSanitizationTest extends TestCase
 
         $view = view('feedback.snapshot', [
             'dom' => $xssPayload,
-            'context' => []
+            'context' => [],
         ])->render();
 
         $this->assertStringNotContainsString('<script>', $view);

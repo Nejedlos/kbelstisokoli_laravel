@@ -7,8 +7,9 @@ use App\Models\ClubEvent;
 use App\Models\Season;
 use App\Models\Training;
 use App\Models\UserSeasonConfig;
-use App\Support\FilamentIcon;
+use App\Support\IconHelper;
 use Filament\Pages\Page;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Collection;
 
 class RealAttendance extends Page
@@ -24,7 +25,7 @@ class RealAttendance extends Page
         return __('admin.navigation.pages.real_attendance');
     }
 
-    public function getTitle(): string|\Illuminate\Contracts\Support\Htmlable
+    public function getTitle(): string|Htmlable
     {
         return __('admin.real_attendance.title');
     }
@@ -35,6 +36,7 @@ class RealAttendance extends Page
     }
 
     public $selectedEventId = null;
+
     public $selectedEventType = null;
 
     public static function canAccess(): bool
@@ -53,9 +55,9 @@ class RealAttendance extends Page
         return __('admin.navigation.groups.sports_agenda');
     }
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
-        return \App\Support\IconHelper::render(\App\Support\IconHelper::ATTENDANCE);
+        return IconHelper::render(IconHelper::ATTENDANCE);
     }
 
     public function mount()
@@ -101,17 +103,18 @@ class RealAttendance extends Page
             ->concat($trainings)
             ->concat($matches)
             ->concat($clubEvents)
-            ->flatMap(function($event) {
+            ->flatMap(function ($event) {
                 $teams = collect();
                 if (method_exists($event, 'teams')) {
                     $teams = $teams->concat($event->teams);
                 }
                 if ($event instanceof BasketballMatch && $event->team) {
-                    if (!$teams->contains('id', $event->team_id)) {
+                    if (! $teams->contains('id', $event->team_id)) {
                         $teams->push($event->team);
                     }
                 }
-                return $teams->flatMap(fn($team) => $team->activePlayers->pluck('user_id'));
+
+                return $teams->flatMap(fn ($team) => $team->activePlayers->pluck('user_id'));
             })
             ->unique();
 
@@ -122,11 +125,11 @@ class RealAttendance extends Page
                 ->get()
             : collect([]);
 
-        $trainingsMapped = $trainings->map(fn($item) => $this->mapEvent($item, Training::class, __('admin.real_attendance.event_types.training') . ($item->location ? ' - ' . $item->location : ''), $item->starts_at, \App\Support\IconHelper::TRAININGS, $activeSeason, $configs));
+        $trainingsMapped = $trainings->map(fn ($item) => $this->mapEvent($item, Training::class, __('admin.real_attendance.event_types.training').($item->location ? ' - '.$item->location : ''), $item->starts_at, IconHelper::TRAININGS, $activeSeason, $configs));
 
-        $matchesMapped = $matches->map(fn($item) => $this->mapEvent($item, BasketballMatch::class, __('admin.real_attendance.event_types.match') . ': ' . $item->getOfficialTeamNameAttribute() . ' vs ' . $item->getOfficialOpponentNameAttribute(), $item->scheduled_at, \App\Support\IconHelper::MATCHES, $activeSeason, $configs));
+        $matchesMapped = $matches->map(fn ($item) => $this->mapEvent($item, BasketballMatch::class, __('admin.real_attendance.event_types.match').': '.$item->getOfficialTeamNameAttribute().' vs '.$item->getOfficialOpponentNameAttribute(), $item->scheduled_at, IconHelper::MATCHES, $activeSeason, $configs));
 
-        $clubEventsMapped = $clubEvents->map(fn($item) => $this->mapEvent($item, ClubEvent::class, $item->getTranslation('title', app()->getLocale()), $item->starts_at, \App\Support\IconHelper::EVENTS, $activeSeason, $configs));
+        $clubEventsMapped = $clubEvents->map(fn ($item) => $this->mapEvent($item, ClubEvent::class, $item->getTranslation('title', app()->getLocale()), $item->starts_at, IconHelper::EVENTS, $activeSeason, $configs));
 
         return collect([])
             ->concat($trainingsMapped)
@@ -144,7 +147,7 @@ class RealAttendance extends Page
             'type' => $type,
             'title' => $title,
             'starts_at' => $startsAt,
-            'icon' => \App\Support\IconHelper::render($icon),
+            'icon' => IconHelper::render($icon),
             'teams' => $item->teams->pluck('name')->toArray(),
             'stats' => $stats,
         ];
@@ -152,7 +155,7 @@ class RealAttendance extends Page
 
     protected function calculateStats($event, $activeSeason, $configs = null)
     {
-        if (!$activeSeason) {
+        if (! $activeSeason) {
             return [
                 'expected' => 0,
                 'attended' => 0,
@@ -166,12 +169,12 @@ class RealAttendance extends Page
             $teams = $teams->concat($event->teams);
         }
         if ($event instanceof BasketballMatch && $event->team) {
-            if (!$teams->contains('id', $event->team_id)) {
+            if (! $teams->contains('id', $event->team_id)) {
                 $teams->push($event->team);
             }
         }
 
-        $userIds = $teams->flatMap(function($team) {
+        $userIds = $teams->flatMap(function ($team) {
             return $team->activePlayers->pluck('user_id');
         })->unique();
 
@@ -202,7 +205,7 @@ class RealAttendance extends Page
 
     public function getSelectedEventProperty()
     {
-        if (!$this->selectedEventId || !$this->selectedEventType) {
+        if (! $this->selectedEventId || ! $this->selectedEventType) {
             return null;
         }
 

@@ -2,18 +2,25 @@
 
 namespace App\Livewire\Member;
 
+use App\Events\RsvpChanged;
 use App\Models\Attendance;
 use App\Models\BasketballMatch;
 use App\Models\ClubEvent;
+use App\Models\Season;
 use App\Models\Training;
+use App\Models\UserSeasonConfig;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 class EventCard extends Component
 {
     public $type;
+
     public $eventId;
+
     public $showActions = true;
+
     public $compact = false;
 
     // Pro Alpine.js integraci
@@ -44,7 +51,9 @@ class EventCard extends Component
             default => null,
         };
 
-        if (!$modelClass) return;
+        if (! $modelClass) {
+            return;
+        }
 
         $item = $modelClass::findOrFail($this->eventId);
 
@@ -56,8 +65,9 @@ class EventCard extends Component
         if ($eventDate->isBefore(now()->addMinutes(90))) {
             $this->dispatch('notify', [
                 'type' => 'error',
-                'message' => __('member.attendance.deadline_reached')
+                'message' => __('member.attendance.deadline_reached'),
             ]);
+
             return;
         }
 
@@ -73,11 +83,11 @@ class EventCard extends Component
             ]
         );
 
-        event(new \App\Events\RsvpChanged($attendance));
+        event(new RsvpChanged($attendance));
 
         // Dispatch event pro ostatní komponenty (pokud by někdo poslouchal)
         $this->dispatch('attendanceUpdated', eventId: $this->eventId, type: $this->type);
-        
+
         // Vizuální feedback (volitelně můžeme použít flash, ale u AJAXu je lepší tichá aktualizace nebo toast)
         // $this->dispatch('notify', ['type' => 'success', 'message' => __('member.attendance.save_success')]);
     }
@@ -85,7 +95,7 @@ class EventCard extends Component
     public function render()
     {
         $user = auth()->user();
-        
+
         $modelClass = match ($this->type) {
             'training' => Training::class,
             'match' => BasketballMatch::class,
@@ -110,10 +120,10 @@ class EventCard extends Component
         $data = $query->findOrFail($this->eventId);
 
         // Výpočet očekávaných hráčů (převzato z AttendanceController)
-        $currentSeasonId = \App\Models\Season::where('is_active', true)->first()?->id;
+        $currentSeasonId = Season::where('is_active', true)->first()?->id;
         $trackedUserIds = $currentSeasonId
-            ? \Illuminate\Support\Facades\Cache::remember("tracked_user_ids_{$currentSeasonId}", 3600, function () use ($currentSeasonId) {
-                return \App\Models\UserSeasonConfig::where('season_id', $currentSeasonId)
+            ? Cache::remember("tracked_user_ids_{$currentSeasonId}", 3600, function () use ($currentSeasonId) {
+                return UserSeasonConfig::where('season_id', $currentSeasonId)
                     ->where('track_attendance', true)
                     ->pluck('user_id')
                     ->toArray();
@@ -127,11 +137,11 @@ class EventCard extends Component
             $expectedIds = $expectedIds->concat(
                 $team->activePlayers
                     ->pluck('user_id')
-                    ->filter(fn($uid) => in_array($uid, $trackedUserIds))
+                    ->filter(fn ($uid) => in_array($uid, $trackedUserIds))
             );
         }
         $data->expected_players_count = $expectedIds->unique()->count();
-        
+
         // Znovu sestavíme event pole pro šablonu (aby byla kompatibilní s původní)
         $event = [
             'type' => $this->type,

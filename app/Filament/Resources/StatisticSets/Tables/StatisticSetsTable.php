@@ -9,6 +9,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class StatisticSetsTable
 {
@@ -18,8 +19,9 @@ class StatisticSetsTable
             ->columns([
                 TextColumn::make('name')
                     ->label('Název')
-                    ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
+                    ->searchable(query: function ($query, string $search): Builder {
                         $locale = app()->getLocale();
+
                         return $query->where("name->{$locale}", 'LIKE', "%{$search}%");
                     })
                     ->sortable()

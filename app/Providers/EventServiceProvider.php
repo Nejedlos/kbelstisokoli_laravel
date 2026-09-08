@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Listeners\InternalAnalytics\AuthEventListener;
 use App\Listeners\SecurityAuthListener;
 use App\Listeners\UpdateLastLoginAt;
 use Illuminate\Auth\Events\Failed;
@@ -9,7 +10,10 @@ use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use Illuminate\Mail\Events\MessageSending;
+use Illuminate\Mail\Events\MessageSent;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
 use Laravel\Fortify\Events\TwoFactorAuthenticationDisabled;
 use Laravel\Fortify\Events\TwoFactorAuthenticationEnabled;
 
@@ -48,7 +52,7 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $subscribe = [
-        \App\Listeners\InternalAnalytics\AuthEventListener::class,
+        AuthEventListener::class,
     ];
 
     /**
@@ -64,14 +68,14 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        \Illuminate\Support\Facades\Event::listen(
-            \Illuminate\Mail\Events\MessageSending::class,
+        Event::listen(
+            MessageSending::class,
             function ($event) {
-                $to = array_map(fn($address) => $address->toString(), $event->message->getTo());
-                $cc = array_map(fn($address) => $address->toString(), $event->message->getCc());
-                $bcc = array_map(fn($address) => $address->toString(), $event->message->getBcc());
+                $to = array_map(fn ($address) => $address->toString(), $event->message->getTo());
+                $cc = array_map(fn ($address) => $address->toString(), $event->message->getCc());
+                $bcc = array_map(fn ($address) => $address->toString(), $event->message->getBcc());
 
-                \Illuminate\Support\Facades\Log::warning('DEBUG_MAIL: Sending email', [
+                Log::warning('DEBUG_MAIL: Sending email', [
                     'mailer' => config('mail.default'),
                     'host' => config('mail.mailers.'.config('mail.default').'.host') ?? 'n/a',
                     'to' => $to,
@@ -82,12 +86,12 @@ class EventServiceProvider extends ServiceProvider
             }
         );
 
-        \Illuminate\Support\Facades\Event::listen(
-            \Illuminate\Mail\Events\MessageSent::class,
+        Event::listen(
+            MessageSent::class,
             function ($event) {
-                $to = array_map(fn($address) => $address->toString(), $event->message->getTo());
+                $to = array_map(fn ($address) => $address->toString(), $event->message->getTo());
 
-                \Illuminate\Support\Facades\Log::warning('DEBUG_MAIL: Email sent successfully', [
+                Log::warning('DEBUG_MAIL: Email sent successfully', [
                     'to' => $to,
                     'subject' => $event->message->getSubject(),
                     'sent_at' => now()->toDateTimeString(),

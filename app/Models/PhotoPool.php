@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\HasSeo;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\Translatable\HasTranslations;
 
@@ -44,7 +45,7 @@ class PhotoPool extends Model
     /**
      * Tým, ke kterému tato galerie patří (pro zpětnou kompatibilitu).
      */
-    public function team(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }

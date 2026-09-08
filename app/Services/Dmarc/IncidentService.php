@@ -53,7 +53,7 @@ class IncidentService
         // Notifikovat pouze pokud je to nový incident nebo nebyl notifikován v posledních hodinách dle configu
         $cooldown = config('dmarc.notification_cooldown_hours', 12);
 
-        if (!$incident->notified_at || $incident->notified_at < now()->subHours($cooldown)) {
+        if (! $incident->notified_at || $incident->notified_at < now()->subHours($cooldown)) {
             $email = config('dmarc.alert_to');
             if ($email) {
                 Notification::route('mail', $email)->notify(new CriticalDmarcIncidentNotification($incident));

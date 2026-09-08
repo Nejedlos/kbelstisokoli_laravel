@@ -2,17 +2,17 @@
 
 namespace App\Filament\Resources\FeedbackReports\Schemas;
 
+use App\Support\FilamentIcon;
+use App\Support\Icons\AppIcon;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ViewField;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Grid;
-use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\ViewField;
 use Filament\Schemas\Schema;
-use App\Support\Icons\AppIcon;
-use App\Support\FilamentIcon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 
@@ -53,7 +53,7 @@ class FeedbackReportForm
                                                     ->label(__('admin.resources.feedback_report.fields.steps'))
                                                     ->rows(3)
                                                     ->disabled()
-                                                    ->visible(fn ($record) => !empty($record?->steps)),
+                                                    ->visible(fn ($record) => ! empty($record?->steps)),
                                             ])->columnSpan(1),
 
                                         Section::make(__('admin.resources.feedback_report.fields.status_and_notes'))
@@ -107,7 +107,7 @@ class FeedbackReportForm
                                 Placeholder::make('screenshot')
                                     ->label('')
                                     ->content(fn ($record) => ($record && $record->screenshot_path)
-                                        ? new HtmlString("<img src='" . route('admin.feedback.screenshot', $record) . "' class='max-w-full rounded-xl shadow-lg' />")
+                                        ? new HtmlString("<img src='".route('admin.feedback.screenshot', $record)."' class='max-w-full rounded-xl shadow-lg' />")
                                         : __('admin.resources.feedback_report.fields.no_screenshot')),
                             ]),
                         Tabs\Tab::make(__('admin.resources.feedback_report.fields.dom_snapshot'))
@@ -123,9 +123,9 @@ class FeedbackReportForm
                                                         <i class='fa-light fa-copy'></i> Kopírovat DOM
                                                     </button>
                                                 </div>
-                                                <pre x-ref='code' class='p-4 bg-slate-900 text-emerald-400 rounded-xl overflow-x-auto text-xs max-h-[600px]'>" . e(Storage::get($record->dom_path)) . "</pre>
+                                                <pre x-ref='code' class='p-4 bg-slate-900 text-emerald-400 rounded-xl overflow-x-auto text-xs max-h-[600px]'>".e(Storage::get($record->dom_path)).'</pre>
                                             </div>
-                                        ")
+                                        ')
                                         : __('admin.resources.feedback_report.fields.no_dom_snapshot')),
                             ]),
 
@@ -152,15 +152,15 @@ class FeedbackReportForm
                                     ->afterStateHydrated(function (ViewField $component, $record) {
                                         if ($record && $record->breadcrumbs_path && Storage::exists($record->breadcrumbs_path)) {
                                             $data = json_decode(Storage::get($record->breadcrumbs_path), true);
-                                            $logs = array_map(fn($b) => [
+                                            $logs = array_map(fn ($b) => [
                                                 'type' => $b['type'] ?? 'info',
                                                 'timestamp' => $b['timestamp'] ?? now()->toIso8601String(),
                                                 'data' => [
-                                                    (($b['type'] ?? '') === 'click' ? "Klik na <" . ($b['tag'] ?? '?') . ">: " . ($b['text'] ?? '?') :
-                                                     (($b['type'] ?? '') === 'nav' ? "Navigace na: " . ($b['to'] ?? '?') :
-                                                      (($b['type'] ?? '') === 'scroll' ? "Scroll depth: " . ($b['depth'] ?? '?') :
-                                                       (($b['type'] ?? '') === 'submit' ? "Odeslání formuláře: " . ($b['form'] ?? '?') : json_encode($b)))))
-                                                ]
+                                                    (($b['type'] ?? '') === 'click' ? 'Klik na <'.($b['tag'] ?? '?').'>: '.($b['text'] ?? '?') :
+                                                     (($b['type'] ?? '') === 'nav' ? 'Navigace na: '.($b['to'] ?? '?') :
+                                                      (($b['type'] ?? '') === 'scroll' ? 'Scroll depth: '.($b['depth'] ?? '?') :
+                                                       (($b['type'] ?? '') === 'submit' ? 'Odeslání formuláře: '.($b['form'] ?? '?') : json_encode($b))))),
+                                                ],
                                             ], $data);
                                             $component->state($logs);
                                         }
@@ -180,13 +180,13 @@ class FeedbackReportForm
                                                     ->afterStateHydrated(function (ViewField $component, $record) {
                                                         if ($record && $record->network_path && Storage::exists($record->network_path)) {
                                                             $data = json_decode(Storage::get($record->network_path), true);
-                                                            $logs = array_map(fn($f) => [
+                                                            $logs = array_map(fn ($f) => [
                                                                 'type' => 'error',
                                                                 'timestamp' => $f['timestamp'] ?? now()->toIso8601String(),
                                                                 'data' => [
-                                                                    ($f['method'] ?? 'GET') . " " . ($f['url'] ?? '?') . " - Status: " . ($f['status'] ?? '?') . " (" . ($f['duration_ms'] ?? '?') . "ms)",
-                                                                    $f['error'] ?? null
-                                                                ]
+                                                                    ($f['method'] ?? 'GET').' '.($f['url'] ?? '?').' - Status: '.($f['status'] ?? '?').' ('.($f['duration_ms'] ?? '?').'ms)',
+                                                                    $f['error'] ?? null,
+                                                                ],
                                                             ], $data);
                                                             $component->state($logs);
                                                         }
@@ -200,10 +200,10 @@ class FeedbackReportForm
                                                     ->afterStateHydrated(function (ViewField $component, $record) {
                                                         if ($record && $record->clicks_path && Storage::exists($record->clicks_path)) {
                                                             $data = json_decode(Storage::get($record->clicks_path), true);
-                                                            $logs = array_map(fn($c) => [
+                                                            $logs = array_map(fn ($c) => [
                                                                 'type' => 'info',
                                                                 'timestamp' => $c['timestamp'] ?? now()->toIso8601String(),
-                                                                'data' => ["Klik na: " . ($c['element'] ?? '?') . " (Text: " . ($c['text'] ?? '?') . ") at [" . ($c['x'] ?? '?') . ", " . ($c['y'] ?? '?') . "]"]
+                                                                'data' => ['Klik na: '.($c['element'] ?? '?').' (Text: '.($c['text'] ?? '?').') at ['.($c['x'] ?? '?').', '.($c['y'] ?? '?').']'],
                                                             ], $data);
                                                             $component->state($logs);
                                                         }
@@ -218,9 +218,12 @@ class FeedbackReportForm
                                 Placeholder::make('performance_data')
                                     ->label('')
                                     ->content(function ($record) {
-                                        if (!$record?->performance_path || !Storage::exists($record->performance_path)) return __('admin.resources.feedback_report.fields.no_performance_data');
+                                        if (! $record?->performance_path || ! Storage::exists($record->performance_path)) {
+                                            return __('admin.resources.feedback_report.fields.no_performance_data');
+                                        }
                                         $perf = json_decode(Storage::get($record->performance_path), true);
                                         $json = json_encode($perf, JSON_PRETTY_PRINT);
+
                                         return new HtmlString("
                                             <div x-data=\"{ copy() { navigator.clipboard.writeText(\$refs.code.innerText); new FilamentNotification().title('Zkopírováno').success().send(); } }\">
                                                 <div class='flex justify-end mb-2'>
@@ -228,9 +231,9 @@ class FeedbackReportForm
                                                         <i class='fa-light fa-copy'></i> Kopírovat data
                                                     </button>
                                                 </div>
-                                                <pre x-ref='code' class='p-4 bg-slate-900 text-emerald-400 rounded-xl overflow-x-auto text-xs'>" . e($json) . "</pre>
+                                                <pre x-ref='code' class='p-4 bg-slate-900 text-emerald-400 rounded-xl overflow-x-auto text-xs'>".e($json).'</pre>
                                             </div>
-                                        ");
+                                        ');
                                     }),
                             ]),
 
@@ -246,9 +249,9 @@ class FeedbackReportForm
                                                     <i class='fa-light fa-copy'></i> Kopírovat meta
                                                 </button>
                                             </div>
-                                            <pre x-ref='code' class='p-4 bg-slate-900 text-emerald-400 rounded-xl overflow-x-auto text-xs'>" . e(json_encode($record->meta, JSON_PRETTY_PRINT)) . "</pre>
+                                            <pre x-ref='code' class='p-4 bg-slate-900 text-emerald-400 rounded-xl overflow-x-auto text-xs'>".e(json_encode($record->meta, JSON_PRETTY_PRINT)).'</pre>
                                         </div>
-                                    ") : null),
+                                    ') : null),
                             ]),
                     ])->columnSpanFull(),
             ]);

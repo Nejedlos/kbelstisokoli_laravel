@@ -2,16 +2,21 @@
 
 namespace App\Models;
 
+use App\Services\BrandingService;
 use App\Traits\Auditable;
 use App\Traits\HasMatchResult;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Carbon;
 use Spatie\Translatable\HasTranslations;
 
 class BasketballMatch extends Model
 {
-    use Auditable, HasTranslations, HasMatchResult;
+    use Auditable, HasMatchResult, HasTranslations;
 
     protected $table = 'matches';
 
@@ -66,37 +71,37 @@ class BasketballMatch extends Model
         return $this->attendances()->where('is_mismatch', true);
     }
 
-    public function team(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
     }
 
-    public function teams(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function teams(): BelongsToMany
     {
         return $this->belongsToMany(Team::class, 'basketball_match_team', 'basketball_match_id', 'team_id');
     }
 
-    public function season(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function season(): BelongsTo
     {
         return $this->belongsTo(Season::class);
     }
 
-    public function opponent(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function opponent(): BelongsTo
     {
         return $this->belongsTo(Opponent::class);
     }
 
-    public function venue(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function venue(): BelongsTo
     {
         return $this->belongsTo(Venue::class);
     }
 
-    public function prediction(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function prediction(): HasOne
     {
         return $this->hasOne(MatchPrediction::class, 'basketball_match_id');
     }
 
-    public function statisticRows(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function statisticRows(): HasMany
     {
         return $this->hasMany(StatisticRow::class, 'basketball_match_id')
             ->whereNotNull('player_id');
@@ -112,7 +117,7 @@ class BasketballMatch extends Model
      */
     public function getPostMatchVibeAttribute(): string
     {
-        if (!$this->has_score) {
+        if (! $this->has_score) {
             return __('motivational.post_match.fallback');
         }
 
@@ -177,7 +182,7 @@ class BasketballMatch extends Model
             $teamIds = [$this->team_id];
         }
 
-        if (!empty($teamIds) && $this->season_id) {
+        if (! empty($teamIds) && $this->season_id) {
             $config = ExternalTeamSeasonConfig::whereIn('team_id', $teamIds)
                 ->where('season_id', $this->season_id)
                 ->whereNotNull('team_name_in_source')
@@ -197,7 +202,7 @@ class BasketballMatch extends Model
         }
 
         // Fallback: Brandingový název nebo "Sokoli"
-        return app(\App\Services\BrandingService::class)->getSettings()['club_short_name'] ?? 'Sokoli';
+        return app(BrandingService::class)->getSettings()['club_short_name'] ?? 'Sokoli';
     }
 
     /**
@@ -216,7 +221,7 @@ class BasketballMatch extends Model
     /**
      * Vrátí čas srazu (vždy 15 minut před začátkem).
      */
-    public function getMeetingAtAttribute(): ?\Illuminate\Support\Carbon
+    public function getMeetingAtAttribute(): ?Carbon
     {
         return $this->scheduled_at?->copy()->subMinutes(15);
     }
@@ -237,7 +242,7 @@ class BasketballMatch extends Model
      */
     public function getCompetitionUrlAttribute(): ?string
     {
-        if (!$this->season_id) {
+        if (! $this->season_id) {
             return null;
         }
 
@@ -247,12 +252,14 @@ class BasketballMatch extends Model
                 ->where('season_id', $this->season_id)
                 ->value('competition_url');
 
-            if ($url) return $url;
+            if ($url) {
+                return $url;
+            }
         }
 
         // 2. Priorita: První tým z vazby teams()
         $teamIds = $this->teams->pluck('id')->toArray();
-        if (!empty($teamIds)) {
+        if (! empty($teamIds)) {
             return ExternalTeamSeasonConfig::whereIn('team_id', $teamIds)
                 ->where('season_id', $this->season_id)
                 ->whereNotNull('competition_url')

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 class DmarcDnsCheckService
 {
     protected bool $enabled;
+
     protected int $cacheHours;
 
     public function __construct()
@@ -22,11 +23,11 @@ class DmarcDnsCheckService
             ->orderBy('checked_at', 'desc')
             ->first();
 
-        if (!$this->enabled) {
+        if (! $this->enabled) {
             return $snapshot ?: new DmarcDnsSnapshot(['domain' => $domain, 'checked_at' => now()]);
         }
 
-        if (!$snapshot || $snapshot->checked_at->diffInHours(now()) >= $this->cacheHours) {
+        if (! $snapshot || $snapshot->checked_at->diffInHours(now()) >= $this->cacheHours) {
             $snapshot = $this->performDnsCheck($domain);
         }
 
@@ -78,7 +79,7 @@ class DmarcDnsCheckService
 
             $snapshot->save();
         } catch (\Exception $e) {
-            Log::error("DMARC DNS Check: Failed for {$domain}: " . $e->getMessage());
+            Log::error("DMARC DNS Check: Failed for {$domain}: ".$e->getMessage());
         }
 
         return $snapshot;
@@ -114,8 +115,8 @@ class DmarcDnsCheckService
         $warnings = [];
         $recs = [];
 
-        if (!$snapshot->dmarc_record) {
-            $warnings[] = "DMARC záznam nebyl nalezen.";
+        if (! $snapshot->dmarc_record) {
+            $warnings[] = 'DMARC záznam nebyl nalezen.';
             $recs[] = "Vytvořte TXT záznam pro _dmarc.{$snapshot->domain} s hodnotou 'v=DMARC1; p=none; rua=mailto:dmarc@{$snapshot->domain}'.";
         } else {
             if ($snapshot->dmarc_policy === 'none') {
@@ -123,14 +124,14 @@ class DmarcDnsCheckService
             }
         }
 
-        if (!$snapshot->spf_exists) {
-            $warnings[] = "SPF záznam nebyl nalezen.";
-            $recs[] = "Vytvořte SPF záznam pro hlavní doménu.";
+        if (! $snapshot->spf_exists) {
+            $warnings[] = 'SPF záznam nebyl nalezen.';
+            $recs[] = 'Vytvořte SPF záznam pro hlavní doménu.';
         }
 
         if ($snapshot->spf_multiple_records) {
-            $warnings[] = "Nalezeno více SPF záznamů. To je nevalidní konfigurace.";
-            $recs[] = "Slučte všechny SPF pravidla do jednoho záznamu.";
+            $warnings[] = 'Nalezeno více SPF záznamů. To je nevalidní konfigurace.';
+            $recs[] = 'Slučte všechny SPF pravidla do jednoho záznamu.';
         }
 
         $snapshot->warnings = $warnings;

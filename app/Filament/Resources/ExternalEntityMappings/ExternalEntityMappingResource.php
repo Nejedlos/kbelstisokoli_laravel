@@ -13,6 +13,7 @@ use App\Support\Icons\AppIcon;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 
 class ExternalEntityMappingResource extends Resource
@@ -39,14 +40,14 @@ class ExternalEntityMappingResource extends Resource
         return __('admin.resources.external_entity_mapping.label');
     }
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
         return FilamentIcon::get(AppIcon::USER_SECRET);
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.statistics_and_data') . ' > ' . __('admin.navigation.groups.external_data');
+        return __('admin.navigation.groups.statistics_and_data').' > '.__('admin.navigation.groups.external_data');
     }
 
     public static function getEloquentQuery(): Builder

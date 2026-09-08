@@ -17,6 +17,7 @@ class CompetitionStandingExtractor implements StatExtractorInterface
         // Hledáme tabulku s pořadím
         $table = $crawler->filter('table')->reduce(function (Crawler $node) {
             $text = mb_strtolower($node->text());
+
             return str_contains($text, 'pořadí') && str_contains($text, 'tým');
         })->first();
 
@@ -36,19 +37,37 @@ class CompetitionStandingExtractor implements StatExtractorInterface
         $headers = [];
         $table->filter('thead th')->each(function (Crawler $th, $i) use (&$headers) {
             $text = mb_strtolower(trim($th->text()));
-            if (str_contains($text, 'pořadí')) $headers['rank'] = $i;
-            if (str_contains($text, 'tým')) $headers['team'] = $i;
-            if (trim($text) === 'z') $headers['gp'] = $i;
-            if (trim($text) === 'v') $headers['w'] = $i;
-            if (trim($text) === 'p') $headers['l'] = $i;
-            if (str_contains($text, 'vstřeleno') || str_contains($text, 'skóre')) $headers['score_plus'] = $i;
-            if (str_contains($text, 'obdrženo')) $headers['score_minus'] = $i;
-            if (str_contains($text, 'body') || trim($text) === 'b') $headers['points'] = $i;
+            if (str_contains($text, 'pořadí')) {
+                $headers['rank'] = $i;
+            }
+            if (str_contains($text, 'tým')) {
+                $headers['team'] = $i;
+            }
+            if (trim($text) === 'z') {
+                $headers['gp'] = $i;
+            }
+            if (trim($text) === 'v') {
+                $headers['w'] = $i;
+            }
+            if (trim($text) === 'p') {
+                $headers['l'] = $i;
+            }
+            if (str_contains($text, 'vstřeleno') || str_contains($text, 'skóre')) {
+                $headers['score_plus'] = $i;
+            }
+            if (str_contains($text, 'obdrženo')) {
+                $headers['score_minus'] = $i;
+            }
+            if (str_contains($text, 'body') || trim($text) === 'b') {
+                $headers['points'] = $i;
+            }
         });
 
         $table->filter('tbody tr')->each(function (Crawler $tr) use (&$rows, $headers) {
             $cells = $tr->filter('td');
-            if ($cells->count() < 4) return;
+            if ($cells->count() < 4) {
+                return;
+            }
 
             $rank = isset($headers['rank']) ? trim($cells->eq($headers['rank'])->text()) : null;
             $teamName = isset($headers['team']) ? trim($cells->eq($headers['team'])->text()) : 'Unknown';
@@ -61,7 +80,7 @@ class CompetitionStandingExtractor implements StatExtractorInterface
 
             $score = $scorePlus;
             if ($scoreMinus) {
-                $score .= ':' . $scoreMinus;
+                $score .= ':'.$scoreMinus;
             }
 
             $points = isset($headers['points']) ? trim($cells->eq($headers['points'])->text()) : null;

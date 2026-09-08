@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class DefaultAvatarsSyncCommand extends Command
@@ -40,7 +41,7 @@ class DefaultAvatarsSyncCommand extends Command
         if (! is_dir($sourceDir)) {
             $msg = "Zdrojový adresář neexistuje: {$sourceDir}. Ujistěte se, že jste nahráli avatary do storage/app/defaults/avatars/";
             $this->error($msg);
-            \Illuminate\Support\Facades\Log::error('DefaultAvatarsSyncCommand: '.$msg);
+            Log::error('DefaultAvatarsSyncCommand: '.$msg);
 
             return Command::FAILURE;
         }
@@ -163,7 +164,7 @@ class DefaultAvatarsSyncCommand extends Command
         $bar->finish();
         $summary = "Synchronizace dokončena. Importováno: {$countImported}, Přeskočeno: {$countSkipped}, Chyby: {$countErrors}.";
         $this->info("\n\n".$summary);
-        \Illuminate\Support\Facades\Log::info('DefaultAvatarsSyncCommand: '.$summary);
+        Log::info('DefaultAvatarsSyncCommand: '.$summary);
 
         return Command::SUCCESS;
     }

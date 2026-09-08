@@ -2,8 +2,10 @@
 
 namespace App\Traits;
 
+use App\Models\PhotoPool;
 use App\Services\PhotoPoolImporter;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Storage;
 
 trait HasPhotoPoolImport
 {
@@ -21,7 +23,7 @@ trait HasPhotoPoolImport
 
     public function confirmCancelImportQueue(): void
     {
-        /** @var \App\Models\PhotoPool $record */
+        /** @var PhotoPool $record */
         $record = $this->getRecord();
 
         if (! $record) {
@@ -34,7 +36,7 @@ trait HasPhotoPoolImport
 
         if (! empty($queue)) {
             $diskName = config('filesystems.uploads.disk');
-            $disk = \Illuminate\Support\Facades\Storage::disk($diskName);
+            $disk = Storage::disk($diskName);
             $deletedCount = 0;
 
             foreach ($queue as $path) {
@@ -74,7 +76,7 @@ trait HasPhotoPoolImport
 
     public function processImportQueue(): void
     {
-        /** @var \App\Models\PhotoPool $record */
+        /** @var PhotoPool $record */
         $record = $this->getRecord();
 
         if (! $record) {

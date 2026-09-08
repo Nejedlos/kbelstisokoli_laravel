@@ -4,8 +4,13 @@ namespace App\Filament\Resources\PhotoPools\Pages;
 
 use App\Filament\Resources\PhotoPools\PhotoPoolResource;
 use App\Models\PhotoPool;
+use App\Services\PhotoPoolImporter;
 use App\Traits\HasPhotoPoolImport;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Contracts\View\View;
+use Illuminate\Support\Arr;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
 class CreatePhotoPool extends CreateRecord
@@ -25,12 +30,12 @@ class CreatePhotoPool extends CreateRecord
     {
         return [
             $this->getCreateFormAction()
-                ->label(new \Illuminate\Support\HtmlString('
+                ->label(new HtmlString('
                     <span x-data="{ uploadingCount: 0 }"
                           x-on:file-upload-started.window="uploadingCount++"
                           x-on:file-upload-finished.window="uploadingCount = Math.max(0, uploadingCount - 1)">
                         <span x-show="uploadingCount === 0">
-                            <i class="fa-light fa-plus mr-1.5"></i> ' . $this->getCreateFormAction()->getLabel() . '
+                            <i class="fa-light fa-plus mr-1.5"></i> '.$this->getCreateFormAction()->getLabel().'
                         </span>
                         <span x-show="uploadingCount > 0" x-cloak class="flex items-center gap-2">
                             <i class="fa-light fa-arrows-rotate fa-spin"></i>
@@ -49,7 +54,7 @@ class CreatePhotoPool extends CreateRecord
         ];
     }
 
-    public function render(): \Illuminate\Contracts\View\View
+    public function render(): View
     {
         return parent::render();
     }
@@ -58,7 +63,7 @@ class CreatePhotoPool extends CreateRecord
     {
         // Vygenerujeme slug pokud chybí
         if (empty($data['slug']) && ! empty($data['title'])) {
-            $base = Str::slug(is_string($data['title']) ? $data['title'] : (string) (\Illuminate\Support\Arr::get($data['title'], app()->getLocale()) ?? ''));
+            $base = Str::slug(is_string($data['title']) ? $data['title'] : (string) (Arr::get($data['title'], app()->getLocale()) ?? ''));
             $slug = $base;
             $i = 1;
             while (PhotoPool::where('slug', $slug)->exists()) {
@@ -84,11 +89,11 @@ class CreatePhotoPool extends CreateRecord
         $pool = $this->record;
 
         // Použijeme službu pro přípravu importu (přesun souborů a naplnění fronty)
-        $importer = app(\App\Services\PhotoPoolImporter::class);
+        $importer = app(PhotoPoolImporter::class);
         $importer->prepareForImport($pool, $files);
 
         // Informujeme uživatele
-        \Filament\Notifications\Notification::make()
+        Notification::make()
             ->title(__('admin.resources.photo_pool.notifications.uploading'))
             ->info()
             ->body('Fotografie byly nahrány a zařazeny do fronty ke zpracování.')

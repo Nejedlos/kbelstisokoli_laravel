@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Dmarc\DmarcMailboxResource\Schemas;
 
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -53,7 +54,7 @@ class MailboxForm
                             ->password()
                             ->helperText('Heslo k e-mailové schránce. Podle konfigurace hostingu Webglobe obvykle stejné jako pro SMTP.')
                             ->dehydrated(fn ($state) => filled($state))
-                            ->required(fn ($livewire) => $livewire instanceof \Filament\Resources\Pages\CreateRecord),
+                            ->required(fn ($livewire) => $livewire instanceof CreateRecord),
                     ]),
             ]);
     }

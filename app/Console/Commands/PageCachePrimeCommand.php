@@ -4,11 +4,9 @@ namespace App\Console\Commands;
 
 use App\Models\Gallery;
 use App\Models\Page;
-use App\Models\Post;
 use App\Models\Team;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 class PageCachePrimeCommand extends Command
 {
@@ -39,7 +37,7 @@ class PageCachePrimeCommand extends Command
         $locales = $this->option('locale') === 'all' ? ['cs', 'en'] : [$this->option('locale')];
 
         $urls = $this->getPublicUrls();
-        $this->info('Found ' . count($urls) . ' base public URLs to prime for ' . count($locales) . ' locales.');
+        $this->info('Found '.count($urls).' base public URLs to prime for '.count($locales).' locales.');
 
         $originalLocale = app()->getLocale();
 
@@ -80,7 +78,8 @@ class PageCachePrimeCommand extends Command
             if (route('public.recruitment.index')) {
                 $urls[] = route('public.recruitment.index');
             }
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+        }
 
         // Pages (Statické stránky z CMS)
         $excludedSlugs = ['home', 'novinky', 'zapasy', 'treninky', 'akce'];
@@ -90,7 +89,7 @@ class PageCachePrimeCommand extends Command
             ->get()
             ->each(function ($page) use (&$urls, $excludedSlugs) {
                 // Vyloučíme homepage (už tam je) a vyloučené sekce
-                if (!in_array($page->slug, $excludedSlugs)) {
+                if (! in_array($page->slug, $excludedSlugs)) {
                     $urls[] = route('public.pages.show', $page->slug);
                 }
             });
@@ -123,7 +122,7 @@ class PageCachePrimeCommand extends Command
         // Pro ostatní jazyky musíme lang parametr poslat, aby SetLocale detekoval správný jazyk.
         $primeUrl = $url;
         if ($locale !== $defaultLocale) {
-            $primeUrl = $url . (str_contains($url, '?') ? '&' : '?') . 'lang=' . $locale;
+            $primeUrl = $url.(str_contains($url, '?') ? '&' : '?').'lang='.$locale;
         }
 
         $this->comment("  Crawling: $primeUrl [$locale]");
@@ -145,10 +144,10 @@ class PageCachePrimeCommand extends Command
             if ($response->successful()) {
                 $this->info("    OK: $url");
             } else {
-                $this->warn("    Failed (" . $response->status() . "): $url");
+                $this->warn('    Failed ('.$response->status()."): $url");
             }
         } catch (\Exception $e) {
-            $this->error("    Error crawling $url: " . $e->getMessage());
+            $this->error("    Error crawling $url: ".$e->getMessage());
         }
     }
 }

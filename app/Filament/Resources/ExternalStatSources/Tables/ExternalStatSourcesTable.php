@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ExternalStatSources\Tables;
 
+use App\Filament\Resources\Teams\TeamResource;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -29,7 +30,7 @@ class ExternalStatSourcesTable
                     ->badge()
                     ->color('success')
                     ->separator(', ')
-                    ->url(fn ($record) => $record->teamMappings->count() === 1 ? \App\Filament\Resources\Teams\TeamResource::getUrl('edit', ['record' => $record->teamMappings->first()->team_id]) : null),
+                    ->url(fn ($record) => $record->teamMappings->count() === 1 ? TeamResource::getUrl('edit', ['record' => $record->teamMappings->first()->team_id]) : null),
                 TextColumn::make('source_type')
                     ->label('Typ')
                     ->badge()

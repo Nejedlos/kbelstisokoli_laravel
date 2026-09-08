@@ -18,7 +18,9 @@ return new class extends Migration
 
         // Pomocná funkce pro opravu JSON dat
         $fixJson = function (string $table, array $columns) {
-            if (! Schema::hasTable($table)) return;
+            if (! Schema::hasTable($table)) {
+                return;
+            }
 
             foreach ($columns as $column) {
                 try {
@@ -42,7 +44,8 @@ return new class extends Migration
                                 }
                             }
                         });
-                } catch (\Throwable $e) {}
+                } catch (Throwable $e) {
+                }
             }
         };
 
@@ -53,10 +56,12 @@ return new class extends Migration
                 // Drop FULLTEXT index if exists (MySQL doesn't support it on JSON)
                 try {
                     $table->dropIndex('ai_documents_fulltext');
-                } catch (\Throwable $e) {}
+                } catch (Throwable $e) {
+                }
                 try {
                     $table->dropIndex('fulltext_title_content');
-                } catch (\Throwable $e) {}
+                } catch (Throwable $e) {
+                }
 
                 // Převod na JSON typ v MySQL 8
                 $table->json('title')->nullable()->change();

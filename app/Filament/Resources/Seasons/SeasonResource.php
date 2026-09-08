@@ -8,9 +8,11 @@ use App\Filament\Resources\Seasons\Pages\ListSeasons;
 use App\Filament\Resources\Seasons\Schemas\SeasonForm;
 use App\Filament\Resources\Seasons\Tables\SeasonsTable;
 use App\Models\Season;
+use App\Support\IconHelper;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 
 class SeasonResource extends Resource
 {
@@ -31,9 +33,9 @@ class SeasonResource extends Resource
         return __('admin.resources.season.plural_label');
     }
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
-        return \App\Support\IconHelper::get(\App\Support\IconHelper::SEASONS);
+        return IconHelper::get(IconHelper::SEASONS);
     }
 
     public static function getNavigationSort(): ?int

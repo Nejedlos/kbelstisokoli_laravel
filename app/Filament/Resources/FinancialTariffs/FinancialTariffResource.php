@@ -5,10 +5,14 @@ namespace App\Filament\Resources\FinancialTariffs;
 use App\Filament\Resources\FinancialTariffs\Pages\CreateFinancialTariff;
 use App\Filament\Resources\FinancialTariffs\Pages\EditFinancialTariff;
 use App\Filament\Resources\FinancialTariffs\Pages\ListFinancialTariffs;
+use App\Filament\Resources\FinancialTariffs\Schemas\FinancialTariffForm;
+use App\Filament\Resources\FinancialTariffs\Tables\FinancialTariffsTable;
 use App\Models\FinancialTariff;
+use App\Support\IconHelper;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 
 class FinancialTariffResource extends Resource
 {
@@ -29,9 +33,9 @@ class FinancialTariffResource extends Resource
         return __('admin.resources.financial_tariff.plural_label');
     }
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
-        return \App\Support\IconHelper::get(\App\Support\IconHelper::BANKNOTES);
+        return IconHelper::get(IconHelper::BANKNOTES);
     }
 
     public static function getNavigationSort(): ?int
@@ -41,12 +45,12 @@ class FinancialTariffResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        return \App\Filament\Resources\FinancialTariffs\Schemas\FinancialTariffForm::configure($schema);
+        return FinancialTariffForm::configure($schema);
     }
 
     public static function table(Table $table): Table
     {
-        return \App\Filament\Resources\FinancialTariffs\Tables\FinancialTariffsTable::configure($table);
+        return FinancialTariffsTable::configure($table);
     }
 
     public static function getRelations(): array

@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Jobs\Stats\SyncMatchDetailJob;
 use App\Models\BasketballMatch;
+use App\Models\ExternalImportRun;
 use App\Models\Season;
 use App\Models\Team;
 use App\Services\Stats\Sync\ExternalStatsSyncService;
@@ -95,7 +96,7 @@ class SyncMatchCommand extends Command
             $bar->start();
 
             // Vytvoření běhu pro UI/Progress
-            $run = \App\Models\ExternalImportRun::start(
+            $run = ExternalImportRun::start(
                 'czbasketball',
                 $season->id,
                 $team->id,
@@ -103,7 +104,7 @@ class SyncMatchCommand extends Command
                 $matchExternalId
             );
             $run->update(['total_count' => 1]);
-            $run->updateProgress(0, 1, "Zápas: " . ($match ? "{$match->scheduled_at->toDateString()} vs {$match->opponent?->name}" : $matchExternalId));
+            $run->updateProgress(0, 1, 'Zápas: '.($match ? "{$match->scheduled_at->toDateString()} vs {$match->opponent?->name}" : $matchExternalId));
 
             // Podpora pro signály (zrušení přes Ctrl+C)
             if (function_exists('pcntl_signal')) {

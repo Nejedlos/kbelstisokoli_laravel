@@ -3,12 +3,11 @@
 namespace App\Filament\Widgets\InternalAnalytics;
 
 use App\Models\InternalAnalyticsEvent;
-use App\Services\InternalAnalytics\AnalyticsQueryService;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
-use Livewire\Attributes\On;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\On;
 
 class TopPagesTableWidget extends BaseWidget
 {
@@ -69,7 +68,7 @@ class TopPagesTableWidget extends BaseWidget
 
     public function getTableRecordKey($record): string
     {
-        return ($record->area ?? '') . '_' . ($record->route_name ?? '') . '_' . ($record->path ?? '');
+        return ($record->area ?? '').'_'.($record->route_name ?? '').'_'.($record->path ?? '');
     }
 
     protected function applyFilters($query)
@@ -78,12 +77,18 @@ class TopPagesTableWidget extends BaseWidget
         $dateFrom = null;
 
         switch ($filters['period'] ?? 'last_7_days') {
-            case 'today': $dateFrom = now()->startOfDay(); break;
-            case 'yesterday': $dateFrom = now()->subDay()->startOfDay(); break;
-            case 'last_30_days': $dateFrom = now()->subDays(30); break;
-            case 'this_month': $dateFrom = now()->startOfMonth(); break;
-            case 'last_month': $dateFrom = now()->subMonth()->startOfMonth(); break;
-            case 'last_7_days': default: $dateFrom = now()->subDays(7); break;
+            case 'today': $dateFrom = now()->startOfDay();
+                break;
+            case 'yesterday': $dateFrom = now()->subDay()->startOfDay();
+                break;
+            case 'last_30_days': $dateFrom = now()->subDays(30);
+                break;
+            case 'this_month': $dateFrom = now()->startOfMonth();
+                break;
+            case 'last_month': $dateFrom = now()->subMonth()->startOfMonth();
+                break;
+            case 'last_7_days': default: $dateFrom = now()->subDays(7);
+                break;
         }
 
         if ($dateFrom) {

@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use Database\Seeders\CmsContentSeeder;
+use Database\Seeders\GdprPageSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -13,8 +15,8 @@ class HomepagePublicRoutesTest extends TestCase
     {
         parent::setUp();
         // Seed pouze CMS obsahu (bez uživatelů/hesel) kvůli rychlosti a stabilitě testů
-        $this->seed(\Database\Seeders\CmsContentSeeder::class);
-        $this->seed(\Database\Seeders\GdprPageSeeder::class);
+        $this->seed(CmsContentSeeder::class);
+        $this->seed(GdprPageSeeder::class);
     }
 
     public function test_homepage_returns_200(): void

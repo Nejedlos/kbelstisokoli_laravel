@@ -2,6 +2,9 @@
 
 namespace App\Filament\Resources\ClubCompetitions\Schemas;
 
+use App\Models\Season;
+use App\Support\IconHelper;
+use App\Support\Icons\AppIcon;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -11,9 +14,6 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
-
-use App\Support\IconHelper;
-use App\Support\Icons\AppIcon;
 use Illuminate\Support\HtmlString;
 
 class ClubCompetitionForm
@@ -22,7 +22,7 @@ class ClubCompetitionForm
     {
         return $schema
             ->components([
-                Section::make(new HtmlString(IconHelper::render(AppIcon::COMPETITIONS) . ' ' . __('admin.resources.club_competition.sections.general')))
+                Section::make(new HtmlString(IconHelper::render(AppIcon::COMPETITIONS).' '.__('admin.resources.club_competition.sections.general')))
                     ->schema([
                         Grid::make(2)
                             ->schema([
@@ -32,27 +32,27 @@ class ClubCompetitionForm
                                             ->icon(new HtmlString(IconHelper::render(AppIcon::GLOBE)))
                                             ->schema([
                                                 TextInput::make('name.cs')
-                                                    ->label(__('admin.resources.club_competition.fields.name') . ' (CS)')
+                                                    ->label(__('admin.resources.club_competition.fields.name').' (CS)')
                                                     ->helperText('Např. Lumír Trophy, Střelec měsíce')
                                                     ->required(),
                                                 Textarea::make('description.cs')
-                                                    ->label(__('admin.resources.club_competition.fields.description') . ' (CS)')
+                                                    ->label(__('admin.resources.club_competition.fields.description').' (CS)')
                                                     ->rows(3),
                                                 Textarea::make('rules.cs')
-                                                    ->label(__('admin.resources.club_competition.fields.rules') . ' (CS)')
+                                                    ->label(__('admin.resources.club_competition.fields.rules').' (CS)')
                                                     ->rows(4),
                                             ]),
                                         Tab::make('English')
                                             ->icon(new HtmlString(IconHelper::render(AppIcon::GLOBE)))
                                             ->schema([
                                                 TextInput::make('name.en')
-                                                    ->label(__('admin.resources.club_competition.fields.name') . ' (EN)')
+                                                    ->label(__('admin.resources.club_competition.fields.name').' (EN)')
                                                     ->helperText('e.g. Scorer of the month'),
                                                 Textarea::make('description.en')
-                                                    ->label(__('admin.resources.club_competition.fields.description') . ' (EN)')
+                                                    ->label(__('admin.resources.club_competition.fields.description').' (EN)')
                                                     ->rows(3),
                                                 Textarea::make('rules.en')
-                                                    ->label(__('admin.resources.club_competition.fields.rules') . ' (EN)')
+                                                    ->label(__('admin.resources.club_competition.fields.rules').' (EN)')
                                                     ->rows(4),
                                             ]),
                                     ])->columnSpanFull(),
@@ -64,16 +64,16 @@ class ClubCompetitionForm
                             ]),
                     ]),
 
-                Section::make(new HtmlString(IconHelper::render(AppIcon::SETTINGS) . ' ' . __('admin.resources.club_competition.sections.settings')))
+                Section::make(new HtmlString(IconHelper::render(AppIcon::SETTINGS).' '.__('admin.resources.club_competition.sections.settings')))
                     ->schema([
                         Grid::make(2)
                             ->schema([
                                 Select::make('season_id')
                                     ->label(__('admin.resources.club_competition.fields.season'))
                                     ->relationship('season', 'name')
-                                    ->getOptionLabelFromRecordUsing(fn ($record) => $record->name ?? 'Sezóna bez názvu (ID: ' . $record->id . ')')
+                                    ->getOptionLabelFromRecordUsing(fn ($record) => $record->name ?? 'Sezóna bez názvu (ID: '.$record->id.')')
                                     ->required()
-                                    ->default(\App\Models\Season::where('is_active', true)->first()?->id),
+                                    ->default(Season::where('is_active', true)->first()?->id),
                                 Select::make('status')
                                     ->label(__('admin.resources.club_competition.fields.status'))
                                     ->options([

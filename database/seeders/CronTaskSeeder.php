@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\CronTask;
 use Illuminate\Database\Seeder;
 
 class CronTaskSeeder extends Seeder
@@ -134,7 +135,7 @@ class CronTaskSeeder extends Seeder
         ];
 
         foreach ($tasks as $task) {
-            \App\Models\CronTask::updateOrCreate(
+            CronTask::updateOrCreate(
                 ['command' => $task['command']],
                 $task
             );

@@ -15,9 +15,9 @@ class StatisticSetService
     /**
      * Zajistí existenci konkrétní statistické sady.
      */
-    public function ensureSet(string $slug, string $name, string $type, string $sourceType = 'external'): \App\Models\StatisticSet
+    public function ensureSet(string $slug, string $name, string $type, string $sourceType = 'external'): StatisticSet
     {
-        return \App\Models\StatisticSet::firstOrCreate(
+        return StatisticSet::firstOrCreate(
             ['slug' => $slug],
             [
                 'name' => $name,

@@ -5,6 +5,9 @@ namespace App\Models;
 use App\Traits\HasSeo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Translatable\HasTranslations;
 
 class Team extends Model
@@ -21,27 +24,27 @@ class Team extends Model
 
     public $translatable = ['name', 'description'];
 
-    public function matches(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function matches(): BelongsToMany
     {
         return $this->belongsToMany(BasketballMatch::class, 'basketball_match_team', 'team_id', 'basketball_match_id');
     }
 
-    public function legacyMatches(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function legacyMatches(): HasMany
     {
         return $this->hasMany(BasketballMatch::class, 'team_id');
     }
 
-    public function trainings(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function trainings(): BelongsToMany
     {
         return $this->belongsToMany(Training::class, 'team_training');
     }
 
-    public function clubEvents(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function clubEvents(): BelongsToMany
     {
         return $this->belongsToMany(ClubEvent::class, 'club_event_team');
     }
 
-    public function primaryVenue(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function primaryVenue(): BelongsTo
     {
         return $this->belongsTo(Venue::class, 'primary_venue_id');
     }
@@ -49,7 +52,7 @@ class Team extends Model
     /**
      * Hráči v týmu.
      */
-    public function players(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function players(): BelongsToMany
     {
         return $this->belongsToMany(PlayerProfile::class, 'player_profile_team')
             ->withPivot(['role_in_team', 'is_primary_team', 'is_on_roster', 'active_from', 'active_to'])
@@ -59,7 +62,7 @@ class Team extends Model
     /**
      * Trenéři přiřazení k tomuto týmu.
      */
-    public function coaches(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function coaches(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'coach_team')
             ->withPivot(['email', 'phone'])
@@ -69,7 +72,7 @@ class Team extends Model
     /**
      * Aktivní trenéři.
      */
-    public function activeCoaches(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function activeCoaches(): BelongsToMany
     {
         return $this->coaches()->where('is_active', true);
     }
@@ -77,7 +80,7 @@ class Team extends Model
     /**
      * Aktivní hráči.
      */
-    public function activePlayers(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function activePlayers(): BelongsToMany
     {
         return $this->players()
             ->where('player_profiles.is_active', true);
@@ -86,7 +89,7 @@ class Team extends Model
     /**
      * Hráči na oficiální soupisce pro zápasy.
      */
-    public function rosterPlayers(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function rosterPlayers(): BelongsToMany
     {
         return $this->activePlayers()
             ->wherePivot('is_on_roster', true);
@@ -95,7 +98,7 @@ class Team extends Model
     /**
      * Externí mapování týmu (cz.basketball atd.)
      */
-    public function externalMappings(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function externalMappings(): HasMany
     {
         return $this->hasMany(ExternalTeamMapping::class, 'team_id');
     }

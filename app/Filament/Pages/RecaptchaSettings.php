@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Models\Setting;
+use App\Support\IconHelper;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -12,6 +13,7 @@ use Filament\Pages\Page;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\HtmlString;
 
 class RecaptchaSettings extends Page implements HasForms
@@ -28,9 +30,9 @@ class RecaptchaSettings extends Page implements HasForms
         return __('admin/recaptcha-settings.navigation');
     }
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
-        return \App\Support\IconHelper::get(\App\Support\IconHelper::RECAPTCHA);
+        return IconHelper::get(IconHelper::RECAPTCHA);
     }
 
     public static function getNavigationGroup(): ?string
@@ -43,7 +45,7 @@ class RecaptchaSettings extends Page implements HasForms
         return 3;
     }
 
-    public function getTitle(): string|\Illuminate\Contracts\Support\Htmlable
+    public function getTitle(): string|Htmlable
     {
         return __('admin/recaptcha-settings.title');
     }

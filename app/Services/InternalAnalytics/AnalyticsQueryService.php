@@ -3,8 +3,9 @@
 namespace App\Services\InternalAnalytics;
 
 use App\Models\InternalAnalyticsEvent;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class AnalyticsQueryService
 {
@@ -35,13 +36,13 @@ class AnalyticsQueryService
             DB::raw('COUNT(*) as total'),
             DB::raw('COUNT(DISTINCT visitor_hash) as unique_visitors')
         )
-        ->whereIn('event_type', ['page_view', 'request'])
-        ->groupBy('date')
-        ->orderBy('date')
-        ->get();
+            ->whereIn('event_type', ['page_view', 'request'])
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
 
         return [
-            'labels' => $results->pluck('date')->map(fn($d) => Carbon::parse($d)->format('d.m.'))->toArray(),
+            'labels' => $results->pluck('date')->map(fn ($d) => Carbon::parse($d)->format('d.m.'))->toArray(),
             'datasets' => [
                 [
                     'label' => 'Celkem',
@@ -82,13 +83,13 @@ class AnalyticsQueryService
             DB::raw('DATE(occurred_at) as date'),
             DB::raw('COUNT(*) as total')
         )
-        ->where('event_type', 'login_success')
-        ->groupBy('date')
-        ->orderBy('date')
-        ->get();
+            ->where('event_type', 'login_success')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
 
         return [
-            'labels' => $results->pluck('date')->map(fn($d) => Carbon::parse($d)->format('d.m.'))->toArray(),
+            'labels' => $results->pluck('date')->map(fn ($d) => Carbon::parse($d)->format('d.m.'))->toArray(),
             'datasets' => [
                 [
                     'label' => 'Přihlášení',
@@ -111,8 +112,8 @@ class AnalyticsQueryService
             END as group_name'),
             DB::raw('COUNT(*) as total')
         )
-        ->groupBy('group_name')
-        ->get();
+            ->groupBy('group_name')
+            ->get();
 
         return [
             'labels' => $results->pluck('group_name')->toArray(),
@@ -124,7 +125,7 @@ class AnalyticsQueryService
         ];
     }
 
-    public function getTopPages(array $filters, int $limit = 10): \Illuminate\Support\Collection
+    public function getTopPages(array $filters, int $limit = 10): Collection
     {
         $query = $this->applyFilters(InternalAnalyticsEvent::query(), $filters);
 
@@ -136,14 +137,14 @@ class AnalyticsQueryService
             DB::raw('COUNT(DISTINCT visitor_hash) as unique_visitors'),
             DB::raw('AVG(response_time_ms) as avg_response_time')
         )
-        ->where('event_type', 'page_view')
-        ->groupBy('path', 'route_name', 'area')
-        ->orderByDesc('views')
-        ->limit($limit)
-        ->get();
+            ->where('event_type', 'page_view')
+            ->groupBy('path', 'route_name', 'area')
+            ->orderByDesc('views')
+            ->limit($limit)
+            ->get();
     }
 
-    public function getRecentEvents(array $filters, int $limit = 20): \Illuminate\Support\Collection
+    public function getRecentEvents(array $filters, int $limit = 20): Collection
     {
         $query = $this->applyFilters(InternalAnalyticsEvent::query(), $filters);
 
@@ -153,7 +154,7 @@ class AnalyticsQueryService
             ->get();
     }
 
-    public function getSlowRequests(array $filters, int $limit = 10): \Illuminate\Support\Collection
+    public function getSlowRequests(array $filters, int $limit = 10): Collection
     {
         $query = $this->applyFilters(InternalAnalyticsEvent::query(), $filters);
 
@@ -164,7 +165,7 @@ class AnalyticsQueryService
             ->get();
     }
 
-    public function getErrorRequests(array $filters, int $limit = 10): \Illuminate\Support\Collection
+    public function getErrorRequests(array $filters, int $limit = 10): Collection
     {
         $query = $this->applyFilters(InternalAnalyticsEvent::query(), $filters);
 
@@ -183,8 +184,8 @@ class AnalyticsQueryService
             'is_authenticated',
             DB::raw('COUNT(*) as total')
         )
-        ->groupBy('is_authenticated')
-        ->get();
+            ->groupBy('is_authenticated')
+            ->get();
 
         return [
             'labels' => ['Hosté', 'Přihlášení'],

@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 
-\App\Models\User::class;
+User::class;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

@@ -3,13 +3,12 @@
 namespace App\Filament\Widgets\InternalAnalytics;
 
 use App\Services\InternalAnalytics\AnalyticsQueryService;
+use App\Support\FilamentIcon;
+use App\Support\Icons\AppIcon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use Livewire\Attributes\On;
-use Carbon\Carbon;
-use App\Support\Icons\AppIcon;
-use App\Support\FilamentIcon;
 use Illuminate\Support\HtmlString;
+use Livewire\Attributes\On;
 
 class AnalyticsOverviewWidget extends BaseWidget
 {
@@ -27,13 +26,13 @@ class AnalyticsOverviewWidget extends BaseWidget
         $data = $queryService->getOverviewStats($this->prepareFilters());
 
         return [
-            Stat::make(new HtmlString(FilamentIcon::render(AppIcon::VIEW) . ' ' . __('internal-analytics.stats.page_views')), $data['page_views']),
-            Stat::make(new HtmlString(FilamentIcon::render(AppIcon::USERS) . ' ' . __('internal-analytics.stats.unique_visitors')), $data['unique_visitors']),
-            Stat::make(new HtmlString(FilamentIcon::render(AppIcon::USER) . ' ' . __('internal-analytics.stats.authenticated_users')), $data['authenticated_users']),
-            Stat::make(new HtmlString(FilamentIcon::render(AppIcon::PERMISSIONS) . ' ' . __('internal-analytics.stats.logins')), $data['logins']),
-            Stat::make(new HtmlString(FilamentIcon::render(AppIcon::CRON_TASKS) . ' ' . __('internal-analytics.stats.avg_response_time')), round($data['avg_response_time']) . ' ms')
+            Stat::make(new HtmlString(FilamentIcon::render(AppIcon::VIEW).' '.__('internal-analytics.stats.page_views')), $data['page_views']),
+            Stat::make(new HtmlString(FilamentIcon::render(AppIcon::USERS).' '.__('internal-analytics.stats.unique_visitors')), $data['unique_visitors']),
+            Stat::make(new HtmlString(FilamentIcon::render(AppIcon::USER).' '.__('internal-analytics.stats.authenticated_users')), $data['authenticated_users']),
+            Stat::make(new HtmlString(FilamentIcon::render(AppIcon::PERMISSIONS).' '.__('internal-analytics.stats.logins')), $data['logins']),
+            Stat::make(new HtmlString(FilamentIcon::render(AppIcon::CRON_TASKS).' '.__('internal-analytics.stats.avg_response_time')), round($data['avg_response_time']).' ms')
                 ->color($data['avg_response_time'] > 500 ? 'warning' : 'success'),
-            Stat::make(new HtmlString(FilamentIcon::render(AppIcon::WARNING) . ' ' . __('internal-analytics.stats.error_requests')), $data['error_requests'])
+            Stat::make(new HtmlString(FilamentIcon::render(AppIcon::WARNING).' '.__('internal-analytics.stats.error_requests')), $data['error_requests'])
                 ->color($data['error_requests'] > 0 ? 'danger' : 'success'),
         ];
     }

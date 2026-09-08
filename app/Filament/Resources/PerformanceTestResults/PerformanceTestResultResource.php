@@ -9,17 +9,19 @@ use App\Filament\Resources\PerformanceTestResults\Schemas\PerformanceTestResultF
 use App\Filament\Resources\PerformanceTestResults\Tables\PerformanceTestResultsTable;
 use App\Models\PerformanceTestResult;
 use App\Support\IconHelper;
+use App\Support\Icons\AppIcon;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 
 class PerformanceTestResultResource extends Resource
 {
     protected static ?string $model = PerformanceTestResult::class;
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
-        return IconHelper::get(\App\Support\Icons\AppIcon::GAUGE);
+        return IconHelper::get(AppIcon::GAUGE);
     }
 
     public static function getNavigationGroup(): ?string

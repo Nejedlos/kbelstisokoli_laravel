@@ -11,9 +11,11 @@ use App\Filament\Resources\Teams\RelationManagers\PlayersRelationManager;
 use App\Filament\Resources\Teams\Schemas\TeamForm;
 use App\Filament\Resources\Teams\Tables\TeamsTable;
 use App\Models\Team;
+use App\Support\IconHelper;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 
 class TeamResource extends Resource
 {
@@ -34,9 +36,9 @@ class TeamResource extends Resource
         return __('admin.resources.team.plural_label');
     }
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
-        return \App\Support\IconHelper::get(\App\Support\IconHelper::TEAMS);
+        return IconHelper::get(IconHelper::TEAMS);
     }
 
     public static function getNavigationSort(): ?int

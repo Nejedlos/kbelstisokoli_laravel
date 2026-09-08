@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\ExternalStatSource;
 use Illuminate\Database\Seeder;
 
 class ExternalStatSourceSeeder extends Seeder
@@ -11,7 +12,7 @@ class ExternalStatSourceSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\ExternalStatSource::updateOrCreate(
+        ExternalStatSource::updateOrCreate(
             ['slug' => 'czbasketball'],
             [
                 'name' => 'cz.basketball',

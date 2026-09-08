@@ -3,30 +3,33 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
+use App\Models\Page;
+use App\Models\Post;
+use App\Services\BreadcrumbService;
 use Illuminate\View\View;
 
 class NewsController extends Controller
 {
-    public function index(\App\Services\BreadcrumbService $breadcrumbService): View
+    public function index(BreadcrumbService $breadcrumbService): View
     {
-        $posts = \App\Models\Post::with('category')
+        $posts = Post::with('category')
             ->where('status', 'published')
             ->where('is_visible', true)
             ->orderByRaw('COALESCE(publish_at, created_at) DESC')
             ->paginate(12);
 
-        $page = \App\Models\Page::where('slug', 'novinky')->first();
+        $page = Page::where('slug', 'novinky')->first();
         $breadcrumbs = $breadcrumbService->addHome()->add(__('general.nav.news'))->get();
 
         return view('public.news.index', compact('posts', 'page', 'breadcrumbs'));
     }
 
-    public function show(\App\Services\BreadcrumbService $breadcrumbService, ?string $slug = null): View
+    public function show(BreadcrumbService $breadcrumbService, ?string $slug = null): View
     {
         if (is_null($slug)) {
             abort(404);
         }
-        $post = \App\Models\Post::with(['category', 'seo'])
+        $post = Post::with(['category', 'seo'])
             ->where('slug', $slug)
             ->where('status', 'published')
             ->where('is_visible', true)

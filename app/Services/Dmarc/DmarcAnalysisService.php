@@ -2,10 +2,9 @@
 
 namespace App\Services\Dmarc;
 
+use App\Models\Dmarc\DmarcAuthorizedSender;
 use App\Models\Dmarc\DmarcRecord;
 use App\Models\Dmarc\DmarcReport;
-use App\Models\Dmarc\DmarcAuthorizedSender;
-use Illuminate\Support\Facades\Log;
 
 class DmarcAnalysisService
 {
@@ -64,7 +63,7 @@ class DmarcAnalysisService
     protected function findKnownSender(DmarcRecord $record, DmarcReport $report, $enrichment): ?DmarcAuthorizedSender
     {
         // Používáme kolekci pro kompatibilitu se SQLite v testech a flexibilitu
-        return DmarcAuthorizedSender::where('is_active', true)->get()->first(function($sender) use ($record) {
+        return DmarcAuthorizedSender::where('is_active', true)->get()->first(function ($sender) use ($record) {
             $allowedIps = is_array($sender->allowed_ips) ? $sender->allowed_ips : [];
             $allowedSpf = is_array($sender->allowed_spf_domains) ? $sender->allowed_spf_domains : [];
             $allowedDkim = is_array($sender->allowed_dkim_domains) ? $sender->allowed_dkim_domains : [];
@@ -86,7 +85,7 @@ class DmarcAnalysisService
         }
 
         // Pokud selhalo obojí a není to známý sender
-        if (!$record->dkim_aligned && !$record->spf_aligned) {
+        if (! $record->dkim_aligned && ! $record->spf_aligned) {
             return 'spoofing_suspected';
         }
 
@@ -95,7 +94,9 @@ class DmarcAnalysisService
 
     protected function calculateSeverity(DmarcRecord $record, bool $dmarcPass, ?DmarcAuthorizedSender $knownSender, string $eventType): string
     {
-        if ($dmarcPass) return 'info';
+        if ($dmarcPass) {
+            return 'info';
+        }
 
         if ($eventType === 'spoofing_suspected') {
             return ($record->count > 10) ? 'critical' : 'high';
@@ -110,15 +111,27 @@ class DmarcAnalysisService
 
     protected function calculateRiskScore(DmarcRecord $record, bool $dmarcPass, ?DmarcAuthorizedSender $knownSender, string $severity): int
     {
-        if ($dmarcPass) return 5;
+        if ($dmarcPass) {
+            return 5;
+        }
 
         $score = 50;
-        if ($severity === 'critical') $score = 95;
-        if ($severity === 'high') $score = 80;
-        if ($severity === 'medium') $score = 40;
+        if ($severity === 'critical') {
+            $score = 95;
+        }
+        if ($severity === 'high') {
+            $score = 80;
+        }
+        if ($severity === 'medium') {
+            $score = 40;
+        }
 
-        if (!$knownSender) $score += 10;
-        if ($record->disposition !== 'none') $score -= 5; // Už bylo zablokováno, riziko je nižší
+        if (! $knownSender) {
+            $score += 10;
+        }
+        if ($record->disposition !== 'none') {
+            $score -= 5;
+        } // Už bylo zablokováno, riziko je nižší
 
         return min(100, max(0, $score));
     }

@@ -29,8 +29,8 @@ class MutualMatchesCalculator
 
         foreach ($mutualMatches as $m) {
             // Skóre je v metadata jako stringy nebo inty
-            $scoreHome = (int)$m['score_home'];
-            $scoreAway = (int)$m['score_away'];
+            $scoreHome = (int) $m['score_home'];
+            $scoreAway = (int) $m['score_away'];
 
             // Zjistíme, jestli jsme byli domácí nebo hosté v tom zápase
             // V metadata mutual_matches bývá team_home a team_away

@@ -14,6 +14,8 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\HtmlString;
 use Livewire\Attributes\On;
 
 class MediaAssetsRelationManager extends RelationManager
@@ -30,7 +32,7 @@ class MediaAssetsRelationManager extends RelationManager
 
     protected static ?string $recordTitleAttribute = 'title';
 
-    public static function getTitle(\Illuminate\Database\Eloquent\Model $ownerRecord, string $pageClass): string
+    public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
         return __('admin.resources.photo_pool.title');
     }
@@ -51,7 +53,7 @@ class MediaAssetsRelationManager extends RelationManager
                 TextColumn::make('title')
                     ->label(__('user.fields.display_name'))
                     ->searchable()
-                    ->description(fn (MediaAsset $record): \Illuminate\Support\HtmlString => new \Illuminate\Support\HtmlString('<span class="flex items-center gap-1">'.IconHelper::render(IconHelper::INFO, 'fal')->toHtml().' '.$record->type.' | '.number_format($record->getFirstMedia('default')?->size / 1024, 2).' KB</span>'))
+                    ->description(fn (MediaAsset $record): HtmlString => new HtmlString('<span class="flex items-center gap-1">'.IconHelper::render(IconHelper::INFO, 'fal')->toHtml().' '.$record->type.' | '.number_format($record->getFirstMedia('default')?->size / 1024, 2).' KB</span>'))
                     ->limit(50),
                 TextColumn::make('sort_order')
                     ->label('Pořadí')

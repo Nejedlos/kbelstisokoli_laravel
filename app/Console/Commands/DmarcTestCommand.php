@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
 
 class DmarcTestCommand extends Command
 {
@@ -35,7 +34,7 @@ class DmarcTestCommand extends Command
         $useProd = $this->option('prod');
 
         if ($useProd && env('PROD_MAIL_HOST')) {
-            $this->info("Konfiguruji produkční SMTP pro tento příkaz...");
+            $this->info('Konfiguruji produkční SMTP pro tento příkaz...');
             config([
                 'mail.mailers.smtp.host' => env('PROD_MAIL_HOST'),
                 'mail.mailers.smtp.port' => env('PROD_MAIL_PORT'),
@@ -49,7 +48,7 @@ class DmarcTestCommand extends Command
         }
 
         $this->info("Připravuji {$count} testovacích DMARC reportů pro: {$targetEmail}");
-        $this->info("SMTP Host: " . config('mail.mailers.smtp.host'));
+        $this->info('SMTP Host: '.config('mail.mailers.smtp.host'));
 
         $scenarios = [
             ['org' => 'google.com', 'ip' => '209.85.222.1', 'dkim' => 'fail', 'spf' => 'fail'],
@@ -66,18 +65,18 @@ class DmarcTestCommand extends Command
 
         for ($i = 0; $i < $count; $i++) {
             $scenario = $scenarios[$i % count($scenarios)];
-            $reportId = 'TEST-REPORT-' . time() . '-' . ($i + 1);
+            $reportId = 'TEST-REPORT-'.time().'-'.($i + 1);
 
             $xml = $this->generateFakeXml($scenario, $reportId);
-            $filename = "{$scenario['org']}!" . config('app.url') . '!' . time() . "!{$reportId}.xml";
+            $filename = "{$scenario['org']}!".config('app.url').'!'.time()."!{$reportId}.xml";
 
             $gzData = gzencode($xml, 9);
-            $gzFilename = $filename . '.gz';
+            $gzFilename = $filename.'.gz';
 
             $this->info("({$i}/{$count}) Odesílám e-mail od {$scenario['org']} (IP: {$scenario['ip']})...");
 
             try {
-                Mail::raw("Toto je automaticky generovaný TESTOVACÍ DMARC report č. " . ($i + 1) . " od {$scenario['org']} pro ověření funkčnosti monitoringu.", function ($message) use ($targetEmail, $gzData, $gzFilename, $scenario, $reportId) {
+                Mail::raw('Toto je automaticky generovaný TESTOVACÍ DMARC report č. '.($i + 1)." od {$scenario['org']} pro ověření funkčnosti monitoringu.", function ($message) use ($targetEmail, $gzData, $gzFilename, $scenario, $reportId) {
                     $message->to($targetEmail)
                         ->subject("Report Domain: kbelstisokoli.cz Submitter: {$scenario['org']} Report-ID: <{$reportId}>")
                         ->attachData($gzData, $gzFilename, [
@@ -85,7 +84,7 @@ class DmarcTestCommand extends Command
                         ]);
                 });
             } catch (\Exception $e) {
-                $this->error("Chyba při odesílání reportu {$i}: " . $e->getMessage());
+                $this->error("Chyba při odesílání reportu {$i}: ".$e->getMessage());
             }
 
             // Malá pauza, aby se neodeslalo vše v jednu sekundu a měly unikátní IDs/časy
@@ -95,7 +94,7 @@ class DmarcTestCommand extends Command
         }
 
         $this->success("Všech {$count} e-mailů bylo odesláno do fronty/odesílání.");
-        $this->info("Nyní můžete spustit: php artisan dmarc:ingest");
+        $this->info('Nyní můžete spustit: php artisan dmarc:ingest');
     }
 
     protected function generateFakeXml(array $scenario, string $reportId): string

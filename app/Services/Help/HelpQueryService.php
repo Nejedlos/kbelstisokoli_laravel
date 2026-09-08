@@ -3,36 +3,36 @@
 namespace App\Services\Help;
 
 use App\Models\HelpArticle;
-use App\Models\HelpCategory;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
 class HelpQueryService
 {
     protected array $roles = [];
+
     protected ?string $section = null;
 
     /**
      * Nastaví role pro filtrování obsahu.
      *
-     * @param array|string $roles
      * @return $this
      */
     public function forAudience(array|string $roles): self
     {
         $this->roles = (array) $roles;
+
         return $this;
     }
 
     /**
      * Nastaví sekci pro filtrování obsahu.
      *
-     * @param string|null $section
      * @return $this
      */
     public function forSection(?string $section): self
     {
         $this->section = $section;
+
         return $this;
     }
 
@@ -51,6 +51,7 @@ class HelpQueryService
         if ($identifier) {
             $key .= "_{$identifier}";
         }
+
         return $key;
     }
 
@@ -91,12 +92,12 @@ class HelpQueryService
         }
 
         $filteringRoles = $this->getFilteringRoles();
-        if (!empty($filteringRoles)) {
+        if (! empty($filteringRoles)) {
             $query->where(function ($q) use ($filteringRoles) {
                 $q->whereNull('audience_roles');
                 foreach ($filteringRoles as $role) {
                     // FALLBACK: Pro produkční DB bez JSON funkcí (Webglobe) použijeme LIKE.
-                    $q->orWhere('audience_roles', 'LIKE', '%"' . (string) $role . '"%');
+                    $q->orWhere('audience_roles', 'LIKE', '%"'.(string) $role.'"%');
                 }
             });
         }
@@ -119,12 +120,12 @@ class HelpQueryService
                         if ($section === 'admin') {
                             // FALLBACK pro Webglobe
                             $q->where('help_articles.metadata', 'LIKE', '%"section":"admin"%')
-                              ->orWhere('help_articles.metadata', 'LIKE', '%"section":"both"%');
+                                ->orWhere('help_articles.metadata', 'LIKE', '%"section":"both"%');
                         } elseif ($section === 'member') {
                             // FALLBACK pro Webglobe
                             $q->where('help_articles.metadata', 'LIKE', '%"section":"member"%')
-                              ->orWhere('help_articles.metadata', 'LIKE', '%"section":"both"%')
-                              ->orWhereNull('help_articles.metadata');
+                                ->orWhere('help_articles.metadata', 'LIKE', '%"section":"both"%')
+                                ->orWhereNull('help_articles.metadata');
                         }
                     });
             });
@@ -132,12 +133,12 @@ class HelpQueryService
 
         // Role-based filtr přímo na kategorii (audience_roles)
         $filteringRoles = $this->getFilteringRoles();
-        if (!empty($filteringRoles)) {
+        if (! empty($filteringRoles)) {
             $query->where(function ($q) use ($filteringRoles) {
                 $q->whereNull('audience_roles');
                 foreach ($filteringRoles as $role) {
                     // FALLBACK pro Webglobe
-                    $q->orWhere('audience_roles', 'LIKE', '%"' . (string) $role . '"%');
+                    $q->orWhere('audience_roles', 'LIKE', '%"'.(string) $role.'"%');
                 }
             });
         }
@@ -146,10 +147,8 @@ class HelpQueryService
     /**
      * Načte kořenové kategorie pro úvodní stránku nápovědy.
      * Používá Query Builder pro maximální výkon a eliminaci rekurze v Eloquentu.
-     *
-     * @return \Illuminate\Support\Collection
      */
-    public function getHomeCategories(): \Illuminate\Support\Collection
+    public function getHomeCategories(): Collection
     {
         $cacheKey = $this->getCacheKey('home_categories');
 
@@ -193,11 +192,8 @@ class HelpQueryService
     /**
      * Načte doporučené (featured) články.
      * Používá Query Builder pro eliminaci paměťové náročnosti Eloquent modelů.
-     *
-     * @param int $limit
-     * @return \Illuminate\Support\Collection
      */
-    public function getFeaturedArticles(int $limit = 5): \Illuminate\Support\Collection
+    public function getFeaturedArticles(int $limit = 5): Collection
     {
         $cacheKey = $this->getCacheKey('featured_articles', (string) $limit);
 
@@ -222,11 +218,12 @@ class HelpQueryService
 
             return $rows->map(function ($item) use ($locale) {
                 $titleRaw = $item->title;
-                $title = is_array($titleRaw) ? $titleRaw : (json_decode((string)$titleRaw, true) ?: []);
+                $title = is_array($titleRaw) ? $titleRaw : (json_decode((string) $titleRaw, true) ?: []);
                 $item->title_str = $title[$locale] ?? ($title['cs'] ?? ($title['en'] ?? 'Untitled'));
                 $item->is_featured = (bool) $item->is_featured;
                 $rolesRaw = $item->audience_roles;
-                $item->audience_roles = is_array($rolesRaw) ? $rolesRaw : (json_decode((string)$rolesRaw, true) ?: []);
+                $item->audience_roles = is_array($rolesRaw) ? $rolesRaw : (json_decode((string) $rolesRaw, true) ?: []);
+
                 return $item;
             });
         });
@@ -234,9 +231,6 @@ class HelpQueryService
 
     /**
      * Načte kategorii podle slugu včetně jejích článků a podkategorií.
-     *
-     * @param string $slug
-     * @return object|null
      */
     public function getCategoryBySlug(string $slug): ?object
     {
@@ -255,7 +249,7 @@ class HelpQueryService
                 })
                 ->first();
 
-            if (!$category) {
+            if (! $category) {
                 return null;
             }
 
@@ -287,13 +281,13 @@ class HelpQueryService
                 ->get()
                 ->map(function ($article) use ($locale) {
                     $rolesRaw = $article->audience_roles;
-                    $article->audience_roles = is_array($rolesRaw) ? $rolesRaw : (json_decode((string)$rolesRaw, true) ?: []);
+                    $article->audience_roles = is_array($rolesRaw) ? $rolesRaw : (json_decode((string) $rolesRaw, true) ?: []);
                     $titleRaw = $article->title;
-                    $article->title = is_array($titleRaw) ? $titleRaw : (json_decode((string)$titleRaw, true) ?: []);
+                    $article->title = is_array($titleRaw) ? $titleRaw : (json_decode((string) $titleRaw, true) ?: []);
                     $article->title_str = $article->title[$locale] ?? ($article->title['cs'] ?? ($article->title['en'] ?? 'Untitled'));
 
                     $metaRaw = $article->metadata;
-                    $m = is_array($metaRaw) ? $metaRaw : (json_decode((string)$metaRaw ?? '[]', true) ?: []);
+                    $m = is_array($metaRaw) ? $metaRaw : (json_decode((string) $metaRaw ?? '[]', true) ?: []);
                     if (array_key_exists('cs', $m) || array_key_exists('en', $m) || array_key_exists($locale, $m)) {
                         $rawM = $m[$locale] ?? ($m['cs'] ?? ($m['en'] ?? '[]'));
                         $article->metadata = is_string($rawM) ? (json_decode($rawM, true) ?: []) : ($rawM ?: []);
@@ -312,8 +306,9 @@ class HelpQueryService
                 ->get()
                 ->map(function ($sub) use ($locale) {
                     $nameRaw = $sub->name;
-                    $name = is_array($nameRaw) ? $nameRaw : (json_decode((string)$nameRaw, true) ?: []);
+                    $name = is_array($nameRaw) ? $nameRaw : (json_decode((string) $nameRaw, true) ?: []);
                     $sub->name_str = $name[$locale] ?? ($name['cs'] ?? ($name['en'] ?? 'Untitled'));
+
                     return $sub;
                 });
 
@@ -323,9 +318,6 @@ class HelpQueryService
 
     /**
      * Načte článek podle slugu se všemi souvisejícími daty.
-     *
-     * @param string $slug
-     * @return object|null
      */
     public function getArticleBySlug(string $slug): ?object
     {
@@ -346,7 +338,7 @@ class HelpQueryService
                 ->with(['category', 'faqs', 'quickActions'])
                 ->first();
 
-            if (!$article) {
+            if (! $article) {
                 return null;
             }
 
@@ -382,10 +374,8 @@ class HelpQueryService
 
     /**
      * Načte všechny aktivní kategorie jako strom.
-     *
-     * @return \Illuminate\Support\Collection
      */
-    public function getCategoryTree(): \Illuminate\Support\Collection
+    public function getCategoryTree(): Collection
     {
         $cacheKey = $this->getCacheKey('category_tree');
 
@@ -404,8 +394,9 @@ class HelpQueryService
                 ->get()
                 ->map(function ($cat) use ($locale) {
                     $nameRaw = $cat->name;
-                    $name = is_array($nameRaw) ? $nameRaw : (json_decode((string)$nameRaw, true) ?: []);
+                    $name = is_array($nameRaw) ? $nameRaw : (json_decode((string) $nameRaw, true) ?: []);
                     $cat->name_str = $name[$locale] ?? ($name['cs'] ?? ($name['en'] ?? 'Untitled'));
+
                     return $cat;
                 });
 
@@ -419,11 +410,11 @@ class HelpQueryService
                 ->get()
                 ->map(function ($art) use ($locale) {
                     $titleRaw = $art->title;
-                    $title = is_array($titleRaw) ? $titleRaw : (json_decode((string)$titleRaw, true) ?: []);
+                    $title = is_array($titleRaw) ? $titleRaw : (json_decode((string) $titleRaw, true) ?: []);
                     $art->title_str = $title[$locale] ?? ($title['cs'] ?? ($title['en'] ?? 'Untitled'));
 
                     $metaRaw = $art->metadata;
-                    $m = is_array($metaRaw) ? $metaRaw : (json_decode((string)$metaRaw ?? '[]', true) ?: []);
+                    $m = is_array($metaRaw) ? $metaRaw : (json_decode((string) $metaRaw ?? '[]', true) ?: []);
                     if (array_key_exists('cs', $m) || array_key_exists('en', $m) || array_key_exists($locale, $m)) {
                         $rawM = $m[$locale] ?? ($m['cs'] ?? ($m['en'] ?? '[]'));
                         $art->metadata = is_string($rawM) ? (json_decode($rawM, true) ?: []) : ($rawM ?: []);
@@ -448,10 +439,10 @@ class HelpQueryService
             return $tree;
         });
     }
+
     /**
      * Vrátí předchozí a následující článek ve stejné kategorii.
      *
-     * @param object $article
      * @return array{prev: object|null, next: object|null}
      */
     public function getArticleNavigation(object $article): array
@@ -474,11 +465,11 @@ class HelpQueryService
 
         if ($prev) {
             $tRaw = $prev->title;
-            $t = is_array($tRaw) ? $tRaw : (json_decode((string)$tRaw, true) ?: []);
+            $t = is_array($tRaw) ? $tRaw : (json_decode((string) $tRaw, true) ?: []);
             $prev->title_str = $t[$locale] ?? ($t['cs'] ?? ($t['en'] ?? 'Untitled'));
 
             $mRaw = $prev->metadata;
-            $m = is_array($mRaw) ? $mRaw : (json_decode((string)$mRaw, true) ?: []);
+            $m = is_array($mRaw) ? $mRaw : (json_decode((string) $mRaw, true) ?: []);
             if (array_key_exists('cs', $m) || array_key_exists('en', $m) || array_key_exists($locale, $m)) {
                 $rawM = $m[$locale] ?? ($m['cs'] ?? ($m['en'] ?? '[]'));
                 $prev->metadata = is_string($rawM) ? (json_decode($rawM, true) ?: []) : ($rawM ?: []);
@@ -488,11 +479,11 @@ class HelpQueryService
         }
         if ($next) {
             $tRaw = $next->title;
-            $t = is_array($tRaw) ? $tRaw : (json_decode((string)$tRaw, true) ?: []);
+            $t = is_array($tRaw) ? $tRaw : (json_decode((string) $tRaw, true) ?: []);
             $next->title_str = $t[$locale] ?? ($t['cs'] ?? ($t['en'] ?? 'Untitled'));
 
             $mRaw = $next->metadata;
-            $m = is_array($mRaw) ? $mRaw : (json_decode((string)$mRaw, true) ?: []);
+            $m = is_array($mRaw) ? $mRaw : (json_decode((string) $mRaw, true) ?: []);
             if (array_key_exists('cs', $m) || array_key_exists('en', $m) || array_key_exists($locale, $m)) {
                 $rawM = $m[$locale] ?? ($m['cs'] ?? ($m['en'] ?? '[]'));
                 $next->metadata = is_string($rawM) ? (json_decode($rawM, true) ?: []) : ($rawM ?: []);

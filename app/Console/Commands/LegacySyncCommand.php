@@ -2,6 +2,10 @@
 
 namespace App\Console\Commands;
 
+use Database\Seeders\AttendanceMigrationSeeder;
+use Database\Seeders\EventMigrationSeeder;
+use Database\Seeders\FinanceMigrationSeeder;
+use Database\Seeders\MemberMigrationSeeder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 
@@ -52,16 +56,16 @@ class LegacySyncCommand extends Command
         config(['app.seed_fresh' => $fresh]);
 
         $seeders = [
-            \Database\Seeders\EventMigrationSeeder::class,
-            \Database\Seeders\AttendanceMigrationSeeder::class,
+            EventMigrationSeeder::class,
+            AttendanceMigrationSeeder::class,
         ];
 
         if ($all) {
             $seeders = [
-                \Database\Seeders\MemberMigrationSeeder::class,
-                \Database\Seeders\EventMigrationSeeder::class,
-                \Database\Seeders\AttendanceMigrationSeeder::class,
-                \Database\Seeders\FinanceMigrationSeeder::class,
+                MemberMigrationSeeder::class,
+                EventMigrationSeeder::class,
+                AttendanceMigrationSeeder::class,
+                FinanceMigrationSeeder::class,
             ];
         }
 

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class NotFoundLog extends Model
 {
@@ -24,7 +25,7 @@ class NotFoundLog extends Model
         'is_ignored' => 'boolean',
     ];
 
-    public function redirect(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function redirect(): BelongsTo
     {
         return $this->belongsTo(Redirect::class);
     }

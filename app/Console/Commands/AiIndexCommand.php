@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Services\AiIndexService;
 use App\Models\AiDocument;
+use App\Services\AiIndexService;
 use Illuminate\Console\Command;
 
 class AiIndexCommand extends Command
@@ -49,10 +49,16 @@ class AiIndexCommand extends Command
             $sections = [$sectionOption];
         }
 
-        $this->info("=== AI Search Indexer ===");
-        if ($fresh) $this->warn("! Režim FRESH: Stávající index pro vybrané parametry bude smazán.");
-        if ($enrich) $this->warn("! Režim ENRICH: Bude provedeno AI obohacení (OpenAI API).");
-        if ($force) $this->warn("! Režim FORCE: Všechny dokumenty budou přepsány bez ohledu na změny.");
+        $this->info('=== AI Search Indexer ===');
+        if ($fresh) {
+            $this->warn('! Režim FRESH: Stávající index pro vybrané parametry bude smazán.');
+        }
+        if ($enrich) {
+            $this->warn('! Režim ENRICH: Bude provedeno AI obohacení (OpenAI API).');
+        }
+        if ($force) {
+            $this->warn('! Režim FORCE: Všechny dokumenty budou přepsány bez ohledu na změny.');
+        }
 
         foreach ($locales as $locale) {
             foreach ($sections as $section) {
@@ -65,7 +71,7 @@ class AiIndexCommand extends Command
                     fresh: $fresh,
                     section: $section,
                     onProgress: function ($message) {
-                        $this->line("  - " . $message);
+                        $this->line('  - '.$message);
                     },
                     force: $force
                 );
@@ -85,7 +91,8 @@ class AiIndexCommand extends Command
                     $docsToEnrich = $query->get();
 
                     if ($docsToEnrich->isEmpty()) {
-                        $this->line("Žádné dokumenty k obohacení.");
+                        $this->line('Žádné dokumenty k obohacení.');
+
                         continue;
                     }
 
@@ -101,13 +108,13 @@ class AiIndexCommand extends Command
                     }
                     $bar->finish();
                     $this->newLine();
-                    $this->info("✓ AI Obohacení dokončeno: {$enrichedCount} / " . $docsToEnrich->count() . " úspěšně.");
+                    $this->info("✓ AI Obohacení dokončeno: {$enrichedCount} / ".$docsToEnrich->count().' úspěšně.');
                 }
             }
         }
 
         $this->newLine();
-        $this->info("=== Indexace kompletně dokončena ===");
+        $this->info('=== Indexace kompletně dokončena ===');
 
         return self::SUCCESS;
     }

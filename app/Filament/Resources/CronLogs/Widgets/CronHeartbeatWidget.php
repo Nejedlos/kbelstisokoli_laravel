@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\CronLogs\Widgets;
 
+use App\Support\IconHelper;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Carbon;
-use App\Support\IconHelper;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\HtmlString;
 
 class CronHeartbeatWidget extends BaseWidget
@@ -30,7 +30,7 @@ class CronHeartbeatWidget extends BaseWidget
 
         return [
             Stat::make(
-                new HtmlString(IconHelper::render(IconHelper::HEARTBEAT) . ' ' . __('admin.widgets.cron_heartbeat.label')),
+                new HtmlString(IconHelper::render(IconHelper::HEARTBEAT).' '.__('admin.widgets.cron_heartbeat.label')),
                 $isOk ? __('admin.widgets.cron_heartbeat.running') : __('admin.widgets.cron_heartbeat.inactive')
             )
                 ->description($lastHeartbeat instanceof Carbon ? __('admin.widgets.cron_heartbeat.last_run', ['time' => $lastHeartbeat->diffForHumans()]) : __('admin.widgets.cron_heartbeat.no_heartbeat'))

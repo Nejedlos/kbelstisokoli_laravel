@@ -11,6 +11,8 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\HtmlString;
 
 class ExternalImportRunForm
 {
@@ -97,23 +99,23 @@ class ExternalImportRunForm
                             ])
                             ->helperText(fn ($record) => $record && isset($record->metadata['html_size']) ? __('admin.resources.external_import_run.helpers.html_info', [
                                 'size' => number_format($record->metadata['html_size'] / 1024, 1),
-                                'sanitized' => (isset($record->metadata['sanitized_length']) ? number_format($record->metadata['sanitized_length'] / 1024, 1) : "N/A"),
-                                'timeout' => (config('services.openai.timeout') ?? 60)
+                                'sanitized' => (isset($record->metadata['sanitized_length']) ? number_format($record->metadata['sanitized_length'] / 1024, 1) : 'N/A'),
+                                'timeout' => (config('services.openai.timeout') ?? 60),
                             ]) : null)
                             ->hintAction(
                                 Action::make('copyError')
-                                    ->label(new \Illuminate\Support\HtmlString('
-                                        <span x-show="!copied">' . __('admin.resources.external_import_run.actions.copy_error') . '</span>
-                                        <span x-show="copied" x-cloak>' . __('admin.resources.external_import_run.actions.copied') . '</span>
+                                    ->label(new HtmlString('
+                                        <span x-show="!copied">'.__('admin.resources.external_import_run.actions.copy_error').'</span>
+                                        <span x-show="copied" x-cloak>'.__('admin.resources.external_import_run.actions.copied').'</span>
                                     '))
-                                    ->icon(new \Illuminate\Support\HtmlString('
-                                        <span x-show="!copied">' . \App\Support\FilamentIcon::render(\App\Support\Icons\AppIcon::COPY) . '</span>
-                                        <span x-show="copied" class="text-success-500" x-cloak>' . \App\Support\FilamentIcon::render(\App\Support\Icons\AppIcon::ACTIVATE) . '</span>
+                                    ->icon(new HtmlString('
+                                        <span x-show="!copied">'.FilamentIcon::render(AppIcon::COPY).'</span>
+                                        <span x-show="copied" class="text-success-500" x-cloak>'.FilamentIcon::render(AppIcon::ACTIVATE).'</span>
                                     '))
                                     ->color('primary')
                                     ->extraAttributes([
                                         'x-data' => '{ copied: false }',
-                                        'class' => 'font-bold'
+                                        'class' => 'font-bold',
                                     ])
                                     ->url('#')
                                     ->alpineClickHandler("event.preventDefault(); window.navigator.clipboard.writeText(\$el.closest('.fi-fo-field').querySelector('textarea').value); copied = true; setTimeout(() => copied = false, 2000); \$tooltip('Zkopírováno do schránky', { timeout: 2000 })")
@@ -121,11 +123,11 @@ class ExternalImportRunForm
                             ->hintAction(
                                 Action::make('downloadDebugHtml')
                                     ->label('Stáhnout zdrojové HTML')
-                                    ->icon(new \Illuminate\Support\HtmlString(\App\Support\FilamentIcon::render(\App\Support\Icons\AppIcon::AUDIT_LOGS)))
+                                    ->icon(new HtmlString(FilamentIcon::render(AppIcon::AUDIT_LOGS)))
                                     ->color('info')
                                     ->action(function ($record) {
-                                        if (isset($record->metadata['debug_html_file']) && \Illuminate\Support\Facades\Storage::disk('local')->exists($record->metadata['debug_html_file'])) {
-                                            return \Illuminate\Support\Facades\Storage::disk('local')->download($record->metadata['debug_html_file'], "import_run_{$record->id}.html");
+                                        if (isset($record->metadata['debug_html_file']) && Storage::disk('local')->exists($record->metadata['debug_html_file'])) {
+                                            return Storage::disk('local')->download($record->metadata['debug_html_file'], "import_run_{$record->id}.html");
                                         }
                                     })
                                     ->hidden(fn ($record) => ! $record || ! isset($record->metadata['debug_html_file']))
@@ -143,6 +145,7 @@ class ExternalImportRunForm
                                 if (is_array($state)) {
                                     return implode("\n", $state);
                                 }
+
                                 return $state;
                             })
                             ->hidden(fn ($record) => ! $record || ! isset($record->metadata['debug_logs'])),
@@ -209,15 +212,14 @@ class ExternalImportRunForm
                             ->deletable(false)
                             ->reorderable(false)
                             ->collapsed()
-                            ->itemLabel(fn (array $state): ?string =>
-                                ($state['action'] === 'created' ? '🆕 ' : ($state['action'] === 'updated' ? '📝 ' : 'ℹ️ ')) .
+                            ->itemLabel(fn (array $state): ?string => ($state['action'] === 'created' ? '🆕 ' : ($state['action'] === 'updated' ? '📝 ' : 'ℹ️ ')).
                                 (match ($state['action'] ?? '') {
                                     'created' => 'Vytvořeno',
                                     'updated' => 'Aktualizováno',
                                     'skipped' => 'Přeskočeno',
                                     'error' => 'Chyba',
                                     default => $state['action'] ?? 'Log',
-                                }) . ': ' .
+                                }).': '.
                                 ($state['model_type'] ? match (class_basename($state['model_type'])) {
                                     'Player' => 'Hráč',
                                     'Team' => 'Tým',
@@ -226,9 +228,9 @@ class ExternalImportRunForm
                                     'Opponent' => 'Soupeř',
                                     'Club' => 'Klub',
                                     default => class_basename($state['model_type'])
-                                } : '') .
-                                ($state['model_id'] ? ' (#' . $state['model_id'] . ')' : '')
-                            )
+                                } : '').
+                                ($state['model_id'] ? ' (#'.$state['model_id'].')' : '')
+                            ),
                     ])
                     ->collapsible()
                     ->hidden(fn ($record) => ! $record || $record->logs()->count() === 0),

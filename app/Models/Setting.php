@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Services\BrandingService;
+use App\Services\PerformanceService;
 use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;
@@ -18,8 +20,8 @@ class Setting extends Model
     {
         static::saved(function ($setting) {
             try {
-                app(\App\Services\BrandingService::class)->clearCache();
-                app(\App\Services\PerformanceService::class)->clearCache();
+                app(BrandingService::class)->clearCache();
+                app(PerformanceService::class)->clearCache();
             } catch (\Throwable $e) {
                 // Ignorovat během migrací/seedování pokud služba není připravena
             }

@@ -6,8 +6,8 @@ use App\Models\Dmarc\DmarcMailbox;
 use App\Models\Dmarc\DmarcRecord;
 use App\Models\Dmarc\DmarcReport;
 use App\Models\Dmarc\DmarcRun;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class DmarcImapService
 {
@@ -28,95 +28,119 @@ class DmarcImapService
             'log' => "Spouštím import pro {$mailbox->email}...\n",
         ]);
 
-        $connectionString = $this->getConnectionString($mailbox);
-        $inbox = @imap_open($connectionString, $mailbox->username, $mailbox->password);
+        $inbox = false;
 
-        if (!$inbox) {
-            $error = imap_last_error();
-            $run->update([
-                'finished_at' => now(),
-                'errors_count' => 1,
-                'log' => $run->log . "Chyba připojení k IMAP: {$error}\n",
-            ]);
-            $mailbox->update(['last_error' => $error]);
-            return $run;
-        }
+        try {
+            $connectionString = $this->getConnectionString($mailbox);
+            $inbox = @imap_open($connectionString, $mailbox->username, $mailbox->password);
 
-        $emails = imap_search($inbox, 'ALL'); // Můžeme později optimalizovat na UNSEEN nebo SINCE date
+            if (! $inbox) {
+                $error = imap_last_error();
+                $run->update([
+                    'finished_at' => now(),
+                    'errors_count' => 1,
+                    'log' => $run->log."Chyba připojení k IMAP: {$error}\n",
+                ]);
+                $mailbox->update(['last_error' => $error]);
 
-        if (!$emails) {
-            $run->update([
-                'finished_at' => now(),
-                'log' => $run->log . "Nenalezeny žádné e-maily.\n",
-            ]);
-            imap_close($inbox);
-            return $run;
-        }
+                return $run;
+            }
 
-        $foundCount = count($emails);
-        $processedCount = 0;
-        $errorsCount = 0;
+            $emails = imap_search($inbox, 'ALL'); // Můžeme později optimalizovat na UNSEEN nebo SINCE date
 
-        foreach ($emails as $mailUid) {
-            try {
-                $overview = imap_fetch_overview($inbox, $mailUid, 0);
-                $overview = $overview[0] ?? null;
+            if (! $emails) {
+                $run->update([
+                    'finished_at' => now(),
+                    'log' => $run->log."Nenalezeny žádné e-maily.\n",
+                ]);
 
-                if (!$overview) continue;
+                return $run;
+            }
 
-                $structure = imap_fetchstructure($inbox, $mailUid);
+            $foundCount = count($emails);
+            $processedCount = 0;
+            $errorsCount = 0;
 
-                if (isset($structure->parts)) {
-                    foreach ($structure->parts as $partNum => $part) {
-                        if ($this->isDmarcAttachment($part)) {
-                            $attachment = imap_fetchbody($inbox, $mailUid, $partNum + 1);
-                            $attachment = $this->decodeBody($attachment, $part->encoding);
-                            $filename = $this->getFilename($part);
+            foreach ($emails as $mailUid) {
+                try {
+                    $overview = imap_fetch_overview($inbox, $mailUid, 0);
+                    $overview = $overview[0] ?? null;
 
-                            if ($this->processAttachment($mailbox, $attachment, $filename, (string)$overview->uid, $overview->date, $run)) {
-                                $processedCount++;
+                    if (! $overview) {
+                        continue;
+                    }
+
+                    $structure = imap_fetchstructure($inbox, $mailUid);
+
+                    if (isset($structure->parts)) {
+                        foreach ($structure->parts as $partNum => $part) {
+                            if ($this->isDmarcAttachment($part)) {
+                                $attachment = imap_fetchbody($inbox, $mailUid, $partNum + 1);
+                                $attachment = $this->decodeBody($attachment, $part->encoding);
+                                $filename = $this->getFilename($part);
+
+                                if ($this->processAttachment($mailbox, $attachment, $filename, (string) $overview->uid, $overview->date, $run)) {
+                                    $processedCount++;
+                                }
                             }
                         }
                     }
+                } catch (\Exception $e) {
+                    $errorsCount++;
+                    $run->log .= "Chyba u UID {$mailUid}: ".$e->getMessage()."\n";
                 }
-            } catch (\Exception $e) {
-                $errorsCount++;
-                $run->log .= "Chyba u UID {$mailUid}: " . $e->getMessage() . "\n";
+            }
+
+            $run->update([
+                'finished_at' => now(),
+                'messages_found' => $foundCount,
+                'reports_processed' => $processedCount,
+                'errors_count' => $errorsCount,
+                'log' => $run->log."Import dokončen. Zpracováno {$processedCount} reportů.\n",
+            ]);
+
+            $mailbox->update([
+                'last_checked_at' => now(),
+                'last_error' => null,
+            ]);
+
+            return $run;
+        } finally {
+            try {
+                if ($inbox !== false) {
+                    imap_close($inbox);
+                }
+            } finally {
+                // imap_last_error() does not clear the queues. Unconsumed messages
+                // become PHP notices at request shutdown, even after @imap_open().
+                imap_errors();
+                imap_alerts();
             }
         }
-
-        $run->update([
-            'finished_at' => now(),
-            'messages_found' => $foundCount,
-            'reports_processed' => $processedCount,
-            'errors_count' => $errorsCount,
-            'log' => $run->log . "Import dokončen. Zpracováno {$processedCount} reportů.\n",
-        ]);
-
-        $mailbox->update([
-            'last_checked_at' => now(),
-            'last_error' => null,
-        ]);
-
-        imap_close($inbox);
-        return $run;
     }
 
     protected function getConnectionString(DmarcMailbox $mailbox): string
     {
         $options = '/imap';
-        if ($mailbox->encryption === 'ssl') $options .= '/ssl';
-        if ($mailbox->encryption === 'tls') $options .= '/tls/novalidate-cert';
+        if ($mailbox->encryption === 'ssl') {
+            $options .= '/ssl';
+        }
+        if ($mailbox->encryption === 'tls') {
+            $options .= '/tls/novalidate-cert';
+        }
 
-        return "{" . "{$mailbox->host}:{$mailbox->port}{$options}" . "}INBOX";
+        return '{'."{$mailbox->host}:{$mailbox->port}{$options}".'}INBOX';
     }
 
     protected function isDmarcAttachment($part): bool
     {
         $filename = $this->getFilename($part);
-        if (!$filename) return false;
+        if (! $filename) {
+            return false;
+        }
 
         $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+
         return in_array($ext, ['zip', 'gz', 'gzip', 'xml']);
     }
 
@@ -134,7 +158,7 @@ class DmarcImapService
             }
         }
 
-        if (!$filename && $part->ifparameters) {
+        if (! $filename && $part->ifparameters) {
             foreach ($part->parameters as $object) {
                 $attr = strtolower($object->attribute);
                 if ($attr === 'name' || $attr === 'name*') {
@@ -144,7 +168,7 @@ class DmarcImapService
             }
         }
 
-        if ($filename && (str_contains($filename, "''") || str_contains($filename, "?="))) {
+        if ($filename && (str_contains($filename, "''") || str_contains($filename, '?='))) {
             // Velmi hrubé pročištění pro RFC 2231/2047 pokud je to nutné
             // Pro účely testu to zkusíme nechat tak, isDmarcAttachment kouká na příponu
             $filename = urldecode(preg_replace('/^.*\'\'/', '', $filename));
@@ -155,8 +179,13 @@ class DmarcImapService
 
     protected function decodeBody($data, $encoding): string
     {
-        if ($encoding == 3) return base64_decode($data);
-        if ($encoding == 4) return quoted_printable_decode($data);
+        if ($encoding == 3) {
+            return base64_decode($data);
+        }
+        if ($encoding == 4) {
+            return quoted_printable_decode($data);
+        }
+
         return $data;
     }
 
@@ -169,8 +198,9 @@ class DmarcImapService
         }
 
         $xmlContent = $this->decoder->decode($content, $filename);
-        if (!$xmlContent) {
+        if (! $xmlContent) {
             $run->log .= "Nepodařilo se dekódovat přílohu {$filename} (UID {$uid})\n";
+
             return false;
         }
 
@@ -182,7 +212,7 @@ class DmarcImapService
         $dateEnd = date('Y-m-d H:i:s', $metadata['date_range']['end']);
 
         // Save XML for later download/viewing
-        $xmlPath = "dmarc/reports/" . date('Y/m/d') . "/{$sha256}.xml";
+        $xmlPath = 'dmarc/reports/'.date('Y/m/d')."/{$sha256}.xml";
         Storage::put($xmlPath, $xmlContent);
 
         $report = DmarcReport::create([
@@ -226,7 +256,7 @@ class DmarcImapService
                 $analysis = $this->analysisService->analyze($record, $report);
                 $this->alertService->handle($record, $report, $analysis);
             } catch (\Exception $e) {
-                Log::error("DMARC Post-processing failed for record {$record->id}: " . $e->getMessage());
+                Log::error("DMARC Post-processing failed for record {$record->id}: ".$e->getMessage());
             }
         }
 

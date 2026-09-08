@@ -6,6 +6,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class FinancePaymentsTable
@@ -63,14 +64,14 @@ class FinancePaymentsTable
                     }),
             ])
             ->filters([
-                \Filament\Tables\Filters\SelectFilter::make('status')
+                SelectFilter::make('status')
                     ->label('Stav')
                     ->options([
                         'recorded' => 'Zapsáno',
                         'confirmed' => 'Potvrzeno',
                         'reversed' => 'Stornováno',
                     ]),
-                \Filament\Tables\Filters\SelectFilter::make('payment_method')
+                SelectFilter::make('payment_method')
                     ->label('Metoda')
                     ->options([
                         'bank_transfer' => 'Bankovní převod',

@@ -2,9 +2,27 @@
 
 namespace App\Filament\Pages;
 
+use App\Models\Attendance;
+use App\Models\AuditLog;
+use App\Models\BasketballMatch;
+use App\Models\ChargePaymentAllocation;
+use App\Models\ClubEvent;
+use App\Models\CronLog;
+use App\Models\FinanceCharge;
+use App\Models\FinancePayment;
+use App\Models\Lead;
+use App\Models\PlayerProfile;
+use App\Models\Post;
+use App\Models\Season;
+use App\Models\Team;
+use App\Models\Training;
+use App\Models\User;
+use App\Models\UserSeasonConfig;
 use App\Services\BackendSearchService;
 use Filament\GlobalSearch\GlobalSearchResult;
+use Filament\Notifications\Notification;
 use Filament\Pages\Dashboard as BaseDashboard;
+use Illuminate\Contracts\Support\Htmlable;
 
 class Dashboard extends BaseDashboard
 {
@@ -15,7 +33,7 @@ class Dashboard extends BaseDashboard
         return __('admin.navigation.pages.dashboard');
     }
 
-    public function getTitle(): string|\Illuminate\Contracts\Support\Htmlable
+    public function getTitle(): string|Htmlable
     {
         return __('admin.navigation.pages.dashboard');
     }
@@ -33,34 +51,34 @@ class Dashboard extends BaseDashboard
         // KPI Stats
         $stats = [
             'users' => [
-                'total' => \App\Models\User::count(),
-                'active' => \App\Models\User::where('is_active', true)->count(),
+                'total' => User::count(),
+                'active' => User::where('is_active', true)->count(),
             ],
-            'players' => \App\Models\PlayerProfile::count(),
-            'teams' => \App\Models\Team::count(),
+            'players' => PlayerProfile::count(),
+            'teams' => Team::count(),
             'matches' => [
-                'total' => \App\Models\BasketballMatch::count(),
-                'upcoming' => \App\Models\BasketballMatch::where('scheduled_at', '>=', now())->count(),
+                'total' => BasketballMatch::count(),
+                'upcoming' => BasketballMatch::where('scheduled_at', '>=', now())->count(),
             ],
             'trainings' => [
-                'total' => \App\Models\Training::count(),
-                'upcoming' => \App\Models\Training::where('starts_at', '>=', now())->count(),
+                'total' => Training::count(),
+                'upcoming' => Training::where('starts_at', '>=', now())->count(),
             ],
-            'attendance' => class_exists(\App\Models\Attendance::class) ? \App\Models\Attendance::count() : 0,
-            'leads_pending' => \App\Models\Lead::where('status', 'pending')->count(),
-            'posts_active' => \App\Models\Post::where('status', 'published')->count(),
-            'events_upcoming' => \App\Models\ClubEvent::where('starts_at', '>=', now())->count(),
+            'attendance' => class_exists(Attendance::class) ? Attendance::count() : 0,
+            'leads_pending' => Lead::where('status', 'pending')->count(),
+            'posts_active' => Post::where('status', 'published')->count(),
+            'events_upcoming' => ClubEvent::where('starts_at', '>=', now())->count(),
         ];
 
         // Finance Stats
-        $totalReceivables = \App\Models\FinanceCharge::whereNotIn('status', ['cancelled'])
-            ->sum('amount_total') - \App\Models\ChargePaymentAllocation::sum('amount');
+        $totalReceivables = FinanceCharge::whereNotIn('status', ['cancelled'])
+            ->sum('amount_total') - ChargePaymentAllocation::sum('amount');
 
-        $overdueReceivables = \App\Models\FinanceCharge::whereNotIn('status', ['cancelled', 'paid'])
+        $overdueReceivables = FinanceCharge::whereNotIn('status', ['cancelled', 'paid'])
             ->where('due_date', '<', now())
             ->sum('amount_total'); // Simplified for now, real calculation would subtract allocations
 
-        $paymentsThisMonth = \App\Models\FinancePayment::whereMonth('paid_at', now()->month)
+        $paymentsThisMonth = FinancePayment::whereMonth('paid_at', now()->month)
             ->whereYear('paid_at', now()->year)
             ->sum('amount');
 
@@ -71,24 +89,24 @@ class Dashboard extends BaseDashboard
         ];
 
         // System Health
-        $lastCronRun = \App\Models\CronLog::latest('started_at')->first()?->started_at;
+        $lastCronRun = CronLog::latest('started_at')->first()?->started_at;
         $cronOk = $lastCronRun && $lastCronRun->gt(now()->subMinutes(65));
 
-        $mismatchesCount = \App\Models\Attendance::where('is_mismatch', true)
+        $mismatchesCount = Attendance::where('is_mismatch', true)
             ->where('updated_at', '>=', now()->subDays(30))
             ->count();
 
-        $currentSeason = \App\Models\Season::where('is_active', true)->first();
+        $currentSeason = Season::where('is_active', true)->first();
         $usersWithoutConfig = 0;
         if ($currentSeason) {
-            $usersWithoutConfig = \App\Models\User::where('is_active', true)
+            $usersWithoutConfig = User::where('is_active', true)
                 ->whereDoesntHave('userSeasonConfigs', fn ($q) => $q->where('season_id', $currentSeason->id))
                 ->count();
         }
 
         // Health & Season Renewal
-        $expectedSeasonName = \App\Models\Season::getExpectedCurrentSeasonName();
-        $configsExist = \App\Models\UserSeasonConfig::whereHas('season', fn ($q) => $q->where('name', $expectedSeasonName))->exists();
+        $expectedSeasonName = Season::getExpectedCurrentSeasonName();
+        $configsExist = UserSeasonConfig::whereHas('season', fn ($q) => $q->where('name', $expectedSeasonName))->exists();
 
         $isSeptember = now()->month == 9;
         $showRenewalWarning = (! $configsExist && $isSeptember) || $debug;
@@ -104,7 +122,7 @@ class Dashboard extends BaseDashboard
         ];
 
         // Recent Activity
-        $recentActivity = \App\Models\AuditLog::with('actor')
+        $recentActivity = AuditLog::with('actor')
             ->latest('occurred_at')
             ->latest('created_at')
             ->limit(8)
@@ -177,19 +195,19 @@ class Dashboard extends BaseDashboard
         ];
 
         // Upcoming Agenda
-        $upcomingMatches = \App\Models\BasketballMatch::with(['opponent', 'team'])
+        $upcomingMatches = BasketballMatch::with(['opponent', 'team'])
             ->where('scheduled_at', '>=', now())
             ->orderBy('scheduled_at')
             ->limit(2)
             ->get();
 
-        $upcomingTrainings = \App\Models\Training::with(['teams'])
+        $upcomingTrainings = Training::with(['teams'])
             ->where('starts_at', '>=', now())
             ->orderBy('starts_at')
             ->limit(2)
             ->get();
 
-        $upcomingEvents = \App\Models\ClubEvent::where('starts_at', '>=', now())
+        $upcomingEvents = ClubEvent::where('starts_at', '>=', now())
             ->orderBy('starts_at')
             ->limit(2)
             ->get();
@@ -224,7 +242,7 @@ class Dashboard extends BaseDashboard
             'contact_subject' => 'required',
         ]);
 
-        \App\Models\Lead::create([
+        Lead::create([
             'type' => 'admin_contact',
             'status' => 'pending',
             'name' => auth()->user()->name,
@@ -239,7 +257,7 @@ class Dashboard extends BaseDashboard
         $this->contact_message = '';
         $this->contact_subject = '';
 
-        \Filament\Notifications\Notification::make()
+        Notification::make()
             ->title(__('admin/dashboard.contact_admin.success_title'))
             ->success()
             ->send();

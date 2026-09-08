@@ -3,8 +3,8 @@
 namespace App\Http\Responses\Auth;
 
 use Illuminate\Http\JsonResponse;
-use Laravel\Fortify\Contracts\FailedPasswordResetLinkRequestResponse as Contract;
 use Illuminate\Support\Facades\Password;
+use Laravel\Fortify\Contracts\FailedPasswordResetLinkRequestResponse as Contract;
 
 class FailedPasswordResetLinkRequestResponse implements Contract
 {

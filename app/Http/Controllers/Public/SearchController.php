@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
+use App\Services\BreadcrumbService;
 use App\Services\SearchService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -13,7 +14,7 @@ class SearchController extends Controller
         protected SearchService $searchService
     ) {}
 
-    public function index(Request $request, \App\Services\BreadcrumbService $breadcrumbService): View
+    public function index(Request $request, BreadcrumbService $breadcrumbService): View
     {
         $query = $request->input('q', '');
         $results = collect();

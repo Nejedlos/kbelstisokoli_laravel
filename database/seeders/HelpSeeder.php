@@ -10,8 +10,6 @@ class HelpSeeder extends Seeder
 {
     /**
      * Seed the help system.
-     *
-     * @return void
      */
     public function run(): void
     {

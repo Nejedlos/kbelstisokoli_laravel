@@ -2,7 +2,15 @@
 
 namespace Database\Seeders;
 
+use App\Models\Attendance;
+use App\Models\BasketballMatch;
+use App\Models\ClubEvent;
+use App\Models\Training;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class AttendanceMigrationSeeder extends Seeder
 {
@@ -22,44 +30,44 @@ class AttendanceMigrationSeeder extends Seeder
 
         if ($isFresh) {
             $this->command->warn('Režim FRESH: Mažu existující docházku...');
-            \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
-            \App\Models\Attendance::truncate();
-            \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
+            Schema::disableForeignKeyConstraints();
+            Attendance::truncate();
+            Schema::enableForeignKeyConstraints();
         }
 
         $this->command->info('Načítám data o docházce ze staré DB...');
 
         try {
             // 1. Mapování uživatelů
-            $usersById = \App\Models\User::all()->mapWithKeys(function ($user) {
+            $usersById = User::all()->mapWithKeys(function ($user) {
                 $legacyId = $user->metadata['legacy_r_id'] ?? null;
 
                 return $legacyId ? [$legacyId => $user] : [];
             });
 
-            $usersByName = \App\Models\User::all()->keyBy('name');
+            $usersByName = User::all()->keyBy('name');
 
             // 2. Mapování událostí
-            $matches = \App\Models\BasketballMatch::all()->mapWithKeys(function ($match) {
+            $matches = BasketballMatch::all()->mapWithKeys(function ($match) {
                 $legacyId = $match->metadata['legacy_z_id'] ?? null;
 
                 return $legacyId ? [(int) $legacyId => $match] : [];
             });
 
-            $trainings = \App\Models\Training::all()->mapWithKeys(function ($training) {
+            $trainings = Training::all()->mapWithKeys(function ($training) {
                 $legacyId = $training->metadata['legacy_z_id'] ?? null;
 
                 return $legacyId ? [(int) $legacyId => $training] : [];
             });
 
-            $clubEvents = \App\Models\ClubEvent::all()->mapWithKeys(function ($event) {
+            $clubEvents = ClubEvent::all()->mapWithKeys(function ($event) {
                 $legacyId = $event->metadata['legacy_z_id'] ?? null;
 
                 return $legacyId ? [(int) $legacyId => $event] : [];
             });
 
             // 2.5 Mapování plátců (pro reálnou docházku)
-            $platiciToRid = \Illuminate\Support\Facades\DB::connection('old_mysql')->table('web_platici')
+            $platiciToRid = DB::connection('old_mysql')->table('web_platici')
                 ->select('id', 'r_id')
                 ->get()
                 ->pluck('r_id', 'id');
@@ -81,13 +89,13 @@ class AttendanceMigrationSeeder extends Seeder
     protected function migrateRsvp($oldDb, $usersById, $matches, $trainings, $clubEvents)
     {
         $this->command->info('Migruji docházku (plánovanou)...');
-        $query = \Illuminate\Support\Facades\DB::connection('old_mysql')->table('dochazka');
+        $query = DB::connection('old_mysql')->table('dochazka');
         $total = $query->count();
 
         $bar = $this->command->getOutput()->createProgressBar($total);
         $bar->start();
 
-        \Illuminate\Support\Facades\DB::disableQueryLog();
+        DB::disableQueryLog();
 
         $query->orderBy('id')->chunk(1000, function ($rsvps) use ($usersById, $matches, $trainings, $clubEvents, $bar) {
             $batch = [];
@@ -123,7 +131,7 @@ class AttendanceMigrationSeeder extends Seeder
                     'is_mismatch' => false, // Zatím nevíme realitu
                     'note' => $rsvp->dochazka === 'omluven' ? 'Omluven ze starého systému' : null,
                     'internal_note' => null,
-                    'responded_at' => \Carbon\Carbon::parse($rsvp->na),
+                    'responded_at' => Carbon::parse($rsvp->na),
                     'created_at' => $now,
                     'updated_at' => $now,
                 ];
@@ -133,7 +141,7 @@ class AttendanceMigrationSeeder extends Seeder
 
             if (! empty($batch)) {
                 try {
-                    \Illuminate\Support\Facades\DB::table('attendances')->upsert(
+                    DB::table('attendances')->upsert(
                         $batch,
                         ['user_id', 'attendable_id', 'attendable_type'],
                         ['planned_status', 'note', 'responded_at', 'updated_at']
@@ -154,7 +162,7 @@ class AttendanceMigrationSeeder extends Seeder
     protected function migrateActualAttendance($oldDb, $usersById, $usersByName, $matches, $trainings, $clubEvents, $platiciToRid)
     {
         $this->command->info('Migruji reálnou docházku (zápisy trenéra)...');
-        $oldActual = \Illuminate\Support\Facades\DB::connection('old_mysql')->table('web_realna_dochazka')->get();
+        $oldActual = DB::connection('old_mysql')->table('web_realna_dochazka')->get();
 
         $bar = $this->command->getOutput()->createProgressBar($oldActual->count());
         $bar->start();
@@ -204,7 +212,7 @@ class AttendanceMigrationSeeder extends Seeder
 
     protected function updateActualStatus($user, $event, $status, $recordedAt = null)
     {
-        $attendance = \App\Models\Attendance::where([
+        $attendance = Attendance::where([
             'user_id' => $user->id,
             'attendable_id' => $event->id,
             'attendable_type' => get_class($event),
@@ -214,20 +222,20 @@ class AttendanceMigrationSeeder extends Seeder
             $attendance->actual_status = $status;
             if ($recordedAt) {
                 $metadata = $attendance->metadata ?? [];
-                $metadata['legacy_recorded_at'] = \Carbon\Carbon::createFromTimestamp($recordedAt)->toDateTimeString();
+                $metadata['legacy_recorded_at'] = Carbon::createFromTimestamp($recordedAt)->toDateTimeString();
                 $attendance->metadata = $metadata;
             }
             // is_mismatch se spočítá automaticky v booted() metodě při save()
             $attendance->save();
         } else {
-            \App\Models\Attendance::create([
+            Attendance::create([
                 'user_id' => $user->id,
                 'attendable_id' => $event->id,
                 'attendable_type' => get_class($event),
                 'planned_status' => 'pending',
                 'actual_status' => $status,
                 'metadata' => $recordedAt ? [
-                    'legacy_recorded_at' => \Carbon\Carbon::createFromTimestamp($recordedAt)->toDateTimeString(),
+                    'legacy_recorded_at' => Carbon::createFromTimestamp($recordedAt)->toDateTimeString(),
                 ] : null,
             ]);
         }

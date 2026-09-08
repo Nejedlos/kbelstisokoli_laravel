@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\FinanceCharge;
+use App\Services\BrandingService;
 use Illuminate\Notifications\Messages\MailMessage;
 
 class NewChargeNotification extends BaseNotification
@@ -19,7 +20,7 @@ class NewChargeNotification extends BaseNotification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $branding = app(\App\Services\BrandingService::class)->getSettings();
+        $branding = app(BrandingService::class)->getSettings();
         $clubName = $branding['club_name'];
 
         return (new MailMessage)

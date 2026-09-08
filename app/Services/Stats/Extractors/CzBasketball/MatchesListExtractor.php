@@ -66,144 +66,144 @@ class MatchesListExtractor implements StatExtractorInterface
                     return;
                 }
 
-            // Najdeme odkaz na detail zápasu
-            $matchLink = $tr->filter('a[href*="/zapas/"]')->first();
-            $matchId = null;
-            if ($matchLink->count() > 0) {
-                if (preg_match('/\/zapas\/(\d+)/', $matchLink->attr('href'), $matches)) {
-                    $matchId = $matches[1];
-                }
-            }
-
-            // Datum a čas (druhá buňka)
-            $dateCell = $cells->eq(1);
-            $dateStr = trim($dateCell->text());
-
-            // Vyčistíme datum (může obsahovat den v týdnu a br)
-            // Např. "6. 3. 2026 Pá 19:15"
-            $scheduledAt = null;
-            if ($dateStr) {
-                // Odstraníme dny v týdnu
-                $cleanDateStr = preg_replace('/(Po|Út|St|Čt|Pá|So|Ne)\s*/', '', $dateStr);
-                // Nahradíme více mezer jednou
-                $cleanDateStr = preg_replace('/\s+/', ' ', trim($cleanDateStr));
-
-                try {
-                    // Formát: 6. 3. 2026 19:15
-                    // Explicitně používáme Europe/Prague časovou zónu, aby se předešlo posunu o hodinu při uložení do DB
-                    $scheduledAt = Carbon::createFromFormat('j. n. Y H:i', $cleanDateStr, 'Europe/Prague');
-                } catch (\Exception $e) {
-                    try {
-                        // Zkusíme bez času - rozdělíme podle mezer a vezmeme první 3 části (např. 6., 3., 2026)
-                        $parts = array_filter(explode(' ', $cleanDateStr));
-                        $dateOnly = implode(' ', array_slice($parts, 0, 3));
-                        $scheduledAt = Carbon::createFromFormat('j. n. Y', $dateOnly, 'Europe/Prague');
-                    } catch (\Exception $e2) {
-                        $warnings[] = "Could not parse date: $dateStr";
+                // Najdeme odkaz na detail zápasu
+                $matchLink = $tr->filter('a[href*="/zapas/"]')->first();
+                $matchId = null;
+                if ($matchLink->count() > 0) {
+                    if (preg_match('/\/zapas\/(\d+)/', $matchLink->attr('href'), $matches)) {
+                        $matchId = $matches[1];
                     }
                 }
-            }
 
-            // Týmy (třetí buňka)
-            $teamNodes = $cells->eq(2)->filter('.text-nowrap');
-            $homeTeamId = null;
-            $awayTeamId = null;
+                // Datum a čas (druhá buňka)
+                $dateCell = $cells->eq(1);
+                $dateStr = trim($dateCell->text());
 
-            if ($teamNodes->count() >= 2) {
-                $homeTeam = trim($teamNodes->eq(0)->text());
-                $awayTeam = trim($teamNodes->eq(1)->text());
+                // Vyčistíme datum (může obsahovat den v týdnu a br)
+                // Např. "6. 3. 2026 Pá 19:15"
+                $scheduledAt = null;
+                if ($dateStr) {
+                    // Odstraníme dny v týdnu
+                    $cleanDateStr = preg_replace('/(Po|Út|St|Čt|Pá|So|Ne)\s*/', '', $dateStr);
+                    // Nahradíme více mezer jednou
+                    $cleanDateStr = preg_replace('/\s+/', ' ', trim($cleanDateStr));
 
-                // Zkusíme najít external_id týmu (v odkazu)
-                $homeLink = $teamNodes->eq(0)->filter('a[href*="/tym/"]')->first();
-                if ($homeLink->count() > 0 && preg_match('/\/tym\/(\d+)/', $homeLink->attr('href'), $m)) {
-                    $homeTeamId = $m[1];
-                }
-                $awayLink = $teamNodes->eq(1)->filter('a[href*="/tym/"]')->first();
-                if ($awayLink->count() > 0 && preg_match('/\/tym\/(\d+)/', $awayLink->attr('href'), $m)) {
-                    $awayTeamId = $m[1];
-                }
-            } else {
-                // Fallback na text rozdělený novým řádkem nebo něčím
-                $teams = explode("\n", trim($cells->eq(2)->text()));
-                $homeTeam = trim($teams[0] ?? 'Unknown');
-                $awayTeam = trim($teams[1] ?? 'Unknown');
-
-                // Zkusíme aspoň odkaz kdekoli v buňce (pokud jsou tam dva, tak první=home, druhý=away)
-                $links = $cells->eq(2)->filter('a[href*="/tym/"]');
-                if ($links->count() >= 1 && preg_match('/\/tym\/(\d+)/', $links->eq(0)->attr('href'), $m)) {
-                    $homeTeamId = $m[1];
-                }
-                if ($links->count() >= 2 && preg_match('/\/tym\/(\d+)/', $links->eq(1)->attr('href'), $m)) {
-                    $awayTeamId = $m[1];
-                }
-            }
-
-            // Skóre (čtvrtá buňka)
-            $scoreCell = $cells->eq(3);
-            $scoreDivs = $scoreCell->filter('div');
-
-            if ($scoreDivs->count() >= 2) {
-                // Často jsou body domácích a hostů v samostatných div-ech
-                $score = trim($scoreDivs->eq(0)->text()).':'.trim($scoreDivs->eq(1)->text());
-            } else {
-                $score = trim($scoreCell->text());
-                // Pokud obsahuje mezeru nebo pomlčku a neobsahuje dvojtečku, zkusíme ji nahradit
-                // Také vyčistíme text od případných divných znaků
-                if (! str_contains($score, ':')) {
-                    if (preg_match_all('/(\d+)/', $score, $scoreMatches)) {
-                        if (count($scoreMatches[0]) >= 2) {
-                            $score = $scoreMatches[0][0].':'.$scoreMatches[0][1];
+                    try {
+                        // Formát: 6. 3. 2026 19:15
+                        // Explicitně používáme Europe/Prague časovou zónu, aby se předešlo posunu o hodinu při uložení do DB
+                        $scheduledAt = Carbon::createFromFormat('j. n. Y H:i', $cleanDateStr, 'Europe/Prague');
+                    } catch (\Exception $e) {
+                        try {
+                            // Zkusíme bez času - rozdělíme podle mezer a vezmeme první 3 části (např. 6., 3., 2026)
+                            $parts = array_filter(explode(' ', $cleanDateStr));
+                            $dateOnly = implode(' ', array_slice($parts, 0, 3));
+                            $scheduledAt = Carbon::createFromFormat('j. n. Y', $dateOnly, 'Europe/Prague');
+                        } catch (\Exception $e2) {
+                            $warnings[] = "Could not parse date: $dateStr";
                         }
                     }
                 }
-            }
 
-            $status = 'scheduled';
-            // Pokud je zápas v budoucnu, ignorujeme skóre (může to být čas utkání)
-            $isFuture = $scheduledAt && $scheduledAt->gt(now()->addMinutes(30));
+                // Týmy (třetí buňka)
+                $teamNodes = $cells->eq(2)->filter('.text-nowrap');
+                $homeTeamId = null;
+                $awayTeamId = null;
 
-            if (! $isFuture && $score && preg_match('/\d+\s*:\s*\d+/', $score)) {
-                $status = 'finished';
-            } elseif ($scheduledAt && $scheduledAt->copy()->addHours(2)->isPast()) {
-                // Pokud je v minulosti (více než 2 hodiny po začátku), považujeme ho za odehraný, i když skóre chybí (bude staženo z detailu)
-                $status = 'finished';
-            }
+                if ($teamNodes->count() >= 2) {
+                    $homeTeam = trim($teamNodes->eq(0)->text());
+                    $awayTeam = trim($teamNodes->eq(1)->text());
 
-            if ($status === 'scheduled') {
-                $score = null;
-            }
+                    // Zkusíme najít external_id týmu (v odkazu)
+                    $homeLink = $teamNodes->eq(0)->filter('a[href*="/tym/"]')->first();
+                    if ($homeLink->count() > 0 && preg_match('/\/tym\/(\d+)/', $homeLink->attr('href'), $m)) {
+                        $homeTeamId = $m[1];
+                    }
+                    $awayLink = $teamNodes->eq(1)->filter('a[href*="/tym/"]')->first();
+                    if ($awayLink->count() > 0 && preg_match('/\/tym\/(\d+)/', $awayLink->attr('href'), $m)) {
+                        $awayTeamId = $m[1];
+                    }
+                } else {
+                    // Fallback na text rozdělený novým řádkem nebo něčím
+                    $teams = explode("\n", trim($cells->eq(2)->text()));
+                    $homeTeam = trim($teams[0] ?? 'Unknown');
+                    $awayTeam = trim($teams[1] ?? 'Unknown');
 
-            $rows[] = new NormalizedRowDTO(
-                values: [
-                    'scheduled_at' => $scheduledAt?->toDateTimeString(),
-                    'home_team' => $homeTeam,
-                    'away_team' => $awayTeam,
-                    'score' => $score,
-                    'status' => $status,
-                    'external_match_id' => $matchId,
-                    'home_team_external_id' => $homeTeamId,
-                    'away_team_external_id' => $awayTeamId,
-                ],
-                metadata: [
-                    'external_match_id' => $matchId,
-                    'home_team_external_id' => $homeTeamId,
-                    'away_team_external_id' => $awayTeamId,
-                    'source' => 'czbasketball',
-                ]
-            );
-        });
-    }
+                    // Zkusíme aspoň odkaz kdekoli v buňce (pokud jsou tam dva, tak první=home, druhý=away)
+                    $links = $cells->eq(2)->filter('a[href*="/tym/"]');
+                    if ($links->count() >= 1 && preg_match('/\/tym\/(\d+)/', $links->eq(0)->attr('href'), $m)) {
+                        $homeTeamId = $m[1];
+                    }
+                    if ($links->count() >= 2 && preg_match('/\/tym\/(\d+)/', $links->eq(1)->attr('href'), $m)) {
+                        $awayTeamId = $m[1];
+                    }
+                }
+
+                // Skóre (čtvrtá buňka)
+                $scoreCell = $cells->eq(3);
+                $scoreDivs = $scoreCell->filter('div');
+
+                if ($scoreDivs->count() >= 2) {
+                    // Často jsou body domácích a hostů v samostatných div-ech
+                    $score = trim($scoreDivs->eq(0)->text()).':'.trim($scoreDivs->eq(1)->text());
+                } else {
+                    $score = trim($scoreCell->text());
+                    // Pokud obsahuje mezeru nebo pomlčku a neobsahuje dvojtečku, zkusíme ji nahradit
+                    // Také vyčistíme text od případných divných znaků
+                    if (! str_contains($score, ':')) {
+                        if (preg_match_all('/(\d+)/', $score, $scoreMatches)) {
+                            if (count($scoreMatches[0]) >= 2) {
+                                $score = $scoreMatches[0][0].':'.$scoreMatches[0][1];
+                            }
+                        }
+                    }
+                }
+
+                $status = 'scheduled';
+                // Pokud je zápas v budoucnu, ignorujeme skóre (může to být čas utkání)
+                $isFuture = $scheduledAt && $scheduledAt->gt(now()->addMinutes(30));
+
+                if (! $isFuture && $score && preg_match('/\d+\s*:\s*\d+/', $score)) {
+                    $status = 'finished';
+                } elseif ($scheduledAt && $scheduledAt->copy()->addHours(2)->isPast()) {
+                    // Pokud je v minulosti (více než 2 hodiny po začátku), považujeme ho za odehraný, i když skóre chybí (bude staženo z detailu)
+                    $status = 'finished';
+                }
+
+                if ($status === 'scheduled') {
+                    $score = null;
+                }
+
+                $rows[] = new NormalizedRowDTO(
+                    values: [
+                        'scheduled_at' => $scheduledAt?->toDateTimeString(),
+                        'home_team' => $homeTeam,
+                        'away_team' => $awayTeam,
+                        'score' => $score,
+                        'status' => $status,
+                        'external_match_id' => $matchId,
+                        'home_team_external_id' => $homeTeamId,
+                        'away_team_external_id' => $awayTeamId,
+                    ],
+                    metadata: [
+                        'external_match_id' => $matchId,
+                        'home_team_external_id' => $homeTeamId,
+                        'away_team_external_id' => $awayTeamId,
+                        'source' => 'czbasketball',
+                    ]
+                );
+            });
+        }
 
         // Odstranění duplicit podle external_match_id (prioritizujeme záznamy s datem a týmy)
         $uniqueRows = collect($rows)
-            ->filter(fn($r) => !empty($r->values['external_match_id']))
-            ->sortByDesc(fn($r) => ($r->values['scheduled_at'] ? 1 : 0) + ($r->values['home_team'] !== 'Unknown' ? 1 : 0))
+            ->filter(fn ($r) => ! empty($r->values['external_match_id']))
+            ->sortByDesc(fn ($r) => ($r->values['scheduled_at'] ? 1 : 0) + ($r->values['home_team'] !== 'Unknown' ? 1 : 0))
             ->unique('values.external_match_id')
             ->values()
             ->all();
 
         // Přidáme zpět ty, které nemají external_match_id (pokud nějaké jsou)
-        $noIdRows = collect($rows)->filter(fn($r) => empty($r->values['external_match_id']))->all();
+        $noIdRows = collect($rows)->filter(fn ($r) => empty($r->values['external_match_id']))->all();
         $finalRows = array_merge($uniqueRows, $noIdRows);
 
         $dto = new NormalizedTableDTO(

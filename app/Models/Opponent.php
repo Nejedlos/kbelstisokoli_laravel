@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Opponent extends Model
 {
@@ -18,12 +20,12 @@ class Opponent extends Model
         'metadata' => 'array',
     ];
 
-    public function matches(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function matches(): HasMany
     {
         return $this->hasMany(BasketballMatch::class, 'opponent_id');
     }
 
-    public function primaryVenue(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function primaryVenue(): BelongsTo
     {
         return $this->belongsTo(Venue::class, 'primary_venue_id');
     }

@@ -11,6 +11,7 @@ use Symfony\Component\Finder\Finder;
 class DocumentationService
 {
     protected string $docsPath;
+
     protected string $baseDocsPath;
 
     public function __construct()
@@ -22,11 +23,11 @@ class DocumentationService
     protected function setPathByLocale(?string $locale = null): void
     {
         $locale = $locale ?: app()->getLocale();
-        $path = $this->baseDocsPath . DIRECTORY_SEPARATOR . $locale;
+        $path = $this->baseDocsPath.DIRECTORY_SEPARATOR.$locale;
 
         // Fallback na cs, pokud složka pro daný jazyk neexistuje
-        if (!File::exists($path)) {
-            $path = $this->baseDocsPath . DIRECTORY_SEPARATOR . 'cs';
+        if (! File::exists($path)) {
+            $path = $this->baseDocsPath.DIRECTORY_SEPARATOR.'cs';
         }
 
         $this->docsPath = $path;
@@ -48,11 +49,12 @@ class DocumentationService
             'is_root' => true,
         ]);
 
-        if (!File::exists($this->docsPath)) {
+        if (! File::exists($this->docsPath)) {
             // Pokud ani cs neexistuje, zkusíme kořen jako nouzovku (pro zpětnou kompatibilitu)
-            if (!File::exists($this->baseDocsPath)) {
+            if (! File::exists($this->baseDocsPath)) {
                 return $tree;
             }
+
             return $tree->concat($this->scanDirectory($this->baseDocsPath));
         }
 
@@ -68,7 +70,9 @@ class DocumentationService
         // Zpracování složek
         foreach ($directories as $directory) {
             $name = basename($directory);
-            if ($name === 'changes') continue; // Ignorujeme changes pro hlavní navi, pokud chceme
+            if ($name === 'changes') {
+                continue;
+            } // Ignorujeme changes pro hlavní navi, pokud chceme
 
             $items->push([
                 'type' => 'directory',
@@ -80,10 +84,14 @@ class DocumentationService
 
         // Zpracování souborů
         foreach ($files as $file) {
-            if ($file->getExtension() !== 'md') continue;
+            if ($file->getExtension() !== 'md') {
+                continue;
+            }
 
             $name = $file->getFilenameWithoutExtension();
-            if ($name === 'index' && $path === $this->docsPath) continue;
+            if ($name === 'index' && $path === $this->docsPath) {
+                continue;
+            }
 
             $items->push([
                 'type' => 'file',
@@ -106,21 +114,21 @@ class DocumentationService
         } elseif (Str::startsWith($relativePath, 'docs/')) {
             $fullPath = base_path($relativePath);
         } else {
-            $fullPath = $this->docsPath . DIRECTORY_SEPARATOR . ltrim($relativePath, DIRECTORY_SEPARATOR);
+            $fullPath = $this->docsPath.DIRECTORY_SEPARATOR.ltrim($relativePath, DIRECTORY_SEPARATOR);
         }
 
-        if (!File::exists($fullPath) || !File::isFile($fullPath)) {
+        if (! File::exists($fullPath) || ! File::isFile($fullPath)) {
             return null;
         }
 
         $content = File::get($fullPath);
 
         // Oprava relativních linků v markdownu pro README.md a ostatní
-        $content = preg_replace_callback('/\[([^\]]+)\]\(([^)]+\.md)\)/', function($matches) use ($relativePath) {
+        $content = preg_replace_callback('/\[([^\]]+)\]\(([^)]+\.md)\)/', function ($matches) use ($relativePath) {
             $text = $matches[1];
             $link = $matches[2];
 
-            if (!Str::startsWith($link, 'http') && !Str::startsWith($link, '/')) {
+            if (! Str::startsWith($link, 'http') && ! Str::startsWith($link, '/')) {
                 // Pokud jsme v README, linky jsou už pravděpodobně docs/cs/...
                 if ($relativePath === 'README.md') {
                     return "[{$text}](?file={$link})";
@@ -132,11 +140,13 @@ class DocumentationService
                     return "[{$text}](?file={$link})";
                 }
 
-                $newLink = $currentDir . '/' . $link;
+                $newLink = $currentDir.'/'.$link;
                 // Zjednodušení cesty (např. odstranění /./)
                 $newLink = str_replace(['/./', './'], '', $newLink);
+
                 return "[{$text}](?file={$newLink})";
             }
+
             return $matches[0];
         }, $content);
 
@@ -158,11 +168,13 @@ class DocumentationService
     public function search(string $query): Collection
     {
         $query = trim($query);
-        if (empty($query)) return collect();
+        if (empty($query)) {
+            return collect();
+        }
 
         $path = File::exists($this->docsPath) ? $this->docsPath : $this->baseDocsPath;
 
-        $finder = new Finder();
+        $finder = new Finder;
         $finder->files()->in($path)->name('*.md');
 
         $results = collect();
@@ -231,7 +243,7 @@ class DocumentationService
 
     protected function getRelativePath(string $fullPath): string
     {
-        return str_replace($this->docsPath . DIRECTORY_SEPARATOR, '', $fullPath);
+        return str_replace($this->docsPath.DIRECTORY_SEPARATOR, '', $fullPath);
     }
 
     protected function getExcerpt(string $content, string $query): string
@@ -244,8 +256,12 @@ class DocumentationService
 
         $excerpt = mb_substr($content, $start, $length);
 
-        if ($start > 0) $excerpt = '...' . $excerpt;
-        if ($start + $length < mb_strlen($content)) $excerpt .= '...';
+        if ($start > 0) {
+            $excerpt = '...'.$excerpt;
+        }
+        if ($start + $length < mb_strlen($content)) {
+            $excerpt .= '...';
+        }
 
         return $excerpt;
     }

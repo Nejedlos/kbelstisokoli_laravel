@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\ExternalTeamSeasonConfigs\Tables;
 
 use App\Services\Stats\Sync\ExternalStatsSyncService;
-use App\Support\IconHelper;
+use App\Support\MatchResultHelper;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -59,7 +59,7 @@ class ExternalTeamSeasonConfigsTable
                         null => 'Neznámo',
                     })
                     ->tooltip(fn ($record) => ($record->metadata['consistency']['is_consistent'] ?? null) === false
-                        ? "Lokálně: Z:{$record->metadata['consistency']['local']['gp']}, V:{$record->metadata['consistency']['local']['w']}, P:{$record->metadata['consistency']['local']['l']}. " .
+                        ? "Lokálně: Z:{$record->metadata['consistency']['local']['gp']}, V:{$record->metadata['consistency']['local']['w']}, P:{$record->metadata['consistency']['local']['l']}. ".
                           "Oficiálně: Z:{$record->metadata['consistency']['official']['gp']}, V:{$record->metadata['consistency']['official']['w']}, P:{$record->metadata['consistency']['official']['l']}."
                         : null),
                 TextColumn::make('health')
@@ -152,7 +152,7 @@ class ExternalTeamSeasonConfigsTable
                 $successCount++;
             } catch (\Exception $e) {
                 $errorCount++;
-                $errors[] = ($record->team?->name ?? 'Neznámý tým') . ': ' . $e->getMessage();
+                $errors[] = ($record->team?->name ?? 'Neznámý tým').': '.$e->getMessage();
             }
         }
 
@@ -163,8 +163,8 @@ class ExternalTeamSeasonConfigsTable
                 ->send();
         } else {
             Notification::make()
-                ->title("Hromadná synchronizace dokončena s chybami")
-                ->body("Úspěšně: $successCount, Chyby: $errorCount. " . implode('; ', array_slice($errors, 0, 3)) . (count($errors) > 3 ? '...' : ''))
+                ->title('Hromadná synchronizace dokončena s chybami')
+                ->body("Úspěšně: $successCount, Chyby: $errorCount. ".implode('; ', array_slice($errors, 0, 3)).(count($errors) > 3 ? '...' : ''))
                 ->warning()
                 ->send();
         }
@@ -218,7 +218,7 @@ class ExternalTeamSeasonConfigsTable
                     ->schema([
                         TextEntry::make('date')->label('Datum'),
                         TextEntry::make('opponent')->label('Soupeř'),
-                        TextEntry::make('score')->label('Skóre')->formatStateUsing(fn ($state) => \App\Support\MatchResultHelper::formatScore($state)),
+                        TextEntry::make('score')->label('Skóre')->formatStateUsing(fn ($state) => MatchResultHelper::formatScore($state)),
                         TextEntry::make('ext_id')->label('Externí ID'),
                     ])
                     ->columns(4),

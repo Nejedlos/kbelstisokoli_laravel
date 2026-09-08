@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Artisan;
+use Laravel\Telescope\Telescope;
 
 class GlobalSeeder extends Seeder
 {
@@ -94,8 +96,8 @@ class GlobalSeeder extends Seeder
     {
         ini_set('memory_limit', '1024M');
 
-        if (class_exists(\Laravel\Telescope\Telescope::class)) {
-            \Laravel\Telescope\Telescope::stopRecording();
+        if (class_exists(Telescope::class)) {
+            Telescope::stopRecording();
         }
 
         $seeders = self::SEEDERS;
@@ -115,6 +117,6 @@ class GlobalSeeder extends Seeder
 
         // Synchronizace výchozích avatarů (nyní ukládá přímo do public/uploads/defaults)
         $this->command->info('Synchronizuji výchozí avatary...');
-        \Illuminate\Support\Facades\Artisan::call('sync:default-avatars', [], $this->command->getOutput());
+        Artisan::call('sync:default-avatars', [], $this->command->getOutput());
     }
 }

@@ -3,6 +3,10 @@
 namespace App\Listeners;
 
 use App\Events\RsvpChanged;
+use App\Models\BasketballMatch;
+use App\Models\ClubEvent;
+use App\Models\Training;
+use App\Models\User;
 use App\Notifications\RsvpChangedNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
@@ -25,7 +29,7 @@ class RsvpChangedHandler implements ShouldQueue
         }
 
         // Načteme relace soupeře pro zápasy a týmy pro ostatní, abychom měli všechna data pro URL a texty
-        if ($eventModel instanceof \App\Models\BasketballMatch) {
+        if ($eventModel instanceof BasketballMatch) {
             $eventModel->loadMissing(['opponent', 'team']);
         } else {
             $eventModel->loadMissing('teams');
@@ -33,16 +37,16 @@ class RsvpChangedHandler implements ShouldQueue
 
         // --- Identifikace události a štítku ---
         $eventLabelKey = match (get_class($eventModel)) {
-            \App\Models\Training::class => 'training',
-            \App\Models\BasketballMatch::class => 'match',
-            \App\Models\ClubEvent::class => 'club_event',
+            Training::class => 'training',
+            BasketballMatch::class => 'match',
+            ClubEvent::class => 'club_event',
             default => 'event',
         };
 
         $eventTitle = match (get_class($eventModel)) {
-            \App\Models\Training::class => ($eventModel->location ? "Trénink ($eventModel->location)" : 'Trénink'),
-            \App\Models\BasketballMatch::class => ($eventModel->team?->name ?? 'Sokoli').' vs. '.($eventModel->opponent?->name ?? 'soupeř'),
-            \App\Models\ClubEvent::class => $eventModel->title,
+            Training::class => ($eventModel->location ? "Trénink ($eventModel->location)" : 'Trénink'),
+            BasketballMatch::class => ($eventModel->team?->name ?? 'Sokoli').' vs. '.($eventModel->opponent?->name ?? 'soupeř'),
+            ClubEvent::class => $eventModel->title,
             default => $eventModel->title ?? $eventModel->name ?? 'událost',
         };
 
@@ -53,16 +57,16 @@ class RsvpChangedHandler implements ShouldQueue
 
         // --- URL a Datum ---
         $type = match (true) {
-            $eventModel instanceof \App\Models\Training => 'training',
-            $eventModel instanceof \App\Models\BasketballMatch => 'match',
-            $eventModel instanceof \App\Models\ClubEvent => 'event',
+            $eventModel instanceof Training => 'training',
+            $eventModel instanceof BasketballMatch => 'match',
+            $eventModel instanceof ClubEvent => 'event',
             default => strtolower(class_basename($eventModel)),
         };
 
         $eventDate = match (true) {
-            $eventModel instanceof \App\Models\Training => $eventModel->starts_at,
-            $eventModel instanceof \App\Models\BasketballMatch => $eventModel->scheduled_at,
-            $eventModel instanceof \App\Models\ClubEvent => $eventModel->starts_at,
+            $eventModel instanceof Training => $eventModel->starts_at,
+            $eventModel instanceof BasketballMatch => $eventModel->scheduled_at,
+            $eventModel instanceof ClubEvent => $eventModel->starts_at,
             default => $eventModel->starts_at ?? $eventModel->scheduled_at ?? null,
         };
 
@@ -102,7 +106,7 @@ class RsvpChangedHandler implements ShouldQueue
 
         if ($teams->isNotEmpty()) {
             $teamIds = $teams->pluck('id')->toArray();
-            $coaches = \App\Models\User::whereHas('teams', function ($q) use ($teamIds) {
+            $coaches = User::whereHas('teams', function ($q) use ($teamIds) {
                 $q->whereIn('teams.id', $teamIds);
             })->where('is_active', true)->get();
 

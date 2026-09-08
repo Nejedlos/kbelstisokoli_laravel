@@ -9,7 +9,7 @@ trait HasMatchResult
      */
     public function getIsWinAttribute(): bool
     {
-        if (!$this->has_score) {
+        if (! $this->has_score) {
             return false;
         }
 
@@ -27,7 +27,7 @@ trait HasMatchResult
      */
     public function getIsLossAttribute(): bool
     {
-        if (!$this->has_score) {
+        if (! $this->has_score) {
             return false;
         }
 
@@ -45,7 +45,7 @@ trait HasMatchResult
      */
     public function getIsDrawAttribute(): bool
     {
-        if (!$this->has_score) {
+        if (! $this->has_score) {
             return false;
         }
 
@@ -57,7 +57,7 @@ trait HasMatchResult
      */
     public function getHasScoreAttribute(): bool
     {
-        return !is_null($this->score_home) && !is_null($this->score_away);
+        return ! is_null($this->score_home) && ! is_null($this->score_away);
     }
 
     /**
@@ -65,7 +65,7 @@ trait HasMatchResult
      */
     public function getOurScoreAttribute(): ?int
     {
-        if (!$this->has_score) {
+        if (! $this->has_score) {
             return null;
         }
 
@@ -77,7 +77,7 @@ trait HasMatchResult
      */
     public function getOpponentScoreAttribute(): ?int
     {
-        if (!$this->has_score) {
+        if (! $this->has_score) {
             return null;
         }
 
@@ -89,12 +89,17 @@ trait HasMatchResult
      */
     public function getResultLetterAttribute(): string
     {
-        if (!$this->has_score) {
+        if (! $this->has_score) {
             return '';
         }
 
-        if ($this->is_win) return 'V';
-        if ($this->is_loss) return 'P';
+        if ($this->is_win) {
+            return 'V';
+        }
+        if ($this->is_loss) {
+            return 'P';
+        }
+
         return 'R';
     }
 
@@ -103,9 +108,16 @@ trait HasMatchResult
      */
     public function getResultTextColorAttribute(): string
     {
-        if (!$this->has_score) return 'text-slate-400';
-        if ($this->is_win) return 'text-emerald-600';
-        if ($this->is_loss) return 'text-rose-600';
+        if (! $this->has_score) {
+            return 'text-slate-400';
+        }
+        if ($this->is_win) {
+            return 'text-emerald-600';
+        }
+        if ($this->is_loss) {
+            return 'text-rose-600';
+        }
+
         return 'text-slate-600';
     }
 
@@ -114,9 +126,16 @@ trait HasMatchResult
      */
     public function getResultBgColorAttribute(): string
     {
-        if (!$this->has_score) return 'bg-slate-100';
-        if ($this->is_win) return 'bg-emerald-500';
-        if ($this->is_loss) return 'bg-rose-500';
+        if (! $this->has_score) {
+            return 'bg-slate-100';
+        }
+        if ($this->is_win) {
+            return 'bg-emerald-500';
+        }
+        if ($this->is_loss) {
+            return 'bg-rose-500';
+        }
+
         return 'bg-slate-500';
     }
 }

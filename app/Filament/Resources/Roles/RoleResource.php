@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Roles;
 
 use App\Filament\Resources\Roles\Pages\ListRoles;
 use App\Models\Role;
+use App\Support\IconHelper;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -15,14 +16,15 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 
 class RoleResource extends Resource
 {
     protected static ?string $model = Role::class;
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
-        return \App\Support\IconHelper::get(\App\Support\IconHelper::ROLES);
+        return IconHelper::get(IconHelper::ROLES);
     }
 
     public static function getNavigationGroup(): ?string

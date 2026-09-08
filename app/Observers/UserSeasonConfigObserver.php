@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\UserSeasonConfig;
+use App\Services\Finance\FinanceAutomationService;
 
 class UserSeasonConfigObserver
 {
@@ -12,7 +13,7 @@ class UserSeasonConfigObserver
     public function created(UserSeasonConfig $userSeasonConfig): void
     {
         if ($userSeasonConfig->financial_tariff_id) {
-            app(\App\Services\Finance\FinanceAutomationService::class)->generateInstallments($userSeasonConfig);
+            app(FinanceAutomationService::class)->generateInstallments($userSeasonConfig);
         }
     }
 
@@ -22,7 +23,7 @@ class UserSeasonConfigObserver
     public function updated(UserSeasonConfig $userSeasonConfig): void
     {
         if ($userSeasonConfig->wasChanged('financial_tariff_id') && $userSeasonConfig->financial_tariff_id) {
-            app(\App\Services\Finance\FinanceAutomationService::class)->generateInstallments($userSeasonConfig);
+            app(FinanceAutomationService::class)->generateInstallments($userSeasonConfig);
         }
     }
 

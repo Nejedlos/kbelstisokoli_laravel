@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -11,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (\Illuminate\Support\Facades\DB::getDriverName() === 'sqlite') {
+        if (DB::getDriverName() === 'sqlite') {
             Schema::table('users', function (Blueprint $table) {
                 $table->longText('metadata')->nullable()->after('onboarding_completed_at');
             });
@@ -19,15 +20,15 @@ return new class extends Migration
             return;
         }
 
-        $prefix = \Illuminate\Support\Facades\DB::getTablePrefix();
+        $prefix = DB::getTablePrefix();
         $table = $prefix.'users';
 
         try {
-            $columnExists = \Illuminate\Support\Facades\DB::select("SHOW COLUMNS FROM {$table} LIKE 'metadata'");
+            $columnExists = DB::select("SHOW COLUMNS FROM {$table} LIKE 'metadata'");
             if (empty($columnExists)) {
-                \Illuminate\Support\Facades\DB::statement("ALTER TABLE {$table} ADD COLUMN metadata LONGTEXT NULL AFTER onboarding_completed_at");
+                DB::statement("ALTER TABLE {$table} ADD COLUMN metadata LONGTEXT NULL AFTER onboarding_completed_at");
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Log or ignore
         }
     }
@@ -37,7 +38,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        if (\Illuminate\Support\Facades\DB::getDriverName() === 'sqlite') {
+        if (DB::getDriverName() === 'sqlite') {
             Schema::table('users', function (Blueprint $table) {
                 $table->dropColumn('metadata');
             });
@@ -45,12 +46,12 @@ return new class extends Migration
             return;
         }
 
-        $prefix = \Illuminate\Support\Facades\DB::getTablePrefix();
+        $prefix = DB::getTablePrefix();
         $table = $prefix.'users';
 
         try {
-            \Illuminate\Support\Facades\DB::statement("ALTER TABLE {$table} DROP COLUMN IF EXISTS metadata");
-        } catch (\Throwable $e) {
+            DB::statement("ALTER TABLE {$table} DROP COLUMN IF EXISTS metadata");
+        } catch (Throwable $e) {
             // Ignore
         }
     }

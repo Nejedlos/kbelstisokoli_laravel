@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands\Matches;
 
+use App\Models\BasketballMatch;
 use Illuminate\Console\Command;
 
 class UpdatePastMatchesStatus extends Command
@@ -27,7 +28,7 @@ class UpdatePastMatchesStatus extends Command
     {
         $this->info('Aktualizuji stav zápasů v minulosti...');
 
-        $query = \App\Models\BasketballMatch::whereIn('status', ['planned', 'scheduled'])
+        $query = BasketballMatch::whereIn('status', ['planned', 'scheduled'])
             ->where('scheduled_at', '<', now()->subHours(2));
 
         $count = $query->count();

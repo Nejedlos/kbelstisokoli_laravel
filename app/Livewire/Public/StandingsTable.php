@@ -6,18 +6,25 @@ use App\Models\CompetitionStanding;
 use App\Models\ExternalTeamSeasonConfig;
 use App\Models\Season;
 use App\Models\Team;
-use Livewire\Component;
 use Illuminate\Support\Collection;
+use Livewire\Component;
 
 class StandingsTable extends Component
 {
     public ?int $seasonId = null;
+
     public ?int $teamId = null;
+
     public ?string $competitionUrl = null;
+
     public bool $showFilters = true;
+
     public ?int $limit = null;
+
     public bool $highlightOurTeam = true;
+
     public bool $compact = false;
+
     public array $expanded = [];
 
     public function mount(?int $seasonId = null, ?int $teamId = null, ?string $competitionUrl = null, bool $showFilters = true, ?int $limit = null, bool $compact = false)
@@ -32,12 +39,12 @@ class StandingsTable extends Component
 
     public function toggleExpand(string $url): void
     {
-        $this->expanded[$url] = !($this->expanded[$url] ?? false);
+        $this->expanded[$url] = ! ($this->expanded[$url] ?? false);
     }
 
     public function getStandingsProperty(): Collection
     {
-        if (!$this->seasonId) {
+        if (! $this->seasonId) {
             return collect();
         }
 

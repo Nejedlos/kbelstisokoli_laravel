@@ -23,8 +23,8 @@ class PlayerDetailExtractor implements StatExtractorInterface
         $photoUrl = null;
         if ($photoImg->count() > 0) {
             $photoUrl = $photoImg->attr('src');
-            if ($photoUrl && !str_starts_with($photoUrl, 'http')) {
-                $photoUrl = 'https://cz.basketball' . $photoUrl;
+            if ($photoUrl && ! str_starts_with($photoUrl, 'http')) {
+                $photoUrl = 'https://cz.basketball'.$photoUrl;
             }
         }
 
@@ -51,7 +51,7 @@ class PlayerDetailExtractor implements StatExtractorInterface
         // Extrakce dostupných sezón z tabulky kariéry
         $seasons = [];
         foreach ($stats as $stat) {
-            if (!empty($stat['season_label']) && !($stat['is_career_total'] ?? false) && !in_array($stat['season_label'], $seasons)) {
+            if (! empty($stat['season_label']) && ! ($stat['is_career_total'] ?? false) && ! in_array($stat['season_label'], $seasons)) {
                 $seasons[] = $stat['season_label'];
             }
         }
@@ -77,29 +77,38 @@ class PlayerDetailExtractor implements StatExtractorInterface
 
     protected function extractBirthYear(?string $text): ?int
     {
-        if (!$text) return null;
+        if (! $text) {
+            return null;
+        }
         if (preg_match('/(\d{4})/', $text, $matches)) {
             return (int) $matches[1];
         }
+
         return null;
     }
 
     protected function extractInt(?string $text): ?int
     {
-        if ($text === null || $text === '' || $text === '-') return null;
+        if ($text === null || $text === '' || $text === '-') {
+            return null;
+        }
         if (preg_match('/(\d+)/', $text, $matches)) {
             return (int) $matches[1];
         }
+
         return null;
     }
 
     protected function extractFloat(?string $text): ?float
     {
-        if ($text === null || $text === '' || $text === '-') return null;
+        if ($text === null || $text === '' || $text === '-') {
+            return null;
+        }
         $text = str_replace(',', '.', $text);
         if (preg_match('/(\d+(\.\d+)?)/', $text, $matches)) {
             return (float) $matches[1];
         }
+
         return null;
     }
 
@@ -129,7 +138,7 @@ class PlayerDetailExtractor implements StatExtractorInterface
         // Odstranění duplicit na základě kombinace sezóna, soutěž, tým
         $uniqueStats = [];
         foreach ($allStats as $stat) {
-            $key = ($stat['season_label'] ?? '') . '|' . ($stat['competition_label'] ?? '') . '|' . ($stat['team_name'] ?? '') . '|' . ($stat['is_career_total'] ? '1' : '0');
+            $key = ($stat['season_label'] ?? '').'|'.($stat['competition_label'] ?? '').'|'.($stat['team_name'] ?? '').'|'.($stat['is_career_total'] ? '1' : '0');
             $uniqueStats[$key] = $stat;
         }
 
@@ -182,7 +191,9 @@ class PlayerDetailExtractor implements StatExtractorInterface
 
             $tr->filter('td')->each(function (Crawler $td, $i) use (&$match, $headers) {
                 $header = $headers[$i] ?? null;
-                if (!$header) return;
+                if (! $header) {
+                    return;
+                }
 
                 $val = trim($td->text());
 
@@ -203,10 +214,10 @@ class PlayerDetailExtractor implements StatExtractorInterface
                 } elseif (in_array($header, ['two_points', 'three_points', 'free_throws'])) {
                     if (str_contains($val, '/')) {
                         $parts = explode('/', $val);
-                        $match[$header . '_made'] = $this->extractInt($parts[0]);
-                        $match[$header . '_attempts'] = $this->extractInt($parts[1]);
+                        $match[$header.'_made'] = $this->extractInt($parts[0]);
+                        $match[$header.'_attempts'] = $this->extractInt($parts[1]);
                     } else {
-                        $match[$header . '_made'] = $this->extractInt($val);
+                        $match[$header.'_made'] = $this->extractInt($val);
                     }
                 } elseif ($header === 'free_throws_pct') {
                     $match['free_throws_pct'] = $this->extractFloat($val);
@@ -220,7 +231,7 @@ class PlayerDetailExtractor implements StatExtractorInterface
                 }
             });
 
-            if (!empty($match['match_date'])) {
+            if (! empty($match['match_date'])) {
                 $matches[] = $match;
             }
         });
@@ -287,7 +298,7 @@ class PlayerDetailExtractor implements StatExtractorInterface
             }
 
             // 2. Pokud neuspěje, zkusíme match na text
-            if (!$mapped) {
+            if (! $mapped) {
                 foreach ($columnMap as $key => $val) {
                     if ($text === $key || mb_stripos($text, $key) !== false) {
                         $mapped = $val;
@@ -301,7 +312,7 @@ class PlayerDetailExtractor implements StatExtractorInterface
 
         // Ověříme, jestli je to tabulka statistik (musí mít aspoň sezónu nebo tým)
         $hasRequiredHeaders = in_array('season_full', $headers) || in_array('team_name', $headers);
-        if (!$hasRequiredHeaders) {
+        if (! $hasRequiredHeaders) {
             return [];
         }
 
@@ -313,7 +324,9 @@ class PlayerDetailExtractor implements StatExtractorInterface
 
             $tr->filter('td')->each(function (Crawler $td, $i) use (&$row, $headers) {
                 $header = $headers[$i] ?? null;
-                if (!$header) return;
+                if (! $header) {
+                    return;
+                }
 
                 $val = trim($td->text());
 
@@ -340,10 +353,10 @@ class PlayerDetailExtractor implements StatExtractorInterface
                     // Může být "2.1/3.1" nebo jen "12.5"
                     if (str_contains($val, '/')) {
                         $parts = explode('/', $val);
-                        $row[$header . '_made_avg'] = $this->extractFloat($parts[0]);
-                        $row[$header . '_attempts_avg'] = $this->extractFloat($parts[1]);
+                        $row[$header.'_made_avg'] = $this->extractFloat($parts[0]);
+                        $row[$header.'_attempts_avg'] = $this->extractFloat($parts[1]);
                     } else {
-                        $row[$header . '_made_avg'] = $this->extractFloat($val);
+                        $row[$header.'_made_avg'] = $this->extractFloat($val);
                     }
                 } else {
                     // Ostatní numerické hodnoty (včetně points_avg, free_throws_pct atd.)
@@ -353,7 +366,7 @@ class PlayerDetailExtractor implements StatExtractorInterface
                 }
             });
 
-            if (!empty($row['team_name']) || !empty($row['season_label'])) {
+            if (! empty($row['team_name']) || ! empty($row['season_label'])) {
                 $rows[] = $row;
             }
         });
@@ -373,7 +386,7 @@ class PlayerDetailExtractor implements StatExtractorInterface
             }
         });
 
-        if (!$recordsTable || $recordsTable->count() === 0) {
+        if (! $recordsTable || $recordsTable->count() === 0) {
             return [];
         }
 

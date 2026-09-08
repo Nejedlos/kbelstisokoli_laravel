@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Teams\RelationManagers;
 
 use App\Filament\Resources\Users\UserResource;
+use App\Models\User;
 use App\Support\IconHelper;
 use Filament\Actions\Action;
 use Filament\Actions\AttachAction;
@@ -14,18 +15,20 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
 
 class CoachesRelationManager extends RelationManager
 {
     protected static string $relationship = 'coaches';
 
-    protected function modifyQueryUsing(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
+    protected function modifyQueryUsing(Builder $query): Builder
     {
         return $query->with(['externalMappings'])->where('users.is_active', true);
     }
 
-    public static function getTitle(\Illuminate\Database\Eloquent\Model $ownerRecord, string $pageClass): string
+    public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
         return __('admin.resources.team.fields.coaches');
     }
@@ -40,7 +43,7 @@ class CoachesRelationManager extends RelationManager
                     ->formatStateUsing(fn ($state, $record) => new HtmlString(
                         ($record->externalMappings->isNotEmpty()
                             ? '<i class="fa-light fa-cloud-arrow-down fa-fw text-info mr-1" title="Synchronizováno z externího zdroje"></i> '
-                            : '') . e($state)
+                            : '').e($state)
                     ))
                     ->url(fn ($record): string => UserResource::getUrl('edit', ['record' => $record]))
                     ->searchable()
@@ -63,7 +66,7 @@ class CoachesRelationManager extends RelationManager
                     ->icon(IconHelper::render(IconHelper::PLUS))
                     ->visible(fn (): bool => auth()->user()->can('manage_rosters'))
                     ->preloadRecordSelect()
-                    ->recordSelectOptionsQuery(fn (\Illuminate\Database\Eloquent\Builder $query) => $query->orderBy('name'))
+                    ->recordSelectOptionsQuery(fn (Builder $query) => $query->orderBy('name'))
                     ->form(fn (AttachAction $action): array => [
                         $action->getRecordSelect()
                             ->live()
@@ -72,7 +75,7 @@ class CoachesRelationManager extends RelationManager
                                     return;
                                 }
 
-                                $user = \App\Models\User::find($state);
+                                $user = User::find($state);
 
                                 if ($user) {
                                     $set('email', $user->email);

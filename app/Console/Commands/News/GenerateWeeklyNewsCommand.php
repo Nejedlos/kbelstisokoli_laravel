@@ -47,7 +47,8 @@ class GenerateWeeklyNewsCommand extends Command
                 $this->components->warn('Žádný článek nebyl vygenerován (pravděpodobně nebyla nalezena nová data nebo došlo k chybě AI).');
             }
         } catch (\Throwable $e) {
-            $this->components->error('Chyba při generování: ' . $e->getMessage());
+            $this->components->error('Chyba při generování: '.$e->getMessage());
+
             return 1;
         }
 

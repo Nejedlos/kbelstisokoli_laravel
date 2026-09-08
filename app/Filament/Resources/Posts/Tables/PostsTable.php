@@ -10,6 +10,7 @@ use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class PostsTable
 {
@@ -25,15 +26,16 @@ class PostsTable
 
                 TextColumn::make('title')
                     ->label('Titulek')
-                    ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
+                    ->searchable(query: function ($query, string $search): Builder {
                         $locale = app()->getLocale();
+
                         return $query->where("title->{$locale}", 'LIKE', "%{$search}%");
                     })
                     ->description(fn ($record) => $record->slug),
 
                 TextColumn::make('category.name')
                     ->label('Kategorie')
-                    ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
+                    ->searchable(query: function ($query, string $search): Builder {
                         return $query->whereHas('category', function ($q) use ($search) {
                             $locale = app()->getLocale();
 

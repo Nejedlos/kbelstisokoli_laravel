@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Member;
 
 use App\Http\Controllers\Controller;
+use App\Models\BasketballMatch;
+use App\Models\MatchPrediction;
 use App\Services\Member\MemberContext;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -66,8 +68,8 @@ class StatisticsController extends Controller
      */
     public function matchDetail(int $matchId): View
     {
-        $match = \App\Models\BasketballMatch::with(['team', 'opponent', 'season'])->findOrFail($matchId);
-        $prediction = \App\Models\MatchPrediction::where('basketball_match_id', $matchId)->first();
+        $match = BasketballMatch::with(['team', 'opponent', 'season'])->findOrFail($matchId);
+        $prediction = MatchPrediction::where('basketball_match_id', $matchId)->first();
 
         return view('member.statistics.match-detail', [
             'title' => __('matches.match_detail'),

@@ -8,22 +8,24 @@ use App\Filament\Resources\StatisticSets\Pages\ListStatisticSets;
 use App\Filament\Resources\StatisticSets\Schemas\StatisticSetForm;
 use App\Filament\Resources\StatisticSets\Tables\StatisticSetsTable;
 use App\Models\StatisticSet;
+use App\Support\IconHelper;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 
 class StatisticSetResource extends Resource
 {
     protected static ?string $model = StatisticSet::class;
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
-        return \App\Support\IconHelper::get(\App\Support\IconHelper::STAT_SETS);
+        return IconHelper::get(IconHelper::STAT_SETS);
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.statistics_and_data') . ' > ' . __('admin.navigation.groups.external_data');
+        return __('admin.navigation.groups.statistics_and_data').' > '.__('admin.navigation.groups.external_data');
     }
 
     public static function getModelLabel(): string

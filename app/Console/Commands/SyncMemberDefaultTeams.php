@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\User;
 use Illuminate\Console\Command;
 
 class SyncMemberDefaultTeams extends Command
@@ -25,7 +26,7 @@ class SyncMemberDefaultTeams extends Command
      */
     public function handle()
     {
-        $users = \App\Models\User::active()->get();
+        $users = User::active()->get();
         $count = 0;
 
         foreach ($users as $user) {

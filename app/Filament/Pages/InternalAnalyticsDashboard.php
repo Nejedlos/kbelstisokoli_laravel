@@ -2,24 +2,24 @@
 
 namespace App\Filament\Pages;
 
-use App\Services\InternalAnalytics\AnalyticsQueryService;
-use Filament\Pages\Page;
+use App\Filament\Widgets\InternalAnalytics\AnalyticsOverviewWidget;
+use App\Filament\Widgets\InternalAnalytics\RecentEventsTableWidget;
+use App\Filament\Widgets\InternalAnalytics\TopPagesTableWidget;
+use App\Filament\Widgets\InternalAnalytics\TrafficByDayChartWidget;
+use App\Support\FilamentIcon;
+use App\Support\Icons\AppIcon;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\DatePicker;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\HtmlString;
-use App\Support\Icons\AppIcon;
-use App\Support\FilamentIcon;
 use Filament\Pages\Dashboard\Concerns\HasFilters;
+use Filament\Pages\Page;
+use Filament\Schemas\Components\Grid;
+use Illuminate\Contracts\Support\Htmlable;
 
 class InternalAnalyticsDashboard extends Page
 {
     use HasFilters;
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
         return FilamentIcon::get(AppIcon::GAUGE);
     }
@@ -54,7 +54,7 @@ class InternalAnalyticsDashboard extends Page
 
     public function mount(): void
     {
-        if (!auth()->user()?->hasRole('admin')) {
+        if (! auth()->user()?->hasRole('admin')) {
             abort(403);
         }
     }
@@ -110,16 +110,16 @@ class InternalAnalyticsDashboard extends Page
     protected function getHeaderWidgets(): array
     {
         return [
-            \App\Filament\Widgets\InternalAnalytics\AnalyticsOverviewWidget::class,
+            AnalyticsOverviewWidget::class,
         ];
     }
 
     protected function getFooterWidgets(): array
     {
         return [
-            \App\Filament\Widgets\InternalAnalytics\TrafficByDayChartWidget::class,
-            \App\Filament\Widgets\InternalAnalytics\TopPagesTableWidget::class,
-            \App\Filament\Widgets\InternalAnalytics\RecentEventsTableWidget::class,
+            TrafficByDayChartWidget::class,
+            TopPagesTableWidget::class,
+            RecentEventsTableWidget::class,
         ];
     }
 }

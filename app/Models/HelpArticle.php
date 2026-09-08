@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Spatie\Translatable\HasTranslations;
 
@@ -24,16 +26,15 @@ use Spatie\Translatable\HasTranslations;
  * @property bool $is_published
  * @property bool $is_featured
  * @property bool $is_customized
- * @property \Illuminate\Support\Carbon|null $published_at
+ * @property Carbon|null $published_at
  * @property string|null $source_hash
  * @property array|null $metadata
- * @property \Illuminate\Support\Carbon $created_at
- * @property \Illuminate\Support\Carbon $updated_at
- *
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  * @property-read HelpCategory $category
- * @property-read \Illuminate\Database\Eloquent\Collection<int, HelpQuickAction> $quickActions
- * @property-read \Illuminate\Database\Eloquent\Collection<int, HelpFaq> $faqs
- * @property-read \Illuminate\Database\Eloquent\Collection<int, HelpArticle> $relatedArticles
+ * @property-read Collection<int, HelpQuickAction> $quickActions
+ * @property-read Collection<int, HelpFaq> $faqs
+ * @property-read Collection<int, HelpArticle> $relatedArticles
  */
 class HelpArticle extends Model
 {
@@ -111,29 +112,19 @@ class HelpArticle extends Model
         );
     }
 
-    /**
-     * @param Builder $query
-     * @return Builder
-     */
     public function scopePublished(Builder $query): Builder
     {
         return $query->where('is_published', true)
-            ->where(fn($q) => $q->whereNull('published_at')->orWhere('published_at', '<=', now()));
+            ->where(fn ($q) => $q->whereNull('published_at')->orWhere('published_at', '<=', now()));
     }
 
-    /**
-     * @param Builder $query
-     * @return Builder
-     */
     public function scopeFeatured(Builder $query): Builder
     {
         return $query->where('is_featured', true);
     }
 
     /**
-     * @param Builder $query
-     * @param string|array $roles
-     * @return Builder
+     * @param  string|array  $roles
      */
     public function scopeForAudience(Builder $query, $roles): Builder
     {
@@ -148,16 +139,13 @@ class HelpArticle extends Model
             foreach ($roles as $role) {
                 // FALLBACK: Pro produkční DB bez JSON funkcí (Webglobe) použijeme LIKE.
                 // V JSON poli rolí ["role"] je název role v uvozovkách.
-                $q->orWhere('audience_roles', 'LIKE', '%"' . (string) $role . '"%');
+                $q->orWhere('audience_roles', 'LIKE', '%"'.(string) $role.'"%');
             }
         });
     }
 
     /**
      * Helper pro zjištění, zda je článek určen pro konkrétní roli.
-     *
-     * @param string $role
-     * @return bool
      */
     public function hasAudienceRole(string $role): bool
     {
@@ -170,8 +158,6 @@ class HelpArticle extends Model
 
     /**
      * Vrátí zformátovaný obsah článku.
-     *
-     * @return string
      */
     public function getParsedContent(): string
     {
@@ -187,13 +173,11 @@ class HelpArticle extends Model
 
     /**
      * Vrátí krátké shrnutí.
-     *
-     * @return string
      */
     public function getSafeExcerpt(): string
     {
         $excerpt = $this->getTranslation('excerpt', app()->getLocale(), false);
-        if (!empty($excerpt)) {
+        if (! empty($excerpt)) {
             return $excerpt;
         }
 
@@ -204,6 +188,7 @@ class HelpArticle extends Model
 
         return Str::limit(strip_tags($this->getParsedContent()), 160);
     }
+
     public function getFallbackLocale(): string
     {
         return config('app.fallback_locale', 'cs');

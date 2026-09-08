@@ -2,6 +2,7 @@
 
 namespace App\Support\Media;
 
+use App\Models\MediaAsset;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\MediaLibrary\Support\PathGenerator\PathGenerator;
 
@@ -33,9 +34,9 @@ class PoolPathGenerator implements PathGenerator
         // Pokud je model MediaAsset a je propojen s PhotoPool, můžeme zkusit získat slug poolu.
         // Ale v MediaLibrary je path generator globální nebo na úrovni modelu.
 
-        if ($media->model_type === \App\Models\MediaAsset::class) {
+        if ($media->model_type === MediaAsset::class) {
             // Zkusíme najít první pool, ke kterému patří (pokud existuje)
-            /** @var \App\Models\MediaAsset $asset */
+            /** @var MediaAsset $asset */
             $asset = $media->model;
             $pool = $asset->photoPools()->first();
 

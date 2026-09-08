@@ -8,10 +8,7 @@ use Symfony\Component\DomCrawler\Crawler;
 class CzBasketballTeamPageDomExtractor
 {
     /**
-     * @param string $html
-     * @param string|int|null $teamExternalId
-     * @param int|null $yYear
-     * @return CzBasketballTeamPageDTO
+     * @param  string|int|null  $teamExternalId
      */
     public function extract(string $html, $teamExternalId = null, ?int $yYear = null): CzBasketballTeamPageDTO
     {
@@ -23,8 +20,8 @@ class CzBasketballTeamPageDomExtractor
 
         // Season mismatch check (1.4)
         if ($yYear) {
-            $seasonText = $yYear . '/' . substr($yYear + 1, 2, 2);
-            if (!str_contains($html, $seasonText)) {
+            $seasonText = $yYear.'/'.substr($yYear + 1, 2, 2);
+            if (! str_contains($html, $seasonText)) {
                 $warnings[] = "Season mismatch: expected {$seasonText} not found in page content.";
             }
         }
@@ -40,21 +37,21 @@ class CzBasketballTeamPageDomExtractor
 
         // 6. VALIDACE
         if (count($rosterTable) < 3) {
-            $warnings[] = "Roster table has fewer than 3 rows.";
+            $warnings[] = 'Roster table has fewer than 3 rows.';
         }
         $hasPlayerLink = false;
         foreach ($rosterTable as $row) {
-            if (!empty($row['player_external_id'])) {
+            if (! empty($row['player_external_id'])) {
                 $hasPlayerLink = true;
                 break;
             }
         }
-        if (!$hasPlayerLink) {
-            $warnings[] = "Roster table contains no player links.";
+        if (! $hasPlayerLink) {
+            $warnings[] = 'Roster table contains no player links.';
         }
 
         if (count($matchesTable) === 0) {
-            $warnings[] = "No matches found in matches table.";
+            $warnings[] = 'No matches found in matches table.';
         }
 
         return new CzBasketballTeamPageDTO(
@@ -68,34 +65,34 @@ class CzBasketballTeamPageDomExtractor
 
     protected function extractHeader(Crawler $crawler): array
     {
-        $teamName = "";
+        $teamName = '';
         $h1 = $crawler->filter('h1')->first();
         if ($h1->count() > 0) {
             $teamName = trim($h1->text());
         }
 
-        $clubName = "";
+        $clubName = '';
         $clubLabel = $crawler->filterXPath("//*[normalize-space(.)='Klub']");
         if ($clubLabel->count() > 0) {
-            $clubValue = $clubLabel->filterXPath("following::*[1]");
+            $clubValue = $clubLabel->filterXPath('following::*[1]');
             if ($clubValue->count() > 0) {
                 $clubName = trim($clubValue->text());
             }
         }
 
-        $category = "";
+        $category = '';
         $catLabel = $crawler->filterXPath("//*[normalize-space(.)='Kategorie']");
         if ($catLabel->count() > 0) {
-            $catValue = $catLabel->filterXPath("following::*[1]");
+            $catValue = $catLabel->filterXPath('following::*[1]');
             if ($catValue->count() > 0) {
                 $category = trim($catValue->text());
             }
         }
 
-        $competition = "";
+        $competition = '';
         $compLabel = $crawler->filterXPath("//*[normalize-space(.)='Soutěž']");
         if ($compLabel->count() > 0) {
-            $compValue = $compLabel->filterXPath("following::*[1]");
+            $compValue = $compLabel->filterXPath('following::*[1]');
             if ($compValue->count() > 0) {
                 $competition = trim($compValue->text());
             }
@@ -132,7 +129,7 @@ class CzBasketballTeamPageDomExtractor
             }
         }
 
-        if (!$targetTable) {
+        if (! $targetTable) {
             return [];
         }
 
@@ -143,7 +140,9 @@ class CzBasketballTeamPageDomExtractor
             $rowData = [];
             $cells = $tr->filter('td');
 
-            if ($cells->count() === 0) return;
+            if ($cells->count() === 0) {
+                return;
+            }
 
             $playerLink = $tr->filter('a[href*="/hrac/"]')->first();
             if ($playerLink->count() > 0) {
@@ -156,20 +155,44 @@ class CzBasketballTeamPageDomExtractor
 
             foreach ($headers as $index => $label) {
                 $cell = $cells->eq($index);
-                if ($cell->count() === 0) continue;
+                if ($cell->count() === 0) {
+                    continue;
+                }
                 $val = trim($cell->text());
 
-                if (str_contains($label, 'Pozice')) $rowData['position'] = $val;
-                if (str_contains($label, 'Rok narození')) $rowData['birth_year'] = $val;
-                if (str_contains($label, 'Výška')) $rowData['height'] = $val;
-                if (str_contains($label, 'Věk')) $rowData['age'] = $val;
-                if ($label === 'Z' || $label === ' Z ') $rowData['gp'] = $val;
-                if (str_contains($label, 'Min')) $rowData['minutes'] = $val;
-                if ($label === 'B' || $label === ' B ') $rowData['points'] = $val;
-                if ($label === '2B') $rowData['fg2'] = $val;
-                if ($label === '3B') $rowData['fg3'] = $val;
-                if ($label === 'TH %') $rowData['ft_pct'] = $val;
-                if ($label === 'F-') $rowData['fouls'] = $val;
+                if (str_contains($label, 'Pozice')) {
+                    $rowData['position'] = $val;
+                }
+                if (str_contains($label, 'Rok narození')) {
+                    $rowData['birth_year'] = $val;
+                }
+                if (str_contains($label, 'Výška')) {
+                    $rowData['height'] = $val;
+                }
+                if (str_contains($label, 'Věk')) {
+                    $rowData['age'] = $val;
+                }
+                if ($label === 'Z' || $label === ' Z ') {
+                    $rowData['gp'] = $val;
+                }
+                if (str_contains($label, 'Min')) {
+                    $rowData['minutes'] = $val;
+                }
+                if ($label === 'B' || $label === ' B ') {
+                    $rowData['points'] = $val;
+                }
+                if ($label === '2B') {
+                    $rowData['fg2'] = $val;
+                }
+                if ($label === '3B') {
+                    $rowData['fg3'] = $val;
+                }
+                if ($label === 'TH %') {
+                    $rowData['ft_pct'] = $val;
+                }
+                if ($label === 'F-') {
+                    $rowData['fouls'] = $val;
+                }
 
                 if ($label === 'TH') {
                     if (str_contains($val, '/')) {
@@ -209,7 +232,7 @@ class CzBasketballTeamPageDomExtractor
             }
         }
 
-        if (!$targetTable) {
+        if (! $targetTable) {
             return [];
         }
 
@@ -219,7 +242,9 @@ class CzBasketballTeamPageDomExtractor
         $targetTable->filter('tbody tr')->each(function (Crawler $tr) use (&$rows, $headers) {
             $rowData = [];
             $cells = $tr->filter('td');
-            if ($cells->count() === 0) return;
+            if ($cells->count() === 0) {
+                return;
+            }
 
             $matchLink = $tr->filter('a[href*="/zapas/"]')->first();
             if ($matchLink->count() > 0) {
@@ -231,15 +256,23 @@ class CzBasketballTeamPageDomExtractor
 
             foreach ($headers as $index => $label) {
                 $cell = $cells->eq($index);
-                if ($cell->count() === 0) continue;
+                if ($cell->count() === 0) {
+                    continue;
+                }
                 $val = trim($cell->text());
 
                 if (str_contains($label, 'Číslo utkání')) {
                     $rowData['match_number'] = $val;
                 }
-                if (str_contains($label, 'Soutěž')) $rowData['competition'] = $val;
-                if (str_contains($label, 'Domácí/hosté')) $rowData['home_away'] = $val;
-                if (str_contains($label, 'Datum')) $rowData['date'] = $val;
+                if (str_contains($label, 'Soutěž')) {
+                    $rowData['competition'] = $val;
+                }
+                if (str_contains($label, 'Domácí/hosté')) {
+                    $rowData['home_away'] = $val;
+                }
+                if (str_contains($label, 'Datum')) {
+                    $rowData['date'] = $val;
+                }
                 if (str_contains($label, 'Soupeř')) {
                     $rowData['opponent_name'] = $val;
                     $oppLink = $cell->filter('a[href*="/tym/"]')->first();
@@ -266,8 +299,12 @@ class CzBasketballTeamPageDomExtractor
                         $rowData['status'] = 'planned';
                     }
                 }
-                if ($label === '2B') $rowData['fg2_made_team'] = $val;
-                if ($label === '3B') $rowData['fg3_made_team'] = $val;
+                if ($label === '2B') {
+                    $rowData['fg2_made_team'] = $val;
+                }
+                if ($label === '3B') {
+                    $rowData['fg3_made_team'] = $val;
+                }
                 if ($label === 'TH') {
                     $rowData['ft_raw'] = $val;
                     if (str_contains($val, '/')) {
@@ -276,7 +313,9 @@ class CzBasketballTeamPageDomExtractor
                         $rowData['ft_att'] = trim($parts[1]);
                     }
                 }
-                if (str_contains($label, 'TH %')) $rowData['ft_pct'] = $val;
+                if (str_contains($label, 'TH %')) {
+                    $rowData['ft_pct'] = $val;
+                }
             }
             $rows[] = $rowData;
         });
@@ -293,6 +332,7 @@ class CzBasketballTeamPageDomExtractor
                 $headers[] = trim($node->text());
             });
         }
+
         return $headers;
     }
 
@@ -300,21 +340,21 @@ class CzBasketballTeamPageDomExtractor
     {
         $playerIds = [];
         foreach ($roster as $row) {
-            if (!empty($row['player_external_id'])) {
+            if (! empty($row['player_external_id'])) {
                 $playerIds[] = $row['player_external_id'];
             }
         }
 
         $matchIds = [];
         foreach ($matches as $row) {
-            if (!empty($row['match_external_id'])) {
+            if (! empty($row['match_external_id'])) {
                 $matchIds[] = $row['match_external_id'];
             }
         }
 
         $opponentTeamIds = [];
         foreach ($matches as $row) {
-            if (!empty($row['opponent_external_id'])) {
+            if (! empty($row['opponent_external_id'])) {
                 $opponentTeamIds[] = $row['opponent_external_id'];
             }
         }

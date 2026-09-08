@@ -4,6 +4,7 @@ namespace App\Filament\Resources\NotFoundLogs\Tables;
 
 use App\Models\NotFoundLog;
 use App\Models\Redirect;
+use App\Support\RedirectSuggester;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
@@ -178,6 +179,6 @@ class NotFoundLogsTable
      */
     protected static function suggestTarget(string $url): ?string
     {
-        return \App\Support\RedirectSuggester::suggest($url);
+        return RedirectSuggester::suggest($url);
     }
 }

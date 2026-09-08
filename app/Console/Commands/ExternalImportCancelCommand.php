@@ -29,13 +29,15 @@ class ExternalImportCancelCommand extends Command
         $id = (int) $this->argument('id');
         $run = ExternalImportRun::find($id);
 
-        if (!$run) {
+        if (! $run) {
             $this->error("Import s ID #{$id} nebyl nalezen.");
+
             return 1;
         }
 
         if ($run->status !== 'running') {
             $this->warn("Import #{$id} není ve stavu 'running' (aktuální stav: {$run->status}).");
+
             return 1;
         }
 
@@ -43,6 +45,7 @@ class ExternalImportCancelCommand extends Command
         $run->cancel();
 
         $this->info("Import byl označen jako 'cancelled'. Pokud proces stále běží, měl by se ukončit při příští kontrole stavu.");
+
         return 0;
     }
 }

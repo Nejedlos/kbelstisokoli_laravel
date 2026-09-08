@@ -16,8 +16,10 @@ return new class extends Migration
             Schema::table('financial_tariffs', function (Blueprint $table) {
                 $table->string('type')->default('flat')->after('unit');
             });
-        } catch (\Throwable $e) {
-            if (!str_contains($e->getMessage(), '1060')) throw $e;
+        } catch (Throwable $e) {
+            if (! str_contains($e->getMessage(), '1060')) {
+                throw $e;
+            }
         }
 
         // 2. installment_plan (používáme longText místo json pro Webglobe)
@@ -25,8 +27,10 @@ return new class extends Migration
             Schema::table('financial_tariffs', function (Blueprint $table) {
                 $table->longText('installment_plan')->nullable()->after('type');
             });
-        } catch (\Throwable $e) {
-            if (!str_contains($e->getMessage(), '1060')) throw $e;
+        } catch (Throwable $e) {
+            if (! str_contains($e->getMessage(), '1060')) {
+                throw $e;
+            }
         }
 
         // 3. calculate_attendance_fines
@@ -34,8 +38,10 @@ return new class extends Migration
             Schema::table('financial_tariffs', function (Blueprint $table) {
                 $table->boolean('calculate_attendance_fines')->default(false)->after('installment_plan');
             });
-        } catch (\Throwable $e) {
-            if (!str_contains($e->getMessage(), '1060')) throw $e;
+        } catch (Throwable $e) {
+            if (! str_contains($e->getMessage(), '1060')) {
+                throw $e;
+            }
         }
 
         // 4. calculate_th_fines
@@ -43,8 +49,10 @@ return new class extends Migration
             Schema::table('financial_tariffs', function (Blueprint $table) {
                 $table->boolean('calculate_th_fines')->default(false)->after('calculate_attendance_fines');
             });
-        } catch (\Throwable $e) {
-            if (!str_contains($e->getMessage(), '1060')) throw $e;
+        } catch (Throwable $e) {
+            if (! str_contains($e->getMessage(), '1060')) {
+                throw $e;
+            }
         }
     }
 
@@ -61,9 +69,11 @@ return new class extends Migration
                     'calculate_attendance_fines',
                     'calculate_th_fines',
                 ]);
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 // Ignore "Column not found" (1091)
-                if (!str_contains($e->getMessage(), '1091')) throw $e;
+                if (! str_contains($e->getMessage(), '1091')) {
+                    throw $e;
+                }
             }
         });
     }

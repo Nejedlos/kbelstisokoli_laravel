@@ -24,7 +24,7 @@ class ComputeMatchPredictionJob implements ShouldQueue
     public function handle(PredictionService $predictionService): void
     {
         $match = BasketballMatch::find($this->matchId);
-        if (!$match) {
+        if (! $match) {
             return;
         }
 

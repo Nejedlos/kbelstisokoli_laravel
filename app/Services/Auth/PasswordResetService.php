@@ -3,6 +3,7 @@
 namespace App\Services\Auth;
 
 use App\Models\User;
+use Filament\Auth\Notifications\ResetPassword;
 use Filament\Facades\Filament;
 use Illuminate\Auth\Events\PasswordResetLinkSent;
 use Illuminate\Support\Facades\Log;
@@ -30,7 +31,7 @@ class PasswordResetService
             ['email' => $email],
             function ($user, $token) use ($panel) {
                 // Použijeme sjednocenou notifikaci zaregistrovanou v AppServiceProvider
-                $notification = app(\Filament\Auth\Notifications\ResetPassword::class, ['token' => $token]);
+                $notification = app(ResetPassword::class, ['token' => $token]);
 
                 if ($panel) {
                     $notification->url = Filament::getPanel($panel)->getResetPasswordUrl($token, $user);
@@ -72,7 +73,7 @@ class PasswordResetService
         if (RateLimiter::tooManyAttempts("pw-reset-email-throttle:{$emailHash}", 1)) {
             $seconds = RateLimiter::availableIn("pw-reset-email-throttle:{$emailHash}");
             throw ValidationException::withMessages([
-                'email' => [__('passwords.throttled') . ' ' . __('passwords.throttled_seconds', ['seconds' => $seconds])],
+                'email' => [__('passwords.throttled').' '.__('passwords.throttled_seconds', ['seconds' => $seconds])],
             ]);
         }
 
@@ -82,7 +83,7 @@ class PasswordResetService
             $seconds = RateLimiter::availableIn("pw-reset-email:{$emailHash}");
             $minutes = ceil($seconds / 60);
             throw ValidationException::withMessages([
-                'email' => [__('passwords.throttled') . ' ' . __('passwords.throttled_minutes', ['minutes' => $minutes])],
+                'email' => [__('passwords.throttled').' '.__('passwords.throttled_minutes', ['minutes' => $minutes])],
             ]);
         }
 
@@ -92,7 +93,7 @@ class PasswordResetService
             $seconds = RateLimiter::availableIn("pw-reset-ip:{$ipHash}");
             $minutes = ceil($seconds / 60);
             throw ValidationException::withMessages([
-                'email' => [__('passwords.throttled') . ' ' . __('passwords.throttled_minutes', ['minutes' => $minutes])],
+                'email' => [__('passwords.throttled').' '.__('passwords.throttled_minutes', ['minutes' => $minutes])],
             ]);
         }
 

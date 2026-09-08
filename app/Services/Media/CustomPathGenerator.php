@@ -2,6 +2,7 @@
 
 namespace App\Services\Media;
 
+use App\Models\MediaAsset;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\MediaLibrary\Support\PathGenerator\PathGenerator;
@@ -49,10 +50,10 @@ class CustomPathGenerator implements PathGenerator
 
         // Pro MediaAsset se snažíme najít, jestli nepatří do PhotoPoolu (pro lepší organizaci na disku)
         if ($modelName === 'MediaAsset') {
-            /** @var \App\Models\MediaAsset $asset */
+            /** @var MediaAsset $asset */
             $asset = $media->model;
 
-            if ($asset instanceof \App\Models\MediaAsset) {
+            if ($asset instanceof MediaAsset) {
                 // Pokud má uploader_id === null a kolekce je default, považujeme to za systémovou věc (defaults)
                 // (např. výchozí avatary synchronizované příkazem)
                 if ($asset->uploaded_by_id === null && $media->collection_name === 'default') {

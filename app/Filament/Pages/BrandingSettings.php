@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Models\Setting;
 use App\Services\BrandingService;
+use App\Support\IconHelper;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -16,6 +17,7 @@ use Filament\Pages\Page;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Contracts\Support\Htmlable;
 
 class BrandingSettings extends Page implements HasForms
 {
@@ -26,9 +28,9 @@ class BrandingSettings extends Page implements HasForms
         return __('admin.navigation.pages.branding');
     }
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
-        return \App\Support\IconHelper::get(\App\Support\IconHelper::BRANDING);
+        return IconHelper::get(IconHelper::BRANDING);
     }
 
     public static function getNavigationGroup(): ?string
@@ -41,7 +43,7 @@ class BrandingSettings extends Page implements HasForms
         return 1;
     }
 
-    public function getTitle(): string|\Illuminate\Contracts\Support\Htmlable
+    public function getTitle(): string|Htmlable
     {
         return __('admin.navigation.pages.branding');
     }

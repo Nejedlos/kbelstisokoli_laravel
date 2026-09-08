@@ -4,6 +4,7 @@ namespace App\Services\Stats\Sync;
 
 use App\Models\BasketballMatch;
 use App\Models\ExternalImportRun;
+use App\Models\ExternalTeamSeasonConfig;
 use App\Models\OpponentMergeSuggestion;
 use App\Models\Season;
 use App\Models\Team;
@@ -35,7 +36,7 @@ class MatchSyncService
         ];
 
         foreach ($stopWords as $word) {
-            $name = preg_replace('/\b' . preg_quote($word, '/') . '\b/i', '', $name);
+            $name = preg_replace('/\b'.preg_quote($word, '/').'\b/i', '', $name);
         }
 
         // 3. Odstraníme vše kromě písmen a čísel (včetně mezer)
@@ -59,7 +60,7 @@ class MatchSyncService
                 $scheduledAt = Carbon::parse($scheduledAtStr);
 
                 // Kontrola a případná oprava sezóny na základě data zápasu
-                if (!$season->containsDate($scheduledAt)) {
+                if (! $season->containsDate($scheduledAt)) {
                     $correctSeason = Season::forDate($scheduledAt);
 
                     if ($correctSeason) {
@@ -70,7 +71,7 @@ class MatchSyncService
                     }
                 }
             } catch (\Exception $e) {
-                \Log::warning("Failed to parse scheduled_at: {$scheduledAtStr} for match " . ($matchData['external_match_id'] ?? 'unknown'));
+                \Log::warning("Failed to parse scheduled_at: {$scheduledAtStr} for match ".($matchData['external_match_id'] ?? 'unknown'));
             }
         }
 
@@ -167,9 +168,9 @@ class MatchSyncService
                 ->where('team_id', $team->id)
                 ->where(function ($q) use ($opponent, $opponentName) {
                     $q->where('opponent_id', $opponent->id)
-                      ->orWhereHas('opponent', function ($sq) use ($opponentName) {
-                          $sq->where('name', 'LIKE', '%' . $opponentName . '%');
-                      });
+                        ->orWhereHas('opponent', function ($sq) use ($opponentName) {
+                            $sq->where('name', 'LIKE', '%'.$opponentName.'%');
+                        });
                 })
                 ->where('is_home', $isHome)
                 ->whereDate('scheduled_at', $scheduledAt->format('Y-m-d'))
@@ -191,7 +192,7 @@ class MatchSyncService
                 ->first();
 
             if ($match) {
-                \Log::info("Match matched by team and close time (New rule): ID {$match->id}, diff: " . abs($match->scheduled_at->diffInMinutes($scheduledAt)) . " min, old opponent: " . ($match->opponent->name ?? 'None') . ", new opponent: {$opponentName}");
+                \Log::info("Match matched by team and close time (New rule): ID {$match->id}, diff: ".abs($match->scheduled_at->diffInMinutes($scheduledAt)).' min, old opponent: '.($match->opponent->name ?? 'None').", new opponent: {$opponentName}");
             }
         }
 
@@ -265,6 +266,7 @@ class MatchSyncService
 
                             if ($isRejected) {
                                 \Log::info("Match fuzzy-match skipped: Opponent merge was previously rejected by user between {$opponent->id} and {$potential->opponent_id}");
+
                                 continue;
                             }
                         }
@@ -398,7 +400,7 @@ class MatchSyncService
         $primary = $dups->first(function (BasketballMatch $m) {
             return ($m->score_home !== null && $m->score_away !== null)
                 || ($m->status === 'finished')
-                || (!empty($m->metadata['boxscore_synced_at'] ?? null));
+                || (! empty($m->metadata['boxscore_synced_at'] ?? null));
         }) ?: $dups->first();
 
         foreach ($dups as $m) {
@@ -408,7 +410,7 @@ class MatchSyncService
 
             // Přesunout pivoty týmů
             $teamIds = $m->teams()->pluck('teams.id')->all();
-            if (!empty($teamIds)) {
+            if (! empty($teamIds)) {
                 $primary->teams()->syncWithoutDetaching($teamIds);
             }
             DB::table('basketball_match_team')->where('basketball_match_id', $m->id)->delete();
@@ -458,7 +460,7 @@ class MatchSyncService
             $primary->metadata = array_replace_recursive($metaOther, $metaPrimary);
 
             // Sjednotit další pole pokud chybí na primárním
-            if (!$primary->scheduled_at && $m->scheduled_at) {
+            if (! $primary->scheduled_at && $m->scheduled_at) {
                 $primary->scheduled_at = $m->scheduled_at;
             }
             if ($primary->opponent_id === null && $m->opponent_id) {
@@ -485,7 +487,7 @@ class MatchSyncService
      */
     protected function mergeDuplicatesForMatch(BasketballMatch $primary, ?ExternalImportRun $run = null): BasketballMatch
     {
-        if (!$primary) {
+        if (! $primary) {
             return $primary;
         }
 
@@ -514,7 +516,7 @@ class MatchSyncService
 
             // Přesunout pivoty a data
             $teamIds = $m->teams()->pluck('teams.id')->all();
-            if (!empty($teamIds)) {
+            if (! empty($teamIds)) {
                 $primary->teams()->syncWithoutDetaching($teamIds);
             }
             DB::table('basketball_match_team')->where('basketball_match_id', $m->id)->delete();
@@ -556,13 +558,13 @@ class MatchSyncService
                 \Log::info("MatchSync (merge_candidate): Transferred score {$m->score_home}:{$m->score_away} from duplicate match ID {$m->id} to primary ID {$primary->id}");
             }
 
-            if (!in_array($primary->status, ['finished', 'played', 'completed']) && in_array($m->status, ['finished', 'played', 'completed'])) {
+            if (! in_array($primary->status, ['finished', 'played', 'completed']) && in_array($m->status, ['finished', 'played', 'completed'])) {
                 $primary->status = 'finished';
                 \Log::info("MatchSync (merge_candidate): Transferred status 'finished' from duplicate match ID {$m->id} to primary ID {$primary->id}");
             }
 
             // Sjednotit další pole pokud chybí na primárním
-            if (!$primary->scheduled_at && $m->scheduled_at) {
+            if (! $primary->scheduled_at && $m->scheduled_at) {
                 $primary->scheduled_at = $m->scheduled_at;
             }
             if ($primary->opponent_id === null && $m->opponent_id) {
@@ -584,7 +586,7 @@ class MatchSyncService
     /**
      * Ověří konzistenci lokálních dat s oficiální tabulkou ze zdroje.
      */
-    public function validateSeasonConsistency(Team $team, Season $season, \App\Models\ExternalTeamSeasonConfig $config): array
+    public function validateSeasonConsistency(Team $team, Season $season, ExternalTeamSeasonConfig $config): array
     {
         $official = $config->metadata['official_standing'] ?? null;
         if (! $official) {

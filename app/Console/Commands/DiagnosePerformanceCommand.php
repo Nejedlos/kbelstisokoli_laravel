@@ -2,6 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Services\BrandingService;
+use App\Services\PartnerService;
+use Illuminate\Cache\FileStore;
+use Illuminate\Cache\RedisStore;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -53,7 +57,7 @@ class DiagnosePerformanceCommand extends Command
             $viewCompiled = config('view.compiled');
             $realPath = storage_path('framework/views');
             if ($viewCompiled !== $realPath) {
-                $this->error("ALARM: Config Cache obsahuje nekonzistentní cesty!");
+                $this->error('ALARM: Config Cache obsahuje nekonzistentní cesty!');
                 $this->line("Cachovaná cesta: $viewCompiled");
                 $this->line("Reálná cesta:    $realPath");
                 $this->warn("Doporučení: Spusťte 'php artisan config:clear'");
@@ -62,7 +66,7 @@ class DiagnosePerformanceCommand extends Command
 
         // 4. Cache Status
         $this->info("\n[CACHE STATUS]");
-        $this->check('Redis/File Cache', Cache::getStore() instanceof \Illuminate\Cache\FileStore || Cache::getStore() instanceof \Illuminate\Cache\RedisStore);
+        $this->check('Redis/File Cache', Cache::getStore() instanceof FileStore || Cache::getStore() instanceof RedisStore);
         $this->check('OPcache Active', function_exists('opcache_get_status') && opcache_get_status() !== false);
 
         // 4b. Database Indexes Status
@@ -83,24 +87,24 @@ class DiagnosePerformanceCommand extends Command
 
         // 6.1 Cold Load (vynucené smazání cache)
         $this->measure('Branding Cold Load (Cache Clear)', function () {
-            app(\App\Services\BrandingService::class)->clearCache();
-            app(\App\Services\BrandingService::class)->getSettings();
+            app(BrandingService::class)->clearCache();
+            app(BrandingService::class)->getSettings();
         });
 
         // 6.2 Cached Load (načtení z cache)
         $this->measure('Branding Cached Load (Hit)', function () {
-            app(\App\Services\BrandingService::class)->getSettings();
+            app(BrandingService::class)->getSettings();
         });
 
         // 7. Partners Check (JSON decoding pressure)
         $this->info("\n[PARTNERS & JSON]");
         $this->measure('Partners Cold Load (Cache Clear)', function () {
             Cache::forget('partners_homepage_strip');
-            app(\App\Services\PartnerService::class)->getHomepagePartners();
+            app(PartnerService::class)->getHomepagePartners();
         });
 
         $this->measure('Partners Cached Load (Hit)', function () {
-            app(\App\Services\PartnerService::class)->getHomepagePartners();
+            app(PartnerService::class)->getHomepagePartners();
         });
 
         $this->line("\n[DONE] Diagnostika dokončena.");

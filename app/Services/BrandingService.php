@@ -4,7 +4,6 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 class BrandingService
 {
@@ -260,6 +259,7 @@ class BrandingService
             }
 
             $store = 'file';
+
             return $this->dbSettings = Cache::store($store)->remember("global_branding_settings_{$locale}", 3600, function () use ($locale) {
                 try {
                     // Načteme klíče přes Query Builder (mnohem rychlejší než Eloquent pro mnoho malých řádků)
@@ -289,7 +289,7 @@ class BrandingService
                     foreach ($settings as $setting) {
                         // Ruční dekódování Spatie translatable JSONu (bypass traitu)
                         $rawValue = $setting->value;
-                        $value = is_array($rawValue) ? $rawValue : json_decode((string)$rawValue, true);
+                        $value = is_array($rawValue) ? $rawValue : json_decode((string) $rawValue, true);
 
                         if (is_array($value)) {
                             $mapped[$setting->key] = $value[$locale] ?? $value['cs'] ?? reset($value);

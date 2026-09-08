@@ -6,6 +6,7 @@ use App\Models\Menu;
 use App\Models\MenuItem;
 use App\Models\Page;
 use App\Models\Setting;
+use App\Services\BrandingService;
 use Illuminate\Database\Seeder;
 
 class CmsContentSeeder extends Seeder
@@ -18,8 +19,8 @@ class CmsContentSeeder extends Seeder
 
         // Vyčistit cache po seedování, aby se změny projevily hned
         try {
-            if (app()->bound(\App\Services\BrandingService::class)) {
-                app(\App\Services\BrandingService::class)->clearCache();
+            if (app()->bound(BrandingService::class)) {
+                app(BrandingService::class)->clearCache();
             }
         } catch (\Throwable $e) {
             // Ignorovat, pokud služba není dostupná
@@ -186,7 +187,7 @@ class CmsContentSeeder extends Seeder
                 }
 
                 // Pokud je content prázdný v databázi, ale v seederu máme data, tak je tam dáme (pro záchranu smazaných stránek)
-                if (empty($page->content) && !empty($pageData['content'])) {
+                if (empty($page->content) && ! empty($pageData['content'])) {
                     $page->update(['content' => $pageData['content']]);
                 }
 
@@ -217,12 +218,13 @@ class CmsContentSeeder extends Seeder
 
         if (empty($content)) {
             $page->update(['content' => $this->getHomeBlocks()]);
+
             return;
         }
 
         foreach ($content as &$block) {
             if ($block['type'] === 'hero') {
-                if (!isset($block['data']['show_upcoming_events']) || $block['data']['show_upcoming_events'] != 1) {
+                if (! isset($block['data']['show_upcoming_events']) || $block['data']['show_upcoming_events'] != 1) {
                     $block['data']['show_upcoming_events'] = 1;
                     $updated = true;
                 }
@@ -255,7 +257,7 @@ class CmsContentSeeder extends Seeder
                     'type' => 'custom_html',
                     'data' => [
                         'title' => 'Kde nás najdete',
-                        'html' => '<div class="w-full h-[450px] rounded-2xl overflow-hidden shadow-lg mb-12"><iframe src="' . $mapUrl . '" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>',
+                        'html' => '<div class="w-full h-[450px] rounded-2xl overflow-hidden shadow-lg mb-12"><iframe src="'.$mapUrl.'" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>',
                     ],
                 ],
             ],
@@ -274,7 +276,7 @@ class CmsContentSeeder extends Seeder
                     'type' => 'custom_html',
                     'data' => [
                         'title' => 'Where to find us',
-                        'html' => '<div class="w-full h-[450px] rounded-2xl overflow-hidden shadow-lg mb-12"><iframe src="' . $mapUrl . '" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>',
+                        'html' => '<div class="w-full h-[450px] rounded-2xl overflow-hidden shadow-lg mb-12"><iframe src="'.$mapUrl.'" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>',
                     ],
                 ],
             ],

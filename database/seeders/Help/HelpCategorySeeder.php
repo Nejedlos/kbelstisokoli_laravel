@@ -12,8 +12,6 @@ class HelpCategorySeeder extends Seeder
 
     /**
      * Seed categories.
-     *
-     * @return void
      */
     public function run(): void
     {

@@ -12,7 +12,7 @@ class RosterStrengthCalculator
      */
     public function calculateRosterStrength(BasketballMatch $match): array
     {
-        if (!$match->scheduled_at) {
+        if (! $match->scheduled_at) {
             return [
                 'team' => ['total' => 0, 'count' => 0, 'players' => []],
                 'opponent' => ['total' => 0, 'count' => 0, 'players' => []],
@@ -56,7 +56,7 @@ class RosterStrengthCalculator
             $playerId = $row->player_id;
             $points = (int) ($row->values['pts'] ?? 0);
 
-            if (!isset($playerStats[$playerId])) {
+            if (! isset($playerStats[$playerId])) {
                 $playerStats[$playerId] = ['pts' => 0, 'games' => 0];
             }
             $playerStats[$playerId]['pts'] += $points;
@@ -99,9 +99,11 @@ class RosterStrengthCalculator
             $points = (int) ($row->values['pts'] ?? 0);
             $rowLabel = $row->row_label; // For opponent players, we might only have labels
 
-            if (!$rowLabel) continue;
+            if (! $rowLabel) {
+                continue;
+            }
 
-            if (!isset($playerStats[$rowLabel])) {
+            if (! isset($playerStats[$rowLabel])) {
                 $playerStats[$rowLabel] = ['pts' => 0, 'games' => 0];
             }
             $playerStats[$rowLabel]['pts'] += $points;
@@ -109,7 +111,7 @@ class RosterStrengthCalculator
         }
 
         if (empty($playerStats)) {
-             return ['total' => 0, 'count' => 0, 'players' => []];
+            return ['total' => 0, 'count' => 0, 'players' => []];
         }
 
         $avgPoints = [];

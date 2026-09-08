@@ -14,6 +14,7 @@ use App\Support\Icons\AppIcon;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 
 class ExternalImportRunResource extends Resource
 {
@@ -41,14 +42,14 @@ class ExternalImportRunResource extends Resource
         return __('admin.resources.external_import_run.label');
     }
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
         return FilamentIcon::get(AppIcon::CRON_LOGS);
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.navigation.groups.statistics_and_data') . ' > ' . __('admin.navigation.groups.external_data');
+        return __('admin.navigation.groups.statistics_and_data').' > '.__('admin.navigation.groups.external_data');
     }
 
     public static function form(Schema $schema): Schema

@@ -6,6 +6,7 @@ use App\Models\HelpArticle;
 use App\Models\HelpCategory;
 use App\Support\HelpUrlHelper;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class HelpNavigationService
 {
@@ -13,25 +14,22 @@ class HelpNavigationService
 
     /**
      * Vygeneruje breadcrumbs pro danou položku (kategorii nebo článek).
-     *
-     * @param object|null $item
-     * @return Collection
      */
-    public function getBreadcrumbs(object|null $item = null): Collection
+    public function getBreadcrumbs(?object $item = null): Collection
     {
         $locale = app()->getLocale();
         $itemId = $item->id ?? 'root';
         $itemType = $item ? get_class($item) : 'none';
         $cacheKey = "help_breadcrumbs_{$itemType}_{$itemId}_{$locale}";
 
-        return \Illuminate\Support\Facades\Cache::remember($cacheKey, now()->addHours(24), function () use ($item) {
+        return Cache::remember($cacheKey, now()->addHours(24), function () use ($item) {
             $breadcrumbs = collect([
                 [
                     'label' => __('admin.navigation.pages.help'),
                     'slug' => null,
                     'url' => HelpUrlHelper::getUrl(),
                     'is_active' => $item === null,
-                ]
+                ],
             ]);
 
             if ($item === null) {
@@ -71,14 +69,10 @@ class HelpNavigationService
 
     /**
      * Rekurzivně přidá kategorie do breadcrumbs.
-     *
-     * @param object|null $category
-     * @param Collection $breadcrumbs
-     * @param bool $isCurrent
      */
-    protected function addCategoryBreadcrumbs(object|null $category, Collection $breadcrumbs, bool $isCurrent = false): void
+    protected function addCategoryBreadcrumbs(?object $category, Collection $breadcrumbs, bool $isCurrent = false): void
     {
-        if (!$category) {
+        if (! $category) {
             return;
         }
 
@@ -116,7 +110,7 @@ class HelpNavigationService
             array_unshift($path, $current);
 
             $parentId = $current->parent_id ?? null;
-            if (!$parentId) {
+            if (! $parentId) {
                 break;
             }
 

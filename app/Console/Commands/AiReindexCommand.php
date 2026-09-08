@@ -2,8 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Models\AiDocument;
 use App\Services\AiIndexService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\App;
 
 class AiReindexCommand extends Command
 {
@@ -37,13 +39,13 @@ class AiReindexCommand extends Command
 
         foreach ($locales as $l) {
             // Nastavíme globální locale pro aktuální iteraci
-            \Illuminate\Support\Facades\App::setLocale($l);
+            App::setLocale($l);
 
             $this->info("Indexing documents for locale '{$l}'".($section ? " section '{$section}'" : '').($fresh ? ' (fresh)' : '').($force ? ' (force)' : '').'...');
 
             // Pokud není fresh, aspoň promažeme typy, které už nechceme indexovat (staré dokumenty z docs)
             if (! $fresh) {
-                $query = \App\Models\AiDocument::where('locale', $l)
+                $query = AiDocument::where('locale', $l)
                     ->where('section', 'documentation'); // Vyčistíme starou dokumentaci, pokud tam zbyla
 
                 if ($section) {
@@ -81,7 +83,7 @@ class AiReindexCommand extends Command
 
             if ($enrich) {
                 $this->info("Enriching documents with AI summary and keywords for locale '{$l}'".($section ? " section '{$section}'" : '').'...');
-                $query = \App\Models\AiDocument::where('locale', $l);
+                $query = AiDocument::where('locale', $l);
 
                 if ($section) {
                     $query->where('section', $section);

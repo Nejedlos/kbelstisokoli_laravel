@@ -9,9 +9,12 @@ use App\Filament\Resources\ClubEvents\RelationManagers\AttendancesRelationManage
 use App\Filament\Resources\ClubEvents\Schemas\ClubEventForm;
 use App\Filament\Resources\ClubEvents\Tables\ClubEventsTable;
 use App\Models\ClubEvent;
+use App\Support\IconHelper;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Builder;
 
 class ClubEventResource extends Resource
 {
@@ -32,9 +35,9 @@ class ClubEventResource extends Resource
         return __('admin.resources.club_event.plural_label');
     }
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
-        return \App\Support\IconHelper::get(\App\Support\IconHelper::EVENTS);
+        return IconHelper::get(IconHelper::EVENTS);
     }
 
     public static function getNavigationSort(): ?int
@@ -42,7 +45,7 @@ class ClubEventResource extends Resource
         return 30;
     }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
             ->with(['teams']);

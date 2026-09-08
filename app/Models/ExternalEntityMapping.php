@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ExternalEntityMapping extends Model
 {
@@ -27,7 +28,7 @@ class ExternalEntityMapping extends Model
         'last_seen_at' => 'datetime',
     ];
 
-    public function season(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function season(): BelongsTo
     {
         return $this->belongsTo(Season::class);
     }
@@ -37,7 +38,7 @@ class ExternalEntityMapping extends Model
         return $this->morphTo();
     }
 
-    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'internal_id');
     }

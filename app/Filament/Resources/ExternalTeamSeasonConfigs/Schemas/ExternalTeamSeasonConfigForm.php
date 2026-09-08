@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ExternalTeamSeasonConfigs\Schemas;
 
+use App\Models\Season;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -27,7 +28,7 @@ class ExternalTeamSeasonConfigForm
                             ->relationship('season', 'name')
                             ->required()
                             ->searchable()
-                            ->default(\App\Models\Season::where('is_active', true)->first()?->id),
+                            ->default(Season::where('is_active', true)->first()?->id),
                         TextInput::make('source_key')
                             ->label('Zdroj')
                             ->default('czbasketball')

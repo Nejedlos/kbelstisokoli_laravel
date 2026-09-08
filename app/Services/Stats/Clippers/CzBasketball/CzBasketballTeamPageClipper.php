@@ -18,19 +18,27 @@ class CzBasketballTeamPageClipper implements ClipperInterface
 
         // 1. TEAM HEADER CLIP
         $header = $this->extractTeamHeader($crawler, $baseUrl);
-        if ($header) $clips[] = $header;
+        if ($header) {
+            $clips[] = $header;
+        }
 
         // 2. ROSTER TABLE CLIP
         $roster = $this->extractRosterTable($crawler, $baseUrl);
-        if ($roster) $clips[] = $roster;
+        if ($roster) {
+            $clips[] = $roster;
+        }
 
         // 3. TEAM MATCHES CLIPS
         $matches = $this->extractMatchesTable($crawler, $baseUrl);
-        if ($matches) $clips[] = $matches;
+        if ($matches) {
+            $clips[] = $matches;
+        }
 
         // 4. HISTORY TABLE CLIP
         $history = $this->extractHistoryTable($crawler, $baseUrl);
-        if ($history) $clips[] = $history;
+        if ($history) {
+            $clips[] = $history;
+        }
 
         // 5. EXTRA STATS TABLES
         $otherTables = $this->extractExtraStatsTables($crawler, $baseUrl);
@@ -50,11 +58,12 @@ class CzBasketballTeamPageClipper implements ClipperInterface
         // Hledáme blok s "Klub", "Kategorie", "Soutěž"
         $infoBlocks = $crawler->filter('div, section, p')->reduce(function (Crawler $node) {
             $text = $node->text();
+
             return str_contains($text, 'Klub') || str_contains($text, 'Kategorie') || str_contains($text, 'Soutěž');
         })->first();
 
         $headerHtml = '<section id="team-header">';
-        $headerHtml .= '<h1>' . $h1->text() . '</h1>';
+        $headerHtml .= '<h1>'.$h1->text().'</h1>';
         if ($infoBlocks->count() > 0) {
             $headerHtml .= $this->sanitizeFragment($infoBlocks, $baseUrl);
         }
@@ -77,6 +86,7 @@ class CzBasketballTeamPageClipper implements ClipperInterface
             $hasHeader = str_contains($html, 'Hráč') && str_contains($html, 'Rok narození') &&
                          str_contains($html, 'Min.') && str_contains($html, 'TH %');
             $playerLinks = $node->filter('a[href*="/hrac/"]')->count();
+
             return $hasHeader && $playerLinks >= 3;
         })->first();
 
@@ -93,7 +103,7 @@ class CzBasketballTeamPageClipper implements ClipperInterface
             links: $links,
             evidence: [
                 'row_count' => $rosterTable->filter('tr')->count(),
-                'player_count' => count($links)
+                'player_count' => count($links),
             ]
         );
     }
@@ -107,6 +117,7 @@ class CzBasketballTeamPageClipper implements ClipperInterface
             $hasHeader = str_contains($html, 'Číslo utkání') && str_contains($html, 'Datum') &&
                          str_contains($html, 'Soupeř') && str_contains($html, 'Skóre') && str_contains($html, 'TH %');
             $matchLinks = $node->filter('a[href*="/zapas/"]')->count();
+
             return $hasHeader && $matchLinks >= 1;
         })->first();
 
@@ -126,7 +137,7 @@ class CzBasketballTeamPageClipper implements ClipperInterface
             links: $links,
             evidence: [
                 'row_count' => $matchesTable->filter('tr')->count(),
-                'match_count' => $matchesTable->filter('a[href*="/zapas/"]')->count()
+                'match_count' => $matchesTable->filter('a[href*="/zapas/"]')->count(),
             ]
         );
     }
@@ -136,6 +147,7 @@ class CzBasketballTeamPageClipper implements ClipperInterface
         // HISTORIE SIGNATURE: <th>Sezóna</th> AND <th>Soutěž</th> AND <th>Umístění</th> AND <th>Počet bodů</th>
         $historyTable = $crawler->filter('table')->reduce(function (Crawler $node) {
             $html = $node->html();
+
             return str_contains($html, 'Sezóna') && str_contains($html, 'Soutěž') &&
                    str_contains($html, 'Umístění') && str_contains($html, 'Počet bodů');
         })->first();
@@ -152,7 +164,7 @@ class CzBasketballTeamPageClipper implements ClipperInterface
             textHint: 'Team history table',
             links: $links,
             evidence: [
-                'row_count' => $historyTable->filter('tr')->count()
+                'row_count' => $historyTable->filter('tr')->count(),
             ]
         );
     }
@@ -162,19 +174,27 @@ class CzBasketballTeamPageClipper implements ClipperInterface
         $clips = [];
         $n = 1;
 
-        //statistiky jsou obvykle v tab-pane-two
+        // statistiky jsou obvykle v tab-pane-two
         $statsPane = $crawler->filter('#tab-pane-two');
         $context = $statsPane->count() > 0 ? $statsPane : $crawler;
 
         $context->filter('table')->each(function (Crawler $table) use (&$clips, &$n, $baseUrl) {
             // Nesmí to být tabulky, které jsme už vybrali (roster, matches, history)
             $html = $table->html();
-            if (str_contains($html, 'Hráč') && str_contains($html, 'Rok narození')) return;
-            if (str_contains($html, 'Číslo utkání') && str_contains($html, 'Datum')) return;
-            if (str_contains($html, 'Sezóna') && str_contains($html, 'Soutěž')) return;
+            if (str_contains($html, 'Hráč') && str_contains($html, 'Rok narození')) {
+                return;
+            }
+            if (str_contains($html, 'Číslo utkání') && str_contains($html, 'Datum')) {
+                return;
+            }
+            if (str_contains($html, 'Sezóna') && str_contains($html, 'Soutěž')) {
+                return;
+            }
 
             // Musí mít aspoň 5 řádků
-            if ($table->filter('tr')->count() < 5) return;
+            if ($table->filter('tr')->count() < 5) {
+                return;
+            }
 
             $clips[] = new ClipDTO(
                 id: "extra_stats_table_{$n}",
@@ -196,8 +216,8 @@ class CzBasketballTeamPageClipper implements ClipperInterface
         // Absolutizace URL
         if ($baseUrl) {
             $base = 'https://cz.basketball';
-            $html = preg_replace_callback('/href="(\/[^"]+)"/', function($m) use ($base) {
-                return 'href="' . $base . $m[1] . '"';
+            $html = preg_replace_callback('/href="(\/[^"]+)"/', function ($m) use ($base) {
+                return 'href="'.$base.$m[1].'"';
             }, $html);
         }
 
@@ -209,8 +229,9 @@ class CzBasketballTeamPageClipper implements ClipperInterface
             preg_match_all('/(href|colspan|rowspan)="([^"]+)"/i', $attrs, $matches, PREG_SET_ORDER);
             $newAttrs = '';
             foreach ($matches as $match) {
-                $newAttrs .= ' ' . $match[1] . '="' . $match[2] . '"';
+                $newAttrs .= ' '.$match[1].'="'.$match[2].'"';
             }
+
             return "<$tag$newAttrs>";
         }, $html);
 
@@ -223,10 +244,10 @@ class CzBasketballTeamPageClipper implements ClipperInterface
     protected function extractLinks(Crawler $node, ?string $baseUrl, ?string $type = null): array
     {
         $links = [];
-        $node->filter('a[href]')->each(function (Crawler $a) use (&$links, $baseUrl, $type) {
+        $node->filter('a[href]')->each(function (Crawler $a) use (&$links, $type) {
             $href = $a->attr('href');
             if (str_starts_with($href, '/')) {
-                $href = 'https://cz.basketball' . $href;
+                $href = 'https://cz.basketball'.$href;
             }
 
             $id = null;
@@ -235,7 +256,9 @@ class CzBasketballTeamPageClipper implements ClipperInterface
 
             if (preg_match('/\/hrac\/(\d+)/', $href, $m)) {
                 $id = $m[1];
-                if ($type === null || $type === 'players') $matchType = true;
+                if ($type === null || $type === 'players') {
+                    $matchType = true;
+                }
             } elseif (preg_match('/\/zapas\/(\d+)/', $href, $m)) {
                 $id = $m[1];
                 if ($type === null || $type === 'matches') {
@@ -254,7 +277,9 @@ class CzBasketballTeamPageClipper implements ClipperInterface
                 }
             } elseif (preg_match('/\/tym\/(\d+)/', $href, $m)) {
                 $id = $m[1];
-                if ($type === null || $type === 'opponent_teams') $matchType = true;
+                if ($type === null || $type === 'opponent_teams') {
+                    $matchType = true;
+                }
             } elseif (preg_match('/\/soutez\/(\d+)/', $href, $m)) {
                 $id = $m[1];
                 if ($type === null || $type === 'competitions') {
@@ -293,19 +318,22 @@ class CzBasketballTeamPageClipper implements ClipperInterface
             'tab-roster' => collect($clips)->firstWhere('id', 'roster_table'),
             'tab-matches' => collect($clips)->firstWhere('id', 'matches_table'),
             'tab-history' => collect($clips)->firstWhere('id', 'history_table'),
-            'tab-stats' => collect($clips)->filter(fn($c) => str_starts_with($c->id, 'extra_stats_table_'))->values(),
+            'tab-stats' => collect($clips)->filter(fn ($c) => str_starts_with($c->id, 'extra_stats_table_'))->values(),
         ];
 
-        $build = function(array $sectionsToInclude) use ($sections) {
+        $build = function (array $sectionsToInclude) use ($sections) {
             $html = "<html>\n<body>\n";
             foreach ($sectionsToInclude as $sec) {
                 if ($sec === 'tab-stats') {
-                    if ($sections['tab-stats']->isEmpty()) continue;
+                    if ($sections['tab-stats']->isEmpty()) {
+                        continue;
+                    }
                     $html .= "  <section id=\"tab-stats\">\n";
                     foreach ($sections['tab-stats'] as $clip) {
                         $html .= "    {$clip->htmlFragment}\n";
                     }
                     $html .= "  </section>\n";
+
                     continue;
                 }
                 $clip = $sections[$sec] ?? null;
@@ -316,6 +344,7 @@ class CzBasketballTeamPageClipper implements ClipperInterface
                 }
             }
             $html .= "</body>\n</html>";
+
             return $html;
         };
 
@@ -362,7 +391,7 @@ class CzBasketballTeamPageClipper implements ClipperInterface
                 }
                 // Absolutizace relativních URL pro konzistenci
                 if (str_starts_with($url, '/')) {
-                    $url = 'https://cz.basketball' . $url;
+                    $url = 'https://cz.basketball'.$url;
                 }
 
                 $entry = [

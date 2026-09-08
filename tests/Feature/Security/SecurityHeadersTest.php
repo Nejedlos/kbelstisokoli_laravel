@@ -2,8 +2,6 @@
 
 namespace Tests\Feature\Security;
 
-use App\Models\User;
-use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class SecurityHeadersTest extends TestCase
@@ -56,7 +54,7 @@ class SecurityHeadersTest extends TestCase
         ];
 
         foreach ($files as $file) {
-            $response = $this->get('/' . $file);
+            $response = $this->get('/'.$file);
             $this->assertTrue(
                 $response->status() === 404 || $response->status() === 403,
                 "Sensitive file {$file} should not be accessible (Status: {$response->status()})"
@@ -75,7 +73,7 @@ class SecurityHeadersTest extends TestCase
         // kde jsme potvrdili, že bootstrap/app.php neobsahuje výjimku.
 
         // Zde pouze ověříme, že routa má 'web' middleware (který CSRF obsahuje).
-        $route = collect(\Route::getRoutes())->first(function($route) {
+        $route = collect(\Route::getRoutes())->first(function ($route) {
             return $route->uri() === 'feedback' && in_array('POST', $route->methods());
         });
 

@@ -2,10 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\Page;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Page>
+ * @extends Factory<Page>
  */
 class PageFactory extends Factory
 {
@@ -20,7 +22,7 @@ class PageFactory extends Factory
 
         return [
             'title' => ['cs' => $title, 'en' => $title],
-            'slug' => \Illuminate\Support\Str::slug($title),
+            'slug' => Str::slug($title),
             'content' => ['cs' => [], 'en' => []],
             'status' => 'published',
             'is_visible' => true,

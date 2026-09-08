@@ -6,17 +6,21 @@ use App\Models\ExternalImportRun;
 use App\Models\Season;
 use App\Models\Team;
 use App\Models\User;
+use App\Services\Support\ConsoleService;
 use App\Support\BinaryHelper;
 use App\Support\FilamentIcon;
 use App\Support\Icons\AppIcon;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\HtmlString;
+use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Process\Process;
 
 class SystemConsole extends Page
@@ -32,8 +36,11 @@ class SystemConsole extends Page
     protected string $view = 'filament.pages.system-console';
 
     public string $consoleOutput = '';
+
     public string $output = '';
+
     public string $pollingInterval = '5s';
+
     public bool $isExecuting = false;
 
     public static function canAccess(): bool
@@ -53,7 +60,7 @@ class SystemConsole extends Page
         return __('admin.navigation.pages.system_console');
     }
 
-    public function getTitle(): string|\Illuminate\Contracts\Support\Htmlable
+    public function getTitle(): string|Htmlable
     {
         return __('admin.navigation.pages.system_console');
     }
@@ -69,7 +76,7 @@ class SystemConsole extends Page
     protected function getKpiData(): array
     {
         // Cachujeme na 60 sekund, aby polling nebo časté refreshe nebrzdily systém
-        return \Illuminate\Support\Facades\Cache::remember('system_console_kpi_data', 60, function () {
+        return Cache::remember('system_console_kpi_data', 60, function () {
             $kpi = [
                 'processes' => [],
                 'imports' => [],
@@ -308,7 +315,7 @@ class SystemConsole extends Page
         $users = User::query()
             ->orderBy('id', 'desc')
             ->get()
-            ->mapWithKeys(fn ($user) => [$user->id => ($user->last_name . ' ' . $user->first_name ?: $user->name) . " (#{$user->id})"])
+            ->mapWithKeys(fn ($user) => [$user->id => ($user->last_name.' '.$user->first_name ?: $user->name)." (#{$user->id})"])
             ->toArray();
         $userOptions = ['' => '-- Všichni uživatelé --'] + $users;
 
@@ -859,7 +866,7 @@ class SystemConsole extends Page
         $valueStr = '';
         if ($selectValue) {
             if (is_array($selectValue)) {
-                $valueStr = ' ' . implode(' ', array_filter($selectValue));
+                $valueStr = ' '.implode(' ', array_filter($selectValue));
             } else {
                 $valueStr = " $selectValue";
             }
@@ -881,7 +888,9 @@ class SystemConsole extends Page
 
                 if (is_array($selectValue)) {
                     foreach ($selectValue as $name => $val) {
-                        if (empty($val)) continue;
+                        if (empty($val)) {
+                            continue;
+                        }
                         if (str_starts_with($name, '--')) {
                             $commandArray[] = "$name=$val";
                         } else {
@@ -962,20 +971,20 @@ class SystemConsole extends Page
         $valueStr = '';
         if ($selectValue) {
             if (is_array($selectValue)) {
-                $valueStr = ' ' . implode(' ', array_filter($selectValue));
+                $valueStr = ' '.implode(' ', array_filter($selectValue));
             } else {
                 $valueStr = " $selectValue";
             }
         }
 
-        $internalDebug = "";
+        $internalDebug = '';
         if (config('app.debug')) {
-            $internalDebug .= "[INTERNAL DEBUG] Memory Limit: " . ini_get('memory_limit') . "\n";
-            $internalDebug .= "[INTERNAL DEBUG] Time Limit: " . ini_get('max_execution_time') . "\n";
-            $internalDebug .= "[INTERNAL DEBUG] DB Connection: " . config('database.default') . "\n";
+            $internalDebug .= '[INTERNAL DEBUG] Memory Limit: '.ini_get('memory_limit')."\n";
+            $internalDebug .= '[INTERNAL DEBUG] Time Limit: '.ini_get('max_execution_time')."\n";
+            $internalDebug .= '[INTERNAL DEBUG] DB Connection: '.config('database.default')."\n";
         }
 
-        $this->safelyStream(content: "\n[$timestamp] > (Internal) artisan $command".(empty($flags) ? '' : ' '.implode(' ', $flags)).$valueStr."\n" . $internalDebug, replace: false);
+        $this->safelyStream(content: "\n[$timestamp] > (Internal) artisan $command".(empty($flags) ? '' : ' '.implode(' ', $flags)).$valueStr."\n".$internalDebug, replace: false);
 
         try {
             $parameters = ['--no-interaction' => true];
@@ -990,7 +999,9 @@ class SystemConsole extends Page
 
             if (is_array($selectValue)) {
                 foreach ($selectValue as $name => $val) {
-                    if (empty($val)) continue;
+                    if (empty($val)) {
+                        continue;
+                    }
                     // Pro Artisan::call se -- u options dává jako název klíče
                     $parameters[$name] = $val;
                 }
@@ -1066,7 +1077,7 @@ class SystemConsole extends Page
             // Použijeme BufferedOutput pro zachycení výstupu a budeme ho streamovat
             // Poznámka: Artisan::call je synchronní, takže streamování proběhne až PO dokončení,
             // pokud nepoužijeme vlastní Output třídu, která volá $this->stream().
-            $outputBuffer = new \Symfony\Component\Console\Output\BufferedOutput;
+            $outputBuffer = new BufferedOutput;
 
             Artisan::call($command, $parameters, $outputBuffer);
             $result = $outputBuffer->fetch();
@@ -1364,7 +1375,7 @@ class SystemConsole extends Page
 
     public function refreshConsoleLogs(): void
     {
-        $newContent = \App\Services\Support\ConsoleService::getContent();
+        $newContent = ConsoleService::getContent();
         if ($this->consoleOutput !== $newContent) {
             $this->consoleOutput = $newContent;
             $this->dispatch('console-updated');
@@ -1376,7 +1387,7 @@ class SystemConsole extends Page
 
     public function clearConsoleLogs(): void
     {
-        \App\Services\Support\ConsoleService::clear();
+        ConsoleService::clear();
         $this->consoleOutput = '';
         Notification::make()->title('Console cleared')->success()->send();
     }
@@ -1404,11 +1415,11 @@ class SystemConsole extends Page
             // vyhodí chybu, protože se snaží volat metodu na null objektu (StreamManager::to()).
             // Zde voláme stream() s parametry a pokud selže, tiše ignorujeme - výstup je stále v $this->consoleOutput.
             // Používáme HtmlString, aby Livewire 3 streaming neescapoval HTML tagy (např. barvy z ConsoleService).
-            $this->stream(to: 'consoleOutput', content: new \Illuminate\Support\HtmlString($content), replace: $replace);
+            $this->stream(to: 'consoleOutput', content: new HtmlString($content), replace: $replace);
         } catch (\Throwable $e) {
             // Ignorujeme chybu streamování, uživatel uvidí výstup po dokončení akce v $this->consoleOutput.
             Log::debug('SystemConsole: Streaming failed, likely due to cache change.', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         }
     }

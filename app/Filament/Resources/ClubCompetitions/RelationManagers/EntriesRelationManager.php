@@ -43,7 +43,7 @@ class EntriesRelationManager extends RelationManager
             ->components([
                 Grid::make(2)
                     ->schema([
-                        Section::make(new HtmlString(IconHelper::render(AppIcon::INFO) . ' ' . __('admin.resources.club_competition.sections.general')))
+                        Section::make(new HtmlString(IconHelper::render(AppIcon::INFO).' '.__('admin.resources.club_competition.sections.general')))
                             ->schema([
                                 DatePicker::make('entry_date')
                                     ->label(__('admin.resources.club_competition.entry_fields.entry_date'))
@@ -65,13 +65,13 @@ class EntriesRelationManager extends RelationManager
                             ])
                             ->columnSpan(1),
 
-                        Section::make(new HtmlString(IconHelper::render(AppIcon::USER) . ' ' . __('admin.resources.club_competition.leaderboard.participant')))
+                        Section::make(new HtmlString(IconHelper::render(AppIcon::USER).' '.__('admin.resources.club_competition.leaderboard.participant')))
                             ->description(__('admin.resources.club_competition.entry_fields.player_id_help'))
                             ->schema([
                                 Select::make('player_id')
                                     ->label(__('admin.resources.club_competition.entry_fields.player_id'))
                                     ->relationship('player', 'name')
-                                    ->getOptionLabelFromRecordUsing(fn ($record) => $record->name ?? 'Uživatel bez jména (ID: ' . $record->id . ')')
+                                    ->getOptionLabelFromRecordUsing(fn ($record) => $record->name ?? 'Uživatel bez jména (ID: '.$record->id.')')
                                     ->searchable()
                                     ->preload(),
 
@@ -151,5 +151,4 @@ class EntriesRelationManager extends RelationManager
             ])
             ->modifyQueryUsing(fn ($query) => $query->orderBy('entry_date', 'desc')->orderBy('value', 'desc'));
     }
-
 }

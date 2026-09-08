@@ -2,6 +2,14 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Resources\AuditLogs\AuditLogResource;
+use App\Filament\Resources\BasketballMatches\BasketballMatchResource;
+use App\Filament\Resources\ClubEvents\ClubEventResource;
+use App\Filament\Resources\FinanceCharges\FinanceChargeResource;
+use App\Filament\Resources\MediaAssets\MediaAssetResource;
+use App\Filament\Resources\Posts\PostResource;
+use App\Filament\Resources\Trainings\TrainingResource;
+use App\Filament\Resources\Users\UserResource;
 use App\Models\PlayerProfile;
 use Filament\Widgets\Widget;
 
@@ -43,36 +51,36 @@ class WelcomeBannerWidget extends Widget
         // Quick actions URLs – use Filament Resource URLs if available, else fallback to admin path.
         $adminPath = config('filament.panels.admin.path', 'admin');
 
-        $matchCreate = method_exists(\App\Filament\Resources\BasketballMatches\BasketballMatchResource::class, 'getUrl')
-            ? \App\Filament\Resources\BasketballMatches\BasketballMatchResource::getUrl('create')
+        $matchCreate = method_exists(BasketballMatchResource::class, 'getUrl')
+            ? BasketballMatchResource::getUrl('create')
             : url("/{$adminPath}/basketball-matches/create");
 
-        $userCreate = method_exists(\App\Filament\Resources\Users\UserResource::class, 'getUrl')
-            ? \App\Filament\Resources\Users\UserResource::getUrl('create')
+        $userCreate = method_exists(UserResource::class, 'getUrl')
+            ? UserResource::getUrl('create')
             : url("/{$adminPath}/users/create");
 
-        $postCreate = class_exists(\App\Filament\Resources\Posts\PostResource::class) && method_exists(\App\Filament\Resources\Posts\PostResource::class, 'getUrl')
-            ? \App\Filament\Resources\Posts\PostResource::getUrl('create')
+        $postCreate = class_exists(PostResource::class) && method_exists(PostResource::class, 'getUrl')
+            ? PostResource::getUrl('create')
             : url("/{$adminPath}/posts/create");
 
-        $trainingCreate = class_exists(\App\Filament\Resources\Trainings\TrainingResource::class) && method_exists(\App\Filament\Resources\Trainings\TrainingResource::class, 'getUrl')
-            ? \App\Filament\Resources\Trainings\TrainingResource::getUrl('create')
+        $trainingCreate = class_exists(TrainingResource::class) && method_exists(TrainingResource::class, 'getUrl')
+            ? TrainingResource::getUrl('create')
             : url("/{$adminPath}/trainings/create");
 
-        $eventCreate = class_exists(\App\Filament\Resources\ClubEvents\ClubEventResource::class) && method_exists(\App\Filament\Resources\ClubEvents\ClubEventResource::class, 'getUrl')
-            ? \App\Filament\Resources\ClubEvents\ClubEventResource::getUrl('create')
+        $eventCreate = class_exists(ClubEventResource::class) && method_exists(ClubEventResource::class, 'getUrl')
+            ? ClubEventResource::getUrl('create')
             : url("/{$adminPath}/club-events/create");
 
-        $mediaUpload = class_exists(\App\Filament\Resources\MediaAssets\MediaAssetResource::class) && method_exists(\App\Filament\Resources\MediaAssets\MediaAssetResource::class, 'getUrl')
-            ? \App\Filament\Resources\MediaAssets\MediaAssetResource::getUrl('index')
+        $mediaUpload = class_exists(MediaAssetResource::class) && method_exists(MediaAssetResource::class, 'getUrl')
+            ? MediaAssetResource::getUrl('index')
             : url("/{$adminPath}/media-assets");
 
-        $auditLog = class_exists(\App\Filament\Resources\AuditLogs\AuditLogResource::class) && method_exists(\App\Filament\Resources\AuditLogs\AuditLogResource::class, 'getUrl')
-            ? \App\Filament\Resources\AuditLogs\AuditLogResource::getUrl('index')
+        $auditLog = class_exists(AuditLogResource::class) && method_exists(AuditLogResource::class, 'getUrl')
+            ? AuditLogResource::getUrl('index')
             : url("/{$adminPath}/audit-logs");
 
-        $finance = class_exists(\App\Filament\Resources\FinanceCharges\FinanceChargeResource::class) && method_exists(\App\Filament\Resources\FinanceCharges\FinanceChargeResource::class, 'getUrl')
-            ? \App\Filament\Resources\FinanceCharges\FinanceChargeResource::getUrl('index')
+        $finance = class_exists(FinanceChargeResource::class) && method_exists(FinanceChargeResource::class, 'getUrl')
+            ? FinanceChargeResource::getUrl('index')
             : url("/{$adminPath}/finance-charges");
 
         return [

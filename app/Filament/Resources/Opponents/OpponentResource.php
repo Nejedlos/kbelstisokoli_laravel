@@ -7,11 +7,13 @@ use App\Filament\Resources\Opponents\Pages\EditOpponent;
 use App\Filament\Resources\Opponents\Pages\ListOpponents;
 use App\Filament\Resources\Opponents\Schemas\OpponentForm;
 use App\Filament\Resources\Opponents\Tables\OpponentsTable;
-use App\Models\Opponent;
 use App\Filament\Resources\Opponents\Widgets\OpponentMergeSuggestionsWidget;
+use App\Models\Opponent;
+use App\Support\IconHelper;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 
 class OpponentResource extends Resource
 {
@@ -32,9 +34,9 @@ class OpponentResource extends Resource
         return __('admin.resources.opponent.plural_label');
     }
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
-        return \App\Support\IconHelper::get(\App\Support\IconHelper::OPPONENTS);
+        return IconHelper::get(IconHelper::OPPONENTS);
     }
 
     public static function getNavigationSort(): ?int

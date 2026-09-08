@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\BasketballMatch;
+use App\Models\Page;
+use App\Models\Season;
+use App\Models\Team;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -20,8 +23,8 @@ class MatchController extends Controller
 
         // Defaultní sezóna (aktuální), pokud není vybrána jiná
         if (! $seasonId) {
-            $currentSeasonName = \App\Models\Season::getExpectedCurrentSeasonName();
-            $currentSeason = \App\Models\Season::where('name', $currentSeasonName)->first();
+            $currentSeasonName = Season::getExpectedCurrentSeasonName();
+            $currentSeason = Season::where('name', $currentSeasonName)->first();
             if ($currentSeason) {
                 $seasonId = $currentSeason->id;
             }
@@ -51,10 +54,10 @@ class MatchController extends Controller
         }
 
         $matches = $query->paginate(15);
-        $page = \App\Models\Page::where('slug', 'zapasy')->first();
+        $page = Page::where('slug', 'zapasy')->first();
 
-        $seasons = \App\Models\Season::orderBy('name', 'desc')->get();
-        $teams = \App\Models\Team::orderBy('name')->get();
+        $seasons = Season::orderBy('name', 'desc')->get();
+        $teams = Team::orderBy('name')->get();
         $matchTypes = [
             'MI' => __('matches.type_mi'),
             'PO' => __('matches.type_po'),

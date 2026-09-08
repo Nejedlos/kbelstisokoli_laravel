@@ -55,7 +55,8 @@ class EmailDebug extends Page
         if (file_exists(base_path('.git'))) {
             try {
                 $gitInfo = trim(shell_exec('git log -1 --format="%h (%cd)" --date=iso'));
-            } catch (\Throwable $e) {}
+            } catch (\Throwable $e) {
+            }
         }
 
         // Mask password
@@ -83,7 +84,7 @@ class EmailDebug extends Page
 
     public function getRecentLogs(): array
     {
-        $logFiles = glob(storage_path("logs/laravel*.log"));
+        $logFiles = glob(storage_path('logs/laravel*.log'));
         usort($logFiles, function ($a, $b) {
             return filemtime($b) <=> filemtime($a);
         });

@@ -4,7 +4,6 @@ namespace App\Support;
 
 use App\Models\BasketballMatch;
 use App\Models\ClubEvent;
-use App\Models\Team;
 use App\Models\Training;
 use Illuminate\Support\Collection;
 
@@ -55,9 +54,9 @@ class HeroEventsHelper
 
         // 4. Sloučíme, seřadíme a naformátujeme
         return $trainings->concat($matches)->concat($clubEvents)
-            ->sortBy(fn($event) => $event instanceof BasketballMatch ? $event->scheduled_at : $event->starts_at)
+            ->sortBy(fn ($event) => $event instanceof BasketballMatch ? $event->scheduled_at : $event->starts_at)
             ->take(3)
-            ->map(fn($event) => self::formatEvent($event));
+            ->map(fn ($event) => self::formatEvent($event));
     }
 
     protected static function formatEvent($event): array
@@ -69,6 +68,7 @@ class HeroEventsHelper
         // Sestavíme zkratky všech zapojených týmů
         $teamShorts = $event->teams->map(function ($team) use ($locale) {
             $name = $team->getTranslation('name', $locale);
+
             return trim(str_replace('Sokol Kbely ', '', $name));
         })->unique();
 
@@ -77,11 +77,11 @@ class HeroEventsHelper
         $title = '';
         if ($isMatch) {
             $title = $event->is_home
-                ? $event->official_team_name . ' – ' . $event->official_opponent_name
-                : $event->official_opponent_name . ' – ' . $event->official_team_name;
+                ? $event->official_team_name.' – '.$event->official_opponent_name
+                : $event->official_opponent_name.' – '.$event->official_team_name;
         } elseif ($isTraining) {
             $sport = $event->sport ?? 'basketball';
-            $title = __('member.attendance.event_types.training_' . $sport);
+            $title = __('member.attendance.event_types.training_'.$sport);
         } else {
             $title = $event->getTranslation('title', $locale);
         }

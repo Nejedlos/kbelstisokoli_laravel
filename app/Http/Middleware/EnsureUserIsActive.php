@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureUserIsActive
@@ -11,7 +12,7 @@ class EnsureUserIsActive
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -21,7 +22,7 @@ class EnsureUserIsActive
 
             if ($isInactive) {
                 if ($request->session()->has('impersonated_by')) {
-                    \Illuminate\Support\Facades\Log::info('EnsureUserIsActive.impersonated_inactive_user', [
+                    Log::info('EnsureUserIsActive.impersonated_inactive_user', [
                         'user_id' => $user->id,
                         'email' => $user->email,
                     ]);
@@ -29,7 +30,7 @@ class EnsureUserIsActive
                     return $next($request);
                 }
 
-                \Illuminate\Support\Facades\Log::warning('EnsureUserIsActive.account_inactive', [
+                Log::warning('EnsureUserIsActive.account_inactive', [
                     'user_id' => $user->id,
                     'email' => $user->email,
                     'is_active' => $user->is_active,

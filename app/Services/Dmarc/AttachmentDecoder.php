@@ -27,7 +27,7 @@ class AttachmentDecoder
                 return $content;
             }
         } catch (\Exception $e) {
-            Log::error("DMARC AttachmentDecoder error: " . $e->getMessage(), [
+            Log::error('DMARC AttachmentDecoder error: '.$e->getMessage(), [
                 'filename' => $filename,
             ]);
         }
@@ -40,7 +40,7 @@ class AttachmentDecoder
         $tempFile = tempnam(sys_get_temp_dir(), 'dmarc_zip');
         file_put_contents($tempFile, $content);
 
-        $zip = new ZipArchive();
+        $zip = new ZipArchive;
         if ($zip->open($tempFile) === true) {
             // Predpokladame, ze v ZIPu je jen jeden soubor (XML)
             for ($i = 0; $i < $zip->numFiles; $i++) {
@@ -49,6 +49,7 @@ class AttachmentDecoder
                     $xmlContent = $zip->getFromIndex($i);
                     $zip->close();
                     unlink($tempFile);
+
                     return $xmlContent;
                 }
             }
@@ -56,6 +57,7 @@ class AttachmentDecoder
         }
 
         unlink($tempFile);
+
         return null;
     }
 

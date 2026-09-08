@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\Post;
 use App\Models\SeoMetadata;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Str;
+use Spatie\MediaLibrary\HasMedia;
 
 class SeoService
 {
@@ -187,7 +189,7 @@ class SeoService
             return web_asset($seo->og_image);
         }
 
-        if ($model instanceof \Spatie\MediaLibrary\HasMedia) {
+        if ($model instanceof HasMedia) {
             $mediaUrl = $model->getFirstMediaUrl('featured_image');
             if ($mediaUrl) {
                 return web_asset($mediaUrl);
@@ -219,7 +221,7 @@ class SeoService
 
     protected function resolveOgType(?Model $model): string
     {
-        if ($model instanceof \App\Models\Post) {
+        if ($model instanceof Post) {
             return 'article';
         }
 
@@ -282,7 +284,7 @@ class SeoService
         $data[] = $this->cleanSchema($local);
 
         // Article if post
-        if ($model instanceof \App\Models\Post) {
+        if ($model instanceof Post) {
             $ogImage = $this->resolveOgImage($seo, $model, $settings);
             $article = [
                 '@context' => 'https://schema.org',

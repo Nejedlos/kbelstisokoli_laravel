@@ -2,15 +2,15 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\Dmarc\DmarcRecord;
-use App\Models\Dmarc\DmarcReport;
-use App\Services\Dmarc\DmarcAnalysisService;
 use App\Services\Dmarc\DmarcAlertService;
+use App\Services\Dmarc\DmarcAnalysisService;
+use Illuminate\Console\Command;
 
 class DmarcReanalyzeCommand extends Command
 {
     protected $signature = 'dmarc:reanalyze {--domain=} {--from=} {--to=} {--send-alerts}';
+
     protected $description = 'Přepočítá DMARC analýzy pro existující záznamy.';
 
     public function handle(DmarcAnalysisService $analysisService, DmarcAlertService $alertService)
@@ -18,7 +18,7 @@ class DmarcReanalyzeCommand extends Command
         $query = DmarcRecord::with('report');
 
         if ($this->option('domain')) {
-            $query->whereHas('report', function($q) {
+            $query->whereHas('report', function ($q) {
                 $q->where('domain', $this->option('domain'));
             });
         }

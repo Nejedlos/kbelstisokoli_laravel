@@ -11,6 +11,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Support\HtmlString;
 
 class CmsForms
@@ -25,10 +27,10 @@ class CmsForms
         }
 
         return $section->schema([
-            \Filament\Schemas\Components\Tabs::make('SeoLanguageVersions')
+            Tabs::make('SeoLanguageVersions')
                 ->tabs([
-                    \Filament\Schemas\Components\Tabs\Tab::make('Čeština')
-                        ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-language mr-1"></i>'))
+                    Tab::make('Čeština')
+                        ->icon(new HtmlString('<i class="fa-light fa-language mr-1"></i>'))
                         ->schema([
                             TextInput::make('title.cs')
                                 ->label('SEO Titulek (CZ)')
@@ -55,8 +57,8 @@ class CmsForms
                                 ->placeholder('Ponechte prázdné pro použití SEO popisu'),
                         ]),
 
-                    \Filament\Schemas\Components\Tabs\Tab::make('English')
-                        ->icon(new \Illuminate\Support\HtmlString('<i class="fa-light fa-language mr-1"></i>'))
+                    Tab::make('English')
+                        ->icon(new HtmlString('<i class="fa-light fa-language mr-1"></i>'))
                         ->schema([
                             TextInput::make('title.en')
                                 ->label('SEO Title (EN)')

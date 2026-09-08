@@ -22,11 +22,13 @@ class CzBasketballMatchesListClipper implements ClipperInterface
         $matchingTables = $tables->reduce(function (Crawler $node, $i) {
             $matchLinks = $node->filter('a[href*="/zapas/"]');
             \Log::debug("Clipper: Table #{$i} has {$matchLinks->count()} match links.");
+
             return $matchLinks->count() >= 5;
         });
 
         if ($matchingTables->count() === 0) {
-            \Log::warning("Clipper: No matches list table found using primary heuristic (>= 5 match links).");
+            \Log::warning('Clipper: No matches list table found using primary heuristic (>= 5 match links).');
+
             return [];
         }
 
@@ -36,14 +38,14 @@ class CzBasketballMatchesListClipper implements ClipperInterface
             $fragmentHtml = $matchesTable->outerHtml();
             $prev = $matchesTable->previousAll()->first();
             if ($prev->count() > 0 && in_array($prev->nodeName(), ['h1', 'h2', 'h3'])) {
-                $fragmentHtml = $prev->outerHtml() . $fragmentHtml;
+                $fragmentHtml = $prev->outerHtml().$fragmentHtml;
             }
 
             $links = [];
             $matchesTable->filter('a[href*="/zapas/"]')->each(function (Crawler $a) use (&$links) {
                 $href = $a->attr('href');
                 if (str_starts_with($href, '/')) {
-                    $href = 'https://cz.basketball' . $href;
+                    $href = 'https://cz.basketball'.$href;
                 }
                 $links[] = [
                     'id' => preg_match('/\/zapas\/(\d+)/', $href, $m) ? $m[1] : null,
@@ -63,9 +65,9 @@ class CzBasketballMatchesListClipper implements ClipperInterface
                 $allClips = array_merge($allClips, $this->chunkTable($matchesTable, $links));
             } else {
                 $allClips[] = new ClipDTO(
-                    id: $matchingTables->count() > 1 ? "matches_list_table_" . ($tableIndex + 1) : "matches_list_table",
+                    id: $matchingTables->count() > 1 ? 'matches_list_table_'.($tableIndex + 1) : 'matches_list_table',
                     htmlFragment: $fragmentHtml,
-                    textHint: "Main matches list table" . ($matchingTables->count() > 1 ? " " . ($tableIndex + 1) : ""),
+                    textHint: 'Main matches list table'.($matchingTables->count() > 1 ? ' '.($tableIndex + 1) : ''),
                     links: $links,
                     evidence: [
                         'row_count' => $rows->count(),
@@ -108,7 +110,7 @@ class CzBasketballMatchesListClipper implements ClipperInterface
                 evidence: [
                     'chunk_index' => $chunkIndex,
                     'rows_in_chunk' => min($chunkSize, $totalRows - $i),
-                    'total_rows' => $totalRows
+                    'total_rows' => $totalRows,
                 ]
             );
         }

@@ -12,8 +12,8 @@ use App\Support\Icons\AppIcon;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
-use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListCompetitionStandings extends ListRecords
@@ -36,7 +36,9 @@ class ListCompetitionStandings extends ListRecords
                 ])
                 ->action(function (array $data, CompetitionSyncService $syncService) {
                     $season = Season::find($data['seasonId']);
-                    if (!$season) return;
+                    if (! $season) {
+                        return;
+                    }
 
                     // Zjistit aktivní tab (tým)
                     $tabKey = request()->query('tab');
@@ -79,6 +81,7 @@ class ListCompetitionStandings extends ListRecords
                 }),
         ];
     }
+
     public function getTabs(): array
     {
         $tabs = [];
@@ -93,7 +96,7 @@ class ListCompetitionStandings extends ListRecords
         // Tabs po týmech (abecedně)
         $teams = Team::orderBy('name')->get(['id', 'name']);
         foreach ($teams as $team) {
-            $tabs['team-' . $team->id] = Tab::make($team->name)
+            $tabs['team-'.$team->id] = Tab::make($team->name)
                 ->modifyQueryUsing(function (Builder $query) use ($team) {
                     $seasonId = request()->query('tableFilters')['season_id']['value'] ?? null;
 

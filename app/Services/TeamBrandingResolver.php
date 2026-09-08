@@ -19,7 +19,7 @@ class TeamBrandingResolver
      */
     public function isInternalTeam(Team|string|null $team): bool
     {
-        if (!$team) {
+        if (! $team) {
             return false;
         }
 
@@ -69,7 +69,7 @@ class TeamBrandingResolver
     public function getMatchLogo(BasketballMatch $match, bool $forHomeTeam = true): ?array
     {
         // Pokud chceme logo pro soupeře, neřešíme ho zde (zadání: "opponent logo neřeš")
-        if (($match->is_home && !$forHomeTeam) || (!$match->is_home && $forHomeTeam)) {
+        if (($match->is_home && ! $forHomeTeam) || (! $match->is_home && $forHomeTeam)) {
             return null;
         }
 

@@ -12,7 +12,7 @@ class FullPageCacheMiddleware
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -92,11 +92,13 @@ class FullPageCacheMiddleware
 
         if (! $enabled) {
             $request->attributes->set('cache_skip_reason', 'config-disabled');
+
             return false;
         }
 
         if (! $request->isMethod('GET')) {
             $request->attributes->set('cache_skip_reason', 'not-get');
+
             return false;
         }
 
@@ -123,6 +125,7 @@ class FullPageCacheMiddleware
 
         if ($request->is($excludedPaths)) {
             $request->attributes->set('cache_skip_reason', 'excluded-path');
+
             return false;
         }
 
@@ -131,6 +134,7 @@ class FullPageCacheMiddleware
             $session = $request->session();
             if ($session->has('errors') || $session->has('status') || $session->has('success') || $session->has('message')) {
                 $request->attributes->set('cache_skip_reason', 'session-flash-data');
+
                 return false;
             }
         }

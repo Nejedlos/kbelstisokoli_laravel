@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Galleries\Schemas;
 
 use App\Filament\Forms\CmsForms;
+use App\Support\IconHelper;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -12,6 +13,7 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Str;
 
 class GalleryForm
 {
@@ -22,7 +24,7 @@ class GalleryForm
                 Tabs::make('Gallery Tabs')
                     ->tabs([
                         Tabs\Tab::make('Obsah')
-                            ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::IMAGE))
+                            ->icon(IconHelper::get(IconHelper::IMAGE))
                             ->schema([
                                 Section::make('Základní informace')
                                     ->schema([
@@ -32,7 +34,7 @@ class GalleryForm
                                                     ->label('Název galerie')
                                                     ->required()
                                                     ->live(onBlur: true)
-                                                    ->afterStateUpdated(fn (string $operation, $state, $set) => $operation === 'create' ? $set('slug', \Illuminate\Support\Str::slug($state)) : null),
+                                                    ->afterStateUpdated(fn (string $operation, $state, $set) => $operation === 'create' ? $set('slug', Str::slug($state)) : null),
 
                                                 TextInput::make('slug')
                                                     ->label('Slug (URL)')
@@ -85,7 +87,7 @@ class GalleryForm
                             ]),
 
                         Tabs\Tab::make('SEO')
-                            ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::GLOBE))
+                            ->icon(IconHelper::get(IconHelper::GLOBE))
                             ->schema([
                                 CmsForms::getSeoSection(),
                             ]),

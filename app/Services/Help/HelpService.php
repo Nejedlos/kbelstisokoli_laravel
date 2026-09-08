@@ -2,8 +2,6 @@
 
 namespace App\Services\Help;
 
-use App\Models\HelpArticle;
-use App\Models\HelpCategory;
 use Illuminate\Support\Collection;
 
 class HelpService
@@ -17,33 +15,31 @@ class HelpService
     /**
      * Nastaví role pro filtrování obsahu.
      *
-     * @param array|string $roles
      * @return $this
      */
     public function forAudience(array|string $roles): self
     {
         $this->queryService->forAudience($roles);
         $this->searchService->forAudience($roles);
+
         return $this;
     }
 
     /**
      * Nastaví sekci pro filtrování obsahu.
      *
-     * @param string|null $section
      * @return $this
      */
     public function forSection(?string $section): self
     {
         $this->queryService->forSection($section);
         $this->searchService->forSection($section);
+
         return $this;
     }
 
     /**
      * Načte data pro úvodní stránku nápovědy.
-     *
-     * @return array
      */
     public function getHomeData(): array
     {
@@ -57,15 +53,12 @@ class HelpService
 
     /**
      * Načte data pro stránku kategorie.
-     *
-     * @param string $slug
-     * @return array|null
      */
     public function getCategoryData(string $slug): ?array
     {
         $category = $this->queryService->getCategoryBySlug($slug);
 
-        if (!$category) {
+        if (! $category) {
             return null;
         }
 
@@ -79,15 +72,12 @@ class HelpService
 
     /**
      * Načte data pro detail článku.
-     *
-     * @param string $slug
-     * @return array|null
      */
     public function getArticleData(string $slug): ?array
     {
         $article = $this->queryService->getArticleBySlug($slug);
 
-        if (!$article) {
+        if (! $article) {
             return null;
         }
 
@@ -104,9 +94,6 @@ class HelpService
 
     /**
      * Vyhledá články.
-     *
-     * @param string $query
-     * @return Collection
      */
     public function search(string $query): Collection
     {
@@ -115,8 +102,6 @@ class HelpService
 
     /**
      * Vrátí strom kategorií pro navigaci/sidebar.
-     *
-     * @return Collection
      */
     public function getNavigationTree(): Collection
     {

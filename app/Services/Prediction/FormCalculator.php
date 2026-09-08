@@ -11,7 +11,7 @@ class FormCalculator
      */
     public function calculateFormDelta(BasketballMatch $match, int $limit = 5): array
     {
-        if (!$match->scheduled_at) {
+        if (! $match->scheduled_at) {
             return [
                 'delta' => 0,
                 'wins' => 0,

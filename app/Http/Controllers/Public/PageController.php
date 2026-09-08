@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Page;
+use App\Services\BreadcrumbService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class PageController extends Controller
 {
-    public function show(\App\Services\BreadcrumbService $breadcrumbService, ?string $slug = null): View|\Illuminate\Http\RedirectResponse
+    public function show(BreadcrumbService $breadcrumbService, ?string $slug = null): View|RedirectResponse
     {
         if (is_null($slug)) {
             abort(404);

@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\MediaAsset;
+
 if (! function_exists('media_url')) {
     /**
      * Získá URL k médiu z knihovny.
@@ -10,7 +12,7 @@ if (! function_exists('media_url')) {
             return null;
         }
 
-        $asset = \App\Models\MediaAsset::find($id);
+        $asset = MediaAsset::find($id);
 
         if (! $asset) {
             return null;
@@ -30,7 +32,7 @@ if (! function_exists('media_alt')) {
             return '';
         }
 
-        $asset = \App\Models\MediaAsset::find($id);
+        $asset = MediaAsset::find($id);
 
         return $asset?->alt_text ?: '';
     }
@@ -58,20 +60,20 @@ if (! function_exists('web_asset')) {
         $normalized = ltrim($path, '/');
 
         // Funkce pro kontrolu existence a vrácení asset URL
-        $checkAndReturn = function($p) use ($tryWebp) {
+        $checkAndReturn = function ($p) use ($tryWebp) {
             $normalizedP = ltrim($p, '/');
 
             // 1) Zkusíme WebP variantu, pokud je to zapnuté
             if ($tryWebp) {
                 $info = pathinfo($normalizedP);
-                $webpPath = ($info['dirname'] !== '.' ? $info['dirname'] . '/' : '') . $info['filename'] . '.webp';
-                if (file_exists(public_path($webpPath)) || @file_exists(base_path('public/' . $webpPath))) {
+                $webpPath = ($info['dirname'] !== '.' ? $info['dirname'].'/' : '').$info['filename'].'.webp';
+                if (file_exists(public_path($webpPath)) || @file_exists(base_path('public/'.$webpPath))) {
                     return asset($webpPath);
                 }
             }
 
             // 2) Zkusíme původní cestu
-            if (file_exists(public_path($normalizedP)) || @file_exists(base_path('public/' . $normalizedP))) {
+            if (file_exists(public_path($normalizedP)) || @file_exists(base_path('public/'.$normalizedP))) {
                 return asset($normalizedP);
             }
 
@@ -81,20 +83,28 @@ if (! function_exists('web_asset')) {
         // Postupně zkoušíme různé lokace:
 
         // A) Přímá cesta (včetně uploads/ pokud je v path)
-        if ($res = $checkAndReturn($normalized)) return $res;
+        if ($res = $checkAndReturn($normalized)) {
+            return $res;
+        }
 
         // B) V uploads/ (pokud tam není)
-        if (!str_starts_with($normalized, 'uploads/')) {
-            if ($res = $checkAndReturn('uploads/' . $normalized)) return $res;
+        if (! str_starts_with($normalized, 'uploads/')) {
+            if ($res = $checkAndReturn('uploads/'.$normalized)) {
+                return $res;
+            }
         }
 
         // C) V storage/ (symlink)
-        if ($res = $checkAndReturn('storage/' . $normalized)) return $res;
+        if ($res = $checkAndReturn('storage/'.$normalized)) {
+            return $res;
+        }
 
         // D) Fallback na assets/img/loga/ (pro loga)
         if (str_contains($normalized, 'logo')) {
             $filename = basename($normalized);
-            if ($res = $checkAndReturn('assets/img/loga/' . $filename)) return $res;
+            if ($res = $checkAndReturn('assets/img/loga/'.$filename)) {
+                return $res;
+            }
         }
 
         // E) Poslední záchrana – vrať asset s původní cestou (i když neexistuje)

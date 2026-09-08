@@ -3,8 +3,8 @@
 namespace Tests\Feature\Users;
 
 use App\Models\User;
-use App\Services\Users\UserMergeService;
 use App\Services\Stats\Sync\StatisticSyncService;
+use App\Services\Users\UserMergeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;

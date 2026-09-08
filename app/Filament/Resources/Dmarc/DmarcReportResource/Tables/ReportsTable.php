@@ -2,16 +2,16 @@
 
 namespace App\Filament\Resources\Dmarc\DmarcReportResource\Tables;
 
+use App\Models\Dmarc\DmarcReport;
+use App\Support\IconHelper;
 use Filament\Actions\Action;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use App\Models\Dmarc\DmarcReport;
 use Illuminate\Support\Facades\Storage;
-use App\Support\IconHelper;
 use Illuminate\Support\HtmlString;
 
 class ReportsTable
@@ -66,8 +66,8 @@ class ReportsTable
 
                         $content .= "Záznamy:\n";
                         foreach ($record->records as $r) {
-                            $content .= "IP: {$r->source_ip} | DKIM: " . ($r->dkim_aligned ? 'PASS' : 'FAIL');
-                            $content .= " | SPF: " . ($r->spf_aligned ? 'PASS' : 'FAIL');
+                            $content .= "IP: {$r->source_ip} | DKIM: ".($r->dkim_aligned ? 'PASS' : 'FAIL');
+                            $content .= ' | SPF: '.($r->spf_aligned ? 'PASS' : 'FAIL');
                             $content .= " | Počet: {$r->count}\n";
                             if ($r->status !== 'OK') {
                                 $content .= "  Doporučení: {$r->recommended_action}\n";

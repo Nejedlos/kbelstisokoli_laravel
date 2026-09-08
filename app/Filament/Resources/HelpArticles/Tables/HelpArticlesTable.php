@@ -98,9 +98,10 @@ class HelpArticlesTable
                         if (empty($data['values'])) {
                             return $query;
                         }
+
                         return $query->where(function ($q) use ($data) {
                             foreach ($data['values'] as $value) {
-                                $q->orWhere('audience_roles', 'LIKE', '%"' . $value . '"%');
+                                $q->orWhere('audience_roles', 'LIKE', '%"'.$value.'"%');
                             }
                         });
                     }),

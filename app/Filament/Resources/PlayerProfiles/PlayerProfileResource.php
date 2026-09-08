@@ -8,17 +8,19 @@ use App\Filament\Resources\PlayerProfiles\Pages\ListPlayerProfiles;
 use App\Filament\Resources\PlayerProfiles\Schemas\PlayerProfileForm;
 use App\Filament\Resources\PlayerProfiles\Tables\PlayerProfilesTable;
 use App\Models\PlayerProfile;
+use App\Support\IconHelper;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 
 class PlayerProfileResource extends Resource
 {
     protected static ?string $model = PlayerProfile::class;
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
-        return \App\Support\IconHelper::get(\App\Support\IconHelper::PLAYER_PROFILES);
+        return IconHelper::get(IconHelper::PLAYER_PROFILES);
     }
 
     public static function getNavigationGroup(): ?string

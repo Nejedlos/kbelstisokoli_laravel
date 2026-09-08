@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\UserSeasonConfigs\Schemas;
 
+use App\Models\Season;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -31,7 +32,7 @@ class UserSeasonConfigForm
                                     ->label(__('admin.resources.user_season_config.fields.season'))
                                     ->relationship('season', 'name')
                                     ->required()
-                                    ->default(\App\Models\Season::where('is_active', true)->first()?->id),
+                                    ->default(Season::where('is_active', true)->first()?->id),
                                 Select::make('financial_tariff_id')
                                     ->label(__('admin.resources.user_season_config.fields.tariff'))
                                     ->relationship('tariff', 'name')

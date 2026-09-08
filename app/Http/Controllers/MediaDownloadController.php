@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MediaAsset;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -15,12 +16,12 @@ class MediaDownloadController extends Controller
         $media = Media::where('uuid', $uuid)->firstOrFail();
         $model = $media->model;
 
-        if (!$model) {
+        if (! $model) {
             abort(403, 'Média bez přiřazeného modelu nelze stahovat.');
         }
 
         // Kontrola oprávnění u MediaAsset (starší systém s access_level)
-        if ($model instanceof \App\Models\MediaAsset) {
+        if ($model instanceof MediaAsset) {
             $this->authorizeAccess($model);
         } else {
             // Generická autorizace pro ostatní modely (User, FinancePayment atd.)
@@ -38,7 +39,7 @@ class MediaDownloadController extends Controller
     /**
      * Ověření oprávnění pro přístup k médiu.
      */
-    protected function authorizeAccess(\App\Models\MediaAsset $asset): void
+    protected function authorizeAccess(MediaAsset $asset): void
     {
         if ($asset->access_level === 'public') {
             return;

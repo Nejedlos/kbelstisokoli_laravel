@@ -4,7 +4,6 @@ namespace App\Services\Finance;
 
 use App\Models\Attendance;
 use App\Models\BasketballMatch;
-use App\Models\ClubEvent;
 use App\Models\FinanceCharge;
 use App\Models\FinancialTariff;
 use App\Models\Season;
@@ -24,16 +23,18 @@ class FinanceAutomationService
     public function finalizeAttendance($event): void
     {
         $season = Season::forDate($event->starts_at ?? $event->scheduled_at);
-        if (!$season) {
+        if (! $season) {
             return;
         }
 
         $teams = $event->teams;
-        $userIds = $teams->flatMap(fn($team) => $team->activePlayers->pluck('user_id'))->unique();
+        $userIds = $teams->flatMap(fn ($team) => $team->activePlayers->pluck('user_id'))->unique();
 
         foreach ($userIds as $userId) {
             $user = User::find($userId);
-            if (!$user) continue;
+            if (! $user) {
+                continue;
+            }
 
             $attendance = Attendance::where('user_id', $userId)
                 ->where('attendable_type', get_class($event))
@@ -41,7 +42,7 @@ class FinanceAutomationService
                 ->first();
 
             // Pokud záznam neexistuje, vytvoříme ho jako pending/absent
-            if (!$attendance) {
+            if (! $attendance) {
                 $attendance = Attendance::create([
                     'user_id' => $userId,
                     'attendable_type' => get_class($event),
@@ -72,7 +73,7 @@ class FinanceAutomationService
     public function processAttendanceFines($event): void
     {
         $season = Season::forDate($event->starts_at ?? $event->scheduled_at);
-        if (!$season) {
+        if (! $season) {
             return;
         }
 
@@ -81,17 +82,21 @@ class FinanceAutomationService
 
         // Načteme všechny členy z týmů přiřazených k akci
         $teams = $event->teams;
-        $userIds = $teams->flatMap(fn($team) => $team->activePlayers->pluck('user_id'))->unique();
+        $userIds = $teams->flatMap(fn ($team) => $team->activePlayers->pluck('user_id'))->unique();
 
         foreach ($userIds as $userId) {
             $user = User::find($userId);
-            if (!$user) continue;
+            if (! $user) {
+                continue;
+            }
 
             $config = UserSeasonConfig::where('user_id', $userId)
                 ->where('season_id', $season->id)
                 ->first();
 
-            if (!$config || !$config->tariff) continue;
+            if (! $config || ! $config->tariff) {
+                continue;
+            }
 
             $tariff = $config->tariff;
 
@@ -124,7 +129,7 @@ class FinanceAutomationService
         $limit = (int) ($tariff->prepaid_events_count ?? 0);
 
         // Unikátní klíč pro tuto událost, abychom nezapočítali čerpání dvakrát
-        $uniqueKey = "usage:prepaid:".Str::snake(class_basename($event)).":{$event->id}:user:{$user->id}";
+        $uniqueKey = 'usage:prepaid:'.Str::snake(class_basename($event)).":{$event->id}:user:{$user->id}";
 
         // Zkontrolujeme v metadatech configu, zda už tato událost nebyla započtena
         $recordedUsages = $config->metadata['prepaid_usage_keys'] ?? [];
@@ -161,7 +166,7 @@ class FinanceAutomationService
         } else {
             // Vyčerpáno, účtujeme extra charge
             $eventDate = Carbon::parse($event->starts_at ?? $event->scheduled_at)->format('d.m.Y');
-            $chargeUniqueKey = "charge:extra:".Str::snake(class_basename($event)).":{$event->id}:user:{$user->id}";
+            $chargeUniqueKey = 'charge:extra:'.Str::snake(class_basename($event)).":{$event->id}:user:{$user->id}";
 
             $this->createChargeIfNotExists([
                 'user_id' => $user->id,
@@ -174,7 +179,7 @@ class FinanceAutomationService
                     'event_type' => get_class($event),
                     'event_id' => $event->id,
                     'prepaid_exhausted' => true,
-                ]
+                ],
             ]);
         }
     }
@@ -185,25 +190,35 @@ class FinanceAutomationService
     public function processThFines(StatisticRow $row): void
     {
         $user = $row->user;
-        if (!$user) return;
+        if (! $user) {
+            return;
+        }
 
         $match = $row->match;
-        if (!$match) return;
+        if (! $match) {
+            return;
+        }
 
         $season = $match->season;
-        if (!$season || $season->fine_missed_free_throw <= 0) return;
+        if (! $season || $season->fine_missed_free_throw <= 0) {
+            return;
+        }
 
         $config = UserSeasonConfig::where('user_id', $user->id)
             ->where('season_id', $season->id)
             ->first();
 
-        if (!$config || !$config->tariff || !$config->tariff->calculate_th_fines) return;
+        if (! $config || ! $config->tariff || ! $config->tariff->calculate_th_fines) {
+            return;
+        }
 
         $fta = (int) ($row->stats['FTA'] ?? 0);
         $ftm = (int) ($row->stats['FTM'] ?? 0);
         $missed = $fta - $ftm;
 
-        if ($missed <= 0) return;
+        if ($missed <= 0) {
+            return;
+        }
 
         $amount = $missed * $season->fine_missed_free_throw;
         $uniqueKey = "fine:th:match:{$match->id}:user:{$user->id}";
@@ -218,7 +233,7 @@ class FinanceAutomationService
                 'incident_key' => $uniqueKey,
                 'match_id' => $match->id,
                 'missed_count' => $missed,
-            ]
+            ],
         ]);
     }
 
@@ -228,11 +243,11 @@ class FinanceAutomationService
     public function generateInstallments(UserSeasonConfig $config): void
     {
         $tariff = $config->tariff;
-        if (!$tariff) {
+        if (! $tariff) {
             return;
         }
 
-        if ($tariff->type === 'flat' && !empty($tariff->installment_plan)) {
+        if ($tariff->type === 'flat' && ! empty($tariff->installment_plan)) {
             foreach ($tariff->installment_plan as $installment) {
                 $label = $installment['label'] ?? 'Splátka';
                 $amount = $installment['amount'] ?? 0;
@@ -251,7 +266,7 @@ class FinanceAutomationService
                         'incident_key' => $uniqueKey,
                         'tariff_id' => $tariff->id,
                         'season_id' => $config->season_id,
-                    ]
+                    ],
                 ]);
             }
         } elseif ($tariff->type === 'prepaid') {
@@ -275,7 +290,7 @@ class FinanceAutomationService
                     'season_id' => $config->season_id,
                     'is_prepaid' => true,
                     'prepaid_events_count' => $tariff->prepaid_events_count,
-                ]
+                ],
             ]);
         }
     }
@@ -294,9 +309,9 @@ class FinanceAutomationService
         };
 
         $eventDate = Carbon::parse($event->starts_at ?? $event->scheduled_at)->format('d.m.Y');
-        $baseTitle = "Automatická pokuta: ";
+        $baseTitle = 'Automatická pokuta: ';
         $amount = 0;
-        $reason = "";
+        $reason = '';
 
         // Stavy:
         // 1. Nezadání (pendning -> absent) - fine_no_response
@@ -304,7 +319,7 @@ class FinanceAutomationService
         // 3. Nezadání a přišel (pending -> attended) - fine_unannounced_show
         // 4. Omluveno a přišel (declined -> attended) - fine_excused_show
 
-        if (!$attendance) {
+        if (! $attendance) {
             // Hráč vůbec nereagoval a ani tam nebyl? (Předpokládáme absent pokud není v Attendance)
             // Ale trenér mohl zadat docházku.
             // Pokud není záznam v Attendance, bereme to jako pending.
@@ -332,11 +347,11 @@ class FinanceAutomationService
         }
 
         if ($amount > 0) {
-            $uniqueKey = "fine:attendance:".Str::snake(class_basename($event)).":{$event->id}:user:{$user->id}";
+            $uniqueKey = 'fine:attendance:'.Str::snake(class_basename($event)).":{$event->id}:user:{$user->id}";
 
             $this->createChargeIfNotExists([
                 'user_id' => $user->id,
-                'title' => $baseTitle . $reason,
+                'title' => $baseTitle.$reason,
                 'amount_total' => $amount,
                 'charge_type' => 'fine',
                 'due_date' => now()->addDays(14),
@@ -344,7 +359,7 @@ class FinanceAutomationService
                     'incident_key' => $uniqueKey,
                     'event_type' => get_class($event),
                     'event_id' => $event->id,
-                ]
+                ],
             ]);
         }
     }
@@ -352,7 +367,7 @@ class FinanceAutomationService
     protected function createPayPerEventCharge(User $user, $event, FinancialTariff $tariff): void
     {
         $eventDate = Carbon::parse($event->starts_at ?? $event->scheduled_at)->format('d.m.Y');
-        $uniqueKey = "charge:event:".Str::snake(class_basename($event)).":{$event->id}:user:{$user->id}";
+        $uniqueKey = 'charge:event:'.Str::snake(class_basename($event)).":{$event->id}:user:{$user->id}";
 
         $this->createChargeIfNotExists([
             'user_id' => $user->id,
@@ -364,7 +379,7 @@ class FinanceAutomationService
                 'incident_key' => $uniqueKey,
                 'event_type' => get_class($event),
                 'event_id' => $event->id,
-            ]
+            ],
         ]);
     }
 
@@ -374,7 +389,7 @@ class FinanceAutomationService
 
         if ($incidentKey) {
             // Hledáme v metadata (JSON v DB) bez použití JSON operátoru pro kompatibilitu
-            $exists = FinanceCharge::where('metadata', 'LIKE', '%"incident_key":"' . $incidentKey . '"%')->exists();
+            $exists = FinanceCharge::where('metadata', 'LIKE', '%"incident_key":"'.$incidentKey.'"%')->exists();
             if ($exists) {
                 return null;
             }

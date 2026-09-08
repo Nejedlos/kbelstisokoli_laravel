@@ -2,7 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\Season;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class SeasonMigrationSeeder extends Seeder
 {
@@ -26,7 +28,7 @@ class SeasonMigrationSeeder extends Seeder
 
             $tables = ['zapasy', 'dochazka', 'web_realna_dochazka', 'web_platici'];
             foreach ($tables as $table) {
-                $names = \Illuminate\Support\Facades\DB::connection('old_mysql')->table($table)
+                $names = DB::connection('old_mysql')->table($table)
                     ->select('sezona')
                     ->distinct()
                     ->pluck('sezona')
@@ -46,14 +48,14 @@ class SeasonMigrationSeeder extends Seeder
 
             foreach ($uniqueSeasons as $name) {
                 $unifiedName = str_replace('-', '/', $name);
-                \App\Models\Season::updateOrCreate(
+                Season::updateOrCreate(
                     ['name' => $unifiedName],
                     ['is_active' => false]
                 );
             }
 
             // Nastavíme nejnovější sezónu jako aktivní
-            $latest = \App\Models\Season::orderBy('name', 'desc')->first();
+            $latest = Season::orderBy('name', 'desc')->first();
             if ($latest) {
                 $latest->update(['is_active' => true]);
                 $this->command->info("Sezóna {$latest->name} byla nastavena jako aktivní.");

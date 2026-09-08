@@ -2,15 +2,13 @@
 
 namespace App\Filament\Resources\FeedbackReports\Tables;
 
-use Filament\Actions\ViewAction;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use App\Models\FeedbackReport;
 
 class FeedbackReportsTable
 {

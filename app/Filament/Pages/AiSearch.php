@@ -6,11 +6,12 @@ use App\Services\AiSearchService;
 use App\Support\FilamentIcon;
 use App\Support\Icons\AppIcon;
 use Filament\Pages\Page;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Http\Request;
 
 class AiSearch extends Page
 {
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
         return FilamentIcon::get(AppIcon::AI);
     }
@@ -22,7 +23,7 @@ class AiSearch extends Page
         return __('admin.ai_search.navigation_label');
     }
 
-    public function getTitle(): string|\Illuminate\Contracts\Support\Htmlable
+    public function getTitle(): string|Htmlable
     {
         return __('admin.ai_search.title');
     }
@@ -86,7 +87,7 @@ class AiSearch extends Page
         } catch (\Throwable $e) {
             $this->messages[] = [
                 'role' => 'assistant',
-                'content' => __('admin.ai_search.error_message') . ' ('.$e->getMessage().')',
+                'content' => __('admin.ai_search.error_message').' ('.$e->getMessage().')',
                 'time' => now()->format('H:i'),
             ];
         }

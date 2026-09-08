@@ -8,7 +8,6 @@ use Filament\GlobalSearch\GlobalSearchResult;
 use Filament\GlobalSearch\GlobalSearchResults;
 use Filament\GlobalSearch\Providers\Contracts\GlobalSearchProvider;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\HtmlString;
 
 class AiGlobalSearchProvider implements GlobalSearchProvider
 {
@@ -34,7 +33,7 @@ class AiGlobalSearchProvider implements GlobalSearchProvider
         $documents = AiDocument::where('locale', $locale)
             ->where(function ($q) {
                 $q->where('type', 'like', 'admin.%')
-                  ->orWhere('type', 'like', 'documentation.%');
+                    ->orWhere('type', 'like', 'documentation.%');
             })
             ->where(function ($q) use ($query) {
                 $q->where('title', 'LIKE', "%{$query}%")
@@ -100,7 +99,7 @@ class AiGlobalSearchProvider implements GlobalSearchProvider
 
         if (count($standardResults) > 0) {
             // Seřadíme výsledky (např. podle titulku)
-            usort($standardResults, fn($a, $b) => strcmp((string)$a->title, (string)$b->title));
+            usort($standardResults, fn ($a, $b) => strcmp((string) $a->title, (string) $b->title));
 
             // Omezíme počet výsledků, abychom nezahltili dropdown
             $limitedResults = array_slice($standardResults, 0, 10);

@@ -3,7 +3,6 @@
 namespace App\Services\Stats\Sync;
 
 use App\Models\BasketballMatch;
-use App\Support\ConsoleService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -13,7 +12,7 @@ class MatchCleanupService
      * Vyhledá a sloučí duplicitní zápasy v celé databázi.
      * Pravidlo: Jeden tým nemůže hrát dva zápasy ve stejný čas (tolerance 120 min).
      *
-     * @param bool $dryRun Pokud je true, pouze vypíše, co by udělal.
+     * @param  bool  $dryRun  Pokud je true, pouze vypíše, co by udělal.
      * @return array Statistiky o provedené akci.
      */
     public function cleanupDuplicates(bool $dryRun = false): array
@@ -26,19 +25,19 @@ class MatchCleanupService
 
         // 1. Najdeme zápasy se stejným external_id (nejsilnější vazba)
         $allMatchesWithExtId = BasketballMatch::all()
-            ->filter(fn($m) => !empty($m->metadata['external_id']));
+            ->filter(fn ($m) => ! empty($m->metadata['external_id']));
 
-        $groups = $allMatchesWithExtId->groupBy(function($m) {
-            return $m->team_id . '_' . $m->season_id . '_' . $m->metadata['external_id'];
-        })->filter(fn($group) => $group->count() > 1);
+        $groups = $allMatchesWithExtId->groupBy(function ($m) {
+            return $m->team_id.'_'.$m->season_id.'_'.$m->metadata['external_id'];
+        })->filter(fn ($group) => $group->count() > 1);
 
         foreach ($groups as $matches) {
             $stats['groups_found']++;
-            $mainMatch = $matches->first(fn($m) => !empty($m->metadata['boxscore_synced_at'] ?? null)) ?: $matches->first();
-            $toMerge = $matches->filter(fn($m) => $m->id !== $mainMatch->id);
+            $mainMatch = $matches->first(fn ($m) => ! empty($m->metadata['boxscore_synced_at'] ?? null)) ?: $matches->first();
+            $toMerge = $matches->filter(fn ($m) => $m->id !== $mainMatch->id);
 
             foreach ($toMerge as $duplicate) {
-                if (!$dryRun) {
+                if (! $dryRun) {
                     $this->mergeMatches($mainMatch, $duplicate);
                 }
                 $stats['matches_merged']++;
@@ -71,7 +70,7 @@ class MatchCleanupService
                         break;
                     }
                 }
-                if (!$foundGroup) {
+                if (! $foundGroup) {
                     $timeGroups[] = [$match];
                 }
             }
@@ -84,15 +83,15 @@ class MatchCleanupService
                 $stats['groups_found']++;
 
                 // Určíme hlavní zápas (ten z externího zdroje nebo ten s ID nejnižším)
-                $mainMatch = collect($timeGroup)->first(fn($m) => !empty($m->metadata['source']));
-                if (!$mainMatch) {
+                $mainMatch = collect($timeGroup)->first(fn ($m) => ! empty($m->metadata['source']));
+                if (! $mainMatch) {
                     $mainMatch = $timeGroup[0];
                 }
 
-                $toMerge = collect($timeGroup)->filter(fn($m) => $m->id !== $mainMatch->id);
+                $toMerge = collect($timeGroup)->filter(fn ($m) => $m->id !== $mainMatch->id);
 
                 foreach ($toMerge as $duplicate) {
-                    if (!$dryRun) {
+                    if (! $dryRun) {
                         $this->mergeMatches($mainMatch, $duplicate);
                     }
                     $stats['matches_merged']++;
@@ -115,7 +114,7 @@ class MatchCleanupService
             foreach ($attendances as $attendance) {
                 // Pokud už hlavní zápas má docházku pro stejného uživatele, ignorujeme (nebo sloučíme)
                 $exists = $main->attendances()->where('user_id', $attendance->user_id)->exists();
-                if (!$exists) {
+                if (! $exists) {
                     $attendance->update([
                         'attendable_id' => $main->id,
                     ]);
@@ -147,7 +146,7 @@ class MatchCleanupService
                     ->where('basketball_match_id', $main->id)
                     ->where('team_id', $teamId)
                     ->exists();
-                if (!$exists) {
+                if (! $exists) {
                     DB::table('basketball_match_team')->insert([
                         'basketball_match_id' => $main->id,
                         'team_id' => $teamId,
@@ -161,11 +160,11 @@ class MatchCleanupService
             $dupMetadata = $duplicate->metadata ?? [];
             $main->metadata = array_merge($dupMetadata, $mainMetadata); // Hlavní metadata vyhrávají
 
-            if (empty($main->notes_internal) && !empty($duplicate->notes_internal)) {
+            if (empty($main->notes_internal) && ! empty($duplicate->notes_internal)) {
                 $main->notes_internal = $duplicate->notes_internal;
             }
 
-            if (empty($main->location) && !empty($duplicate->location)) {
+            if (empty($main->location) && ! empty($duplicate->location)) {
                 $main->location = $duplicate->location;
             }
 

@@ -2,7 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Season;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class SeasonsNormalize extends Command
 {
@@ -27,32 +30,33 @@ class SeasonsNormalize extends Command
     {
         $dryRun = $this->option('dry-run');
         // Musíme brát sezóny jednu po druhé, protože při mazání by se mohl porušit iterátor
-        $seasons = \App\Models\Season::orderBy('id')->get();
+        $seasons = Season::orderBy('id')->get();
         $normalizedMap = [];
 
-        $this->info("Kontrola " . $seasons->count() . " sezón...");
+        $this->info('Kontrola '.$seasons->count().' sezón...');
 
         foreach ($seasons as $season) {
             // Kontrola existence, pokud byla smazána v rámci merge
-            if (!\App\Models\Season::find($season->id)) {
+            if (! Season::find($season->id)) {
                 continue;
             }
 
             $oldName = $season->name;
-            $newName = \App\Models\Season::normalizeName($oldName);
+            $newName = Season::normalizeName($oldName);
 
             if ($oldName !== $newName) {
                 // Pokud už existuje sezóna se stejným cílovým jménem, musíme ji sloučit
-                $existing = \App\Models\Season::where('name', $newName)->first();
+                $existing = Season::where('name', $newName)->first();
                 if ($existing && $existing->id !== $season->id) {
                     $this->error("Přejmenování ID {$season->id} '{$oldName}' -> '{$newName}' narazilo na existující ID {$existing->id}");
-                    if (!$dryRun) {
+                    if (! $dryRun) {
                         $this->mergeSeasons($season->id, $existing->id);
+
                         continue;
                     }
                 } else {
                     $this->warn("Sezóna ID {$season->id}: '{$oldName}' -> '{$newName}'");
-                    if (!$dryRun) {
+                    if (! $dryRun) {
                         $season->update(['name' => $newName]);
                     }
                 }
@@ -65,7 +69,7 @@ class SeasonsNormalize extends Command
 
                 $this->error("DUPLICITA: Sezóna ID {$sourceSeasonId} ('{$newName}') je duplicitní k ID {$targetSeasonId}");
 
-                if (!$dryRun) {
+                if (! $dryRun) {
                     $this->mergeSeasons($sourceSeasonId, $targetSeasonId);
                 }
             } else {
@@ -73,7 +77,7 @@ class SeasonsNormalize extends Command
             }
         }
 
-        $this->info("Hotovo.");
+        $this->info('Hotovo.');
     }
 
     protected function mergeSeasons(int $sourceId, int $targetId): void
@@ -91,12 +95,13 @@ class SeasonsNormalize extends Command
         ];
 
         foreach ($tables as $table) {
-            if (!\Illuminate\Support\Facades\Schema::hasTable($table)) {
+            if (! Schema::hasTable($table)) {
                 $this->line("- Tabulka {$table} neexistuje, přeskakuji.");
+
                 continue;
             }
 
-            $count = \Illuminate\Support\Facades\DB::table($table)
+            $count = DB::table($table)
                 ->where('season_id', $sourceId)
                 ->update(['season_id' => $targetId]);
 
@@ -106,7 +111,7 @@ class SeasonsNormalize extends Command
         }
 
         // Smazat původní sezónu
-        \App\Models\Season::find($sourceId)->delete();
+        Season::find($sourceId)->delete();
         $this->info("- Původní sezóna ID {$sourceId} smazána.");
     }
 }

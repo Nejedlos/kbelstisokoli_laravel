@@ -5,7 +5,9 @@ namespace App\Services\Dmarc;
 class DmarcClassifier
 {
     public const STATUS_OK = 'OK';
+
     public const STATUS_WARNING = 'Warning';
+
     public const STATUS_CRITICAL = 'Critical';
 
     /**
@@ -39,16 +41,16 @@ class DmarcClassifier
         $status = self::STATUS_OK;
         $recommendation = null;
 
-        if (!$dkimAligned && !$spfAligned) {
+        if (! $dkimAligned && ! $spfAligned) {
             $status = self::STATUS_CRITICAL;
             if ($disposition === 'none') {
                 $recommendation = "Kritické selhání: E-mail neprošel SPF ani DKIM zarovnáním. Aktuální politika 'none' jej propustila, ale při 'quarantine/reject' bude zahozen. Prověřte, zda IP {$record['source_ip']} je legitimní odesílatel.";
             } else {
                 $recommendation = "Kritické selhání: E-mail byl zablokován nebo doručen do spamu ({$disposition}). Prověřte nastavení SPF a DKIM pro IP {$record['source_ip']}.";
             }
-        } elseif (!$dkimAligned || !$spfAligned) {
+        } elseif (! $dkimAligned || ! $spfAligned) {
             $status = self::STATUS_WARNING;
-            $missing = !$dkimAligned ? 'DKIM' : 'SPF';
+            $missing = ! $dkimAligned ? 'DKIM' : 'SPF';
             $recommendation = "Varování: Chybí {$missing} zarovnání. E-mail sice prošel díky druhému faktoru, ale konfigurace není ideální. Zkontrolujte nastavení pro IP {$record['source_ip']}.";
         }
 
@@ -65,6 +67,7 @@ class DmarcClassifier
         if ($mode === 's') { // strict
             return strtolower($source) === strtolower($target);
         }
+
         // relaxed (default)
         return $this->getMainDomain($source) === $this->getMainDomain($target);
     }
@@ -76,6 +79,7 @@ class DmarcClassifier
         if (count($parts) <= 2) {
             return $domain;
         }
+
         return implode('.', array_slice($parts, -2));
     }
 }

@@ -5,9 +5,12 @@ namespace App\Console\Commands;
 use App\Models\Page;
 use Database\Seeders\CmsContentSeeder;
 use Database\Seeders\GdprPageSeeder;
+use Database\Seeders\GlobalSeeder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
 
 class AppSeedCommand extends Command
 {
@@ -157,23 +160,23 @@ class AppSeedCommand extends Command
     {
         $this->info('Čistím tabulky definované v GlobalSeeder...');
 
-        \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
+        Schema::disableForeignKeyConstraints();
 
-        foreach (\Database\Seeders\GlobalSeeder::TABLES_TO_WIPE as $table) {
-            if (\Illuminate\Support\Facades\Schema::hasTable($table)) {
+        foreach (GlobalSeeder::TABLES_TO_WIPE as $table) {
+            if (Schema::hasTable($table)) {
                 $this->line("- Čištění tabulky: <comment>{$table}</comment>");
 
                 // Používáme DB::table()->delete() pro maximální kompatibilitu napříč DB drivery
                 // (zejména SQLite na hostingu může mít s TRUNCATE problémy u cizích klíčů)
-                \Illuminate\Support\Facades\DB::table($table)->delete();
+                DB::table($table)->delete();
 
                 // Resetování auto-incrementu
                 try {
-                    $prefix = \Illuminate\Support\Facades\DB::getTablePrefix();
+                    $prefix = DB::getTablePrefix();
                     if (config('database.default') === 'mysql') {
-                        \Illuminate\Support\Facades\DB::statement("ALTER TABLE `{$prefix}{$table}` AUTO_INCREMENT = 1");
+                        DB::statement("ALTER TABLE `{$prefix}{$table}` AUTO_INCREMENT = 1");
                     } elseif (config('database.default') === 'sqlite') {
-                        \Illuminate\Support\Facades\DB::statement("DELETE FROM sqlite_sequence WHERE name='{$prefix}{$table}'");
+                        DB::statement("DELETE FROM sqlite_sequence WHERE name='{$prefix}{$table}'");
                     }
                 } catch (\Throwable $e) {
                     $this->warn("  - Nepodařilo se resetovat auto-increment pro: {$table}");
@@ -181,13 +184,13 @@ class AppSeedCommand extends Command
             }
         }
 
-        \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
+        Schema::enableForeignKeyConstraints();
 
         // Čištění lokálních adresářů s avatary (pro ošetření duplicit na localhostu)
         $this->info('Čistím lokální složky s avatary (defaults)...');
         $defaultsPath = public_path('uploads/defaults');
-        if (\Illuminate\Support\Facades\File::exists($defaultsPath)) {
-            \Illuminate\Support\Facades\File::cleanDirectory($defaultsPath);
+        if (File::exists($defaultsPath)) {
+            File::cleanDirectory($defaultsPath);
             $this->line("- Složka vyčištěna: <comment>{$defaultsPath}</comment>");
         }
 

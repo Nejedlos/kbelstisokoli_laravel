@@ -49,7 +49,7 @@ class CleanupExternalStats extends Command
         // Načteme cesty k snapshotům, které chceme zachovat (z neúspěšných běhů)
         $importantSnapshotPaths = ExternalImportRun::whereIn('status', ['failed', 'partial_failed'])
             ->get()
-            ->map(fn($run) => $run->metadata['snapshot_path'] ?? null)
+            ->map(fn ($run) => $run->metadata['snapshot_path'] ?? null)
             ->filter()
             ->unique()
             ->toArray();

@@ -6,7 +6,6 @@ use App\Models\BasketballMatch;
 use App\Models\ExternalEntityMapping;
 use App\Models\Opponent;
 use App\Models\OpponentMergeSuggestion;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -15,7 +14,7 @@ class OpponentMergeService
     /**
      * Skenuje databázi soupeřů a hledá potenciální duplicity.
      *
-     * @param bool $hard Pokud je true, zahrne i dříve odmítnuté návrhy.
+     * @param  bool  $hard  Pokud je true, zahrne i dříve odmítnuté návrhy.
      */
     public function scan(bool $hard = false): int
     {
@@ -92,6 +91,7 @@ class OpponentMergeService
                 if ($cityA === $cityB || ! $cityA || ! $cityB) {
                     $score += 5;
                 }
+
                 return $score;
             }
         }

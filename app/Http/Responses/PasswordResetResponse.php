@@ -2,16 +2,20 @@
 
 namespace App\Http\Responses;
 
+use App\Models\User;
 use Filament\Auth\Http\Responses\Contracts\PasswordResetResponse as FilamentPasswordResetResponseContract;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Laravel\Fortify\Contracts\PasswordResetResponse as PasswordResetResponseContract;
+use Symfony\Component\HttpFoundation\Response;
 
 class PasswordResetResponse implements FilamentPasswordResetResponseContract, PasswordResetResponseContract
 {
     /**
      * Create an HTTP response that represents the object.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @param  Request  $request
+     * @return Response
      */
     public function toResponse($request)
     {
@@ -23,10 +27,10 @@ class PasswordResetResponse implements FilamentPasswordResetResponseContract, Pa
 
             if ($email) {
                 $email = trim(strtolower($email));
-                $user = \App\Models\User::where('email', $email)->first();
+                $user = User::where('email', $email)->first();
                 if ($user) {
                     auth()->login($user);
-                    \Illuminate\Support\Facades\Log::info('PasswordResetResponse.auto_login_successful', [
+                    Log::info('PasswordResetResponse.auto_login_successful', [
                         'user_id' => $user->id,
                         'email' => $user->email,
                         'can_access_admin' => $user->canAccessAdmin(),

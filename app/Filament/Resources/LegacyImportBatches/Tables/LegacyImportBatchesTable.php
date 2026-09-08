@@ -4,11 +4,11 @@ namespace App\Filament\Resources\LegacyImportBatches\Tables;
 
 use App\Support\FilamentIcon;
 use App\Support\Icons\AppIcon;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;

@@ -32,7 +32,7 @@ class HelpCenter extends Component
             'userRoles' => $userRoles,
         ])->layout('layouts.member', [
             'title' => __('admin.navigation.pages.help'),
-            'subtitle' => __('admin.navigation.pages.help_subtitle')
+            'subtitle' => __('admin.navigation.pages.help_subtitle'),
         ]);
     }
 
@@ -53,17 +53,19 @@ class HelpCenter extends Component
 
     public function getCategoryData(): ?array
     {
-        if (!$this->currentCategory) {
+        if (! $this->currentCategory) {
             return null;
         }
+
         return $this->getHelpService()->getCategoryData($this->currentCategory);
     }
 
     public function getArticleData(): ?array
     {
-        if (!$this->currentFile) {
+        if (! $this->currentFile) {
             return null;
         }
+
         return $this->getHelpService()->getArticleData($this->currentFile);
     }
 
@@ -76,6 +78,7 @@ class HelpCenter extends Component
                 ->forSection('member')
                 ->forAudience(auth()->user()->getRoleNames()->toArray());
         }
+
         return $this->helpService;
     }
 

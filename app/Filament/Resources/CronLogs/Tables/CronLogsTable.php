@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\CronLogs\Tables;
 
+use App\Support\IconHelper;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -62,7 +63,7 @@ class CronLogsTable
             ->actions([
                 Action::make('view_output')
                     ->label('Zobrazit výstup')
-                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::VIEW))
+                    ->icon(IconHelper::get(IconHelper::VIEW))
                     ->modalHeading('Výstup úlohy')
                     ->modalContent(fn ($record) => view('filament.components.cron-output', ['record' => $record]))
                     ->modalSubmitAction(false),

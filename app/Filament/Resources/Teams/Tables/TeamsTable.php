@@ -12,6 +12,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ReplicateAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\HtmlString;
 
 class TeamsTable
@@ -23,8 +24,9 @@ class TeamsTable
             ->columns([
                 TextColumn::make('name')
                     ->label(__('admin.resources.team.fields.name'))
-                    ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
+                    ->searchable(query: function ($query, string $search): Builder {
                         $locale = app()->getLocale();
+
                         return $query->where("name->{$locale}", 'LIKE', "%{$search}%");
                     }),
                 TextColumn::make('slug')

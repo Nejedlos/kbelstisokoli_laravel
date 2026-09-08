@@ -17,7 +17,7 @@ class BrandingSeeder extends Seeder
     public function run(): void
     {
         $currentYear = (int) date('Y');
-        $yearRange = ($currentYear > 2026) ? "2026–{$currentYear}" : "2026";
+        $yearRange = ($currentYear > 2026) ? "2026–{$currentYear}" : '2026';
         $clubName = 'TJ Sokol Kbely C & E';
 
         $settings = [

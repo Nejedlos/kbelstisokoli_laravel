@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Partner;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class PartnerService
 {
@@ -21,11 +22,11 @@ class PartnerService
     {
         $settings = $this->branding->getSettings();
 
-        if (!$settings['partners']['enabled'] || !$settings['partners']['homepage_strip_enabled']) {
+        if (! $settings['partners']['enabled'] || ! $settings['partners']['homepage_strip_enabled']) {
             return collect();
         }
 
-        return \Illuminate\Support\Facades\Cache::store('file')->remember('partners_homepage_strip', 3600, function () {
+        return Cache::store('file')->remember('partners_homepage_strip', 3600, function () {
             return Partner::where('is_active', true)
                 ->where('show_on_homepage', true)
                 ->where('show_below_hero', true)
@@ -42,11 +43,11 @@ class PartnerService
     {
         $settings = $this->branding->getSettings();
 
-        if (!$settings['partners']['enabled'] || !$settings['partners']['footer_enabled']) {
+        if (! $settings['partners']['enabled'] || ! $settings['partners']['footer_enabled']) {
             return collect();
         }
 
-        return \Illuminate\Support\Facades\Cache::store('file')->remember('partners_footer', 3600, function () {
+        return Cache::store('file')->remember('partners_footer', 3600, function () {
             return Partner::where('is_active', true)
                 ->where('show_in_footer', true)
                 ->orderBy('is_featured', 'desc')
@@ -62,11 +63,11 @@ class PartnerService
     {
         $settings = $this->branding->getSettings();
 
-        if (!$settings['partners']['enabled'] || !$settings['partners']['match_badge_enabled']) {
+        if (! $settings['partners']['enabled'] || ! $settings['partners']['match_badge_enabled']) {
             return collect();
         }
 
-        return \Illuminate\Support\Facades\Cache::store('file')->remember('partners_match', 3600, function () {
+        return Cache::store('file')->remember('partners_match', 3600, function () {
             return Partner::where('is_active', true)
                 ->where('show_on_match_pages', true)
                 ->orderBy('is_featured', 'desc')
@@ -82,7 +83,7 @@ class PartnerService
     {
         $settings = $this->branding->getSettings();
 
-        if (!$settings['partners']['enabled'] || !$settings['partners']['contact_enabled']) {
+        if (! $settings['partners']['enabled'] || ! $settings['partners']['contact_enabled']) {
             return collect();
         }
 
@@ -100,7 +101,7 @@ class PartnerService
     {
         $settings = $this->branding->getSettings();
 
-        if (!$settings['partners']['enabled'] || !$settings['partners']['recruitment_enabled']) {
+        if (! $settings['partners']['enabled'] || ! $settings['partners']['recruitment_enabled']) {
             return collect();
         }
 

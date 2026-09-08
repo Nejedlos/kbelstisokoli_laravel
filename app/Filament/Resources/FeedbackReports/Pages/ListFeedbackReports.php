@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\FeedbackReports\Pages;
 
 use App\Filament\Resources\FeedbackReports\FeedbackReportResource;
-use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
 class ListFeedbackReports extends ListRecords

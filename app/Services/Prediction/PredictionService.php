@@ -5,13 +5,15 @@ namespace App\Services\Prediction;
 use App\Models\BasketballMatch;
 use App\Models\MatchPrediction;
 use App\Models\TeamEloRating;
-use Carbon\Carbon;
 
 class PredictionService
 {
     private EloCalculator $eloCalculator;
+
     private FormCalculator $formCalculator;
+
     private RosterStrengthCalculator $rosterStrengthCalculator;
+
     private MutualMatchesCalculator $mutualMatchesCalculator;
 
     public function __construct(
@@ -28,7 +30,7 @@ class PredictionService
 
     public function predict(BasketballMatch $match): ?MatchPrediction
     {
-        if (!$match->opponent_id) {
+        if (! $match->opponent_id) {
             return null;
         }
 
@@ -183,22 +185,23 @@ class PredictionService
 
         // Úspěšnost střelby
         if (isset($comparison['fg2_pct'])) {
-             $homePct = (float) str_replace(['%', ','], ['', '.'], $comparison['fg2_pct']['home']);
-             $awayPct = (float) str_replace(['%', ','], ['', '.'], $comparison['fg2_pct']['away']);
-             $diff = $match->is_home ? ($homePct - $awayPct) : ($awayPct - $homePct);
-             $delta += $diff * 2; // 1% = 2 Elo
+            $homePct = (float) str_replace(['%', ','], ['', '.'], $comparison['fg2_pct']['home']);
+            $awayPct = (float) str_replace(['%', ','], ['', '.'], $comparison['fg2_pct']['away']);
+            $diff = $match->is_home ? ($homePct - $awayPct) : ($awayPct - $homePct);
+            $delta += $diff * 2; // 1% = 2 Elo
         }
 
         return [
             'delta' => max(-50, min(50, $delta)),
             'factors' => $factors,
-            'source' => 'external_comparison'
+            'source' => 'external_comparison',
         ];
     }
 
     private function logit(float $p): float
     {
         $p = max(0.001, min(0.999, $p));
+
         return log($p / (1 - $p));
     }
 
@@ -226,9 +229,9 @@ class PredictionService
 
             $text = "Historie: z posledních {$count} vzájemných zápasů jsme vyhráli {$wins}x.";
             if ($delta < -50) {
-                $text .= " Tato bilance výrazně snižuje naši šanci na výhru.";
+                $text .= ' Tato bilance výrazně snižuje naši šanci na výhru.';
             } elseif ($delta > 50) {
-                $text .= " Tato historie nám dává psychickou výhodu.";
+                $text .= ' Tato historie nám dává psychickou výhodu.';
             }
             $points[] = $text;
         }
@@ -240,22 +243,22 @@ class PredictionService
 
         // 3. Forma týmu (z interních dat)
         if ($formResult['count'] >= 3) {
-            $winText = "{$formResult['wins']}–" . ($formResult['count'] - $formResult['wins']);
+            $winText = "{$formResult['wins']}–".($formResult['count'] - $formResult['wins']);
             $diffPrefix = $formResult['avg_diff'] > 0 ? '+' : '';
-            $points[] = "Naše forma: posledních {$formResult['count']} zápasů {$winText}, průměrný rozdíl skóre {$diffPrefix}" . round($formResult['avg_diff'], 1) . ".";
+            $points[] = "Naše forma: posledních {$formResult['count']} zápasů {$winText}, průměrný rozdíl skóre {$diffPrefix}".round($formResult['avg_diff'], 1).'.';
         }
 
         // 4. Forma soupeře (pokud je v preview_data)
         $lastMatches = $match->metadata['last_matches'] ?? [];
-        if (!empty($lastMatches['away'])) {
+        if (! empty($lastMatches['away'])) {
             $awayMatches = array_slice($lastMatches['away'], 0, 5);
             $oppWins = 0;
             $oppCount = count($awayMatches);
             $oppName = $match->opponent?->name ?? 'Soupeř';
             foreach ($awayMatches as $m) {
-                $isWin = (int)$m['score_home'] > (int)$m['score_away'];
+                $isWin = (int) $m['score_home'] > (int) $m['score_away'];
                 if (str_contains(strtolower($m['team_home']), strtolower($oppName)) === false) {
-                    $isWin = (int)$m['score_away'] > (int)$m['score_home'];
+                    $isWin = (int) $m['score_away'] > (int) $m['score_home'];
                 }
                 if ($isWin) {
                     $oppWins++;
@@ -268,23 +271,23 @@ class PredictionService
 
         // 5. Soupiska
         if ($rosterResult['team']['count'] >= 3) {
-            $points[] = "Naše soupiska: top 5 hráčů drží průměrně " . round($rosterResult['team']['total'] / 5, 1) . " bodů na zápas (dle interních dat).";
+            $points[] = 'Naše soupiska: top 5 hráčů drží průměrně '.round($rosterResult['team']['total'] / 5, 1).' bodů na zápas (dle interních dat).';
         }
 
         // 6. Rozvaha (externí srovnání)
-        if (!empty($previewResult['factors']['pts'])) {
+        if (! empty($previewResult['factors']['pts'])) {
             $diff = $previewResult['factors']['pts'];
             $diffPrefix = $diff > 0 ? '+' : '';
-            $points[] = "Statistika (rozvaha): rozdíl v průměru vstřelených bodů obou týmů je {$diffPrefix}" . round($diff, 1) . ".";
+            $points[] = "Statistika (rozvaha): rozdíl v průměru vstřelených bodů obou týmů je {$diffPrefix}".round($diff, 1).'.';
         }
 
         // 7. Varování
         if ($rosterResult['opponent']['count'] === 0 && empty($previewResult['factors'])) {
-            $points[] = "Pozor: o soupeři máme málo dat → predikce má nižší jistotu.";
+            $points[] = 'Pozor: o soupeři máme málo dat → predikce má nižší jistotu.';
         }
 
-        if (!empty($previewResult['factors'])) {
-            $points[] = "Model využívá aktuální statistické srovnání (rozvahu) ze serveru cz.basketball.";
+        if (! empty($previewResult['factors'])) {
+            $points[] = 'Model využívá aktuální statistické srovnání (rozvahu) ze serveru cz.basketball.';
         }
 
         return $points;

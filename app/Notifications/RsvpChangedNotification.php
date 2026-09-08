@@ -2,6 +2,9 @@
 
 namespace App\Notifications;
 
+use App\Models\User;
+use Carbon\Carbon;
+
 class RsvpChangedNotification extends BaseNotification
 {
     protected string $notificationType = 'attendance';
@@ -9,10 +12,10 @@ class RsvpChangedNotification extends BaseNotification
     public function __construct(
         protected string $eventTitle,
         protected string $status,
-        protected ?\App\Models\User $user = null,
+        protected ?User $user = null,
         protected ?string $actionUrl = null,
         protected string $eventLabelKey = 'event',
-        protected ?\Carbon\Carbon $eventDate = null
+        protected ?Carbon $eventDate = null
     ) {}
 
     /**
@@ -52,7 +55,7 @@ class RsvpChangedNotification extends BaseNotification
         };
 
         $label = __("member.notifications.event_labels.{$this->eventLabelKey}");
-        $datetime = $this->eventDate ? " (" . $this->eventDate->translatedFormat('j. n. H:i') . ")" : '';
+        $datetime = $this->eventDate ? ' ('.$this->eventDate->translatedFormat('j. n. H:i').')' : '';
 
         // Akce (sloveso)
         $actionKey = $this->user ? "member.notifications.rsvp_actions_user.{$statusKey}" : "member.notifications.rsvp_actions_self.{$statusKey}";

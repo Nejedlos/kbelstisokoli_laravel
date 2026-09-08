@@ -42,7 +42,7 @@ class DiscoverSeasonsJob implements ShouldQueue
 
             ConsoleService::log("Job: Discovery dokončeno. Nalezeno a vytvořeno: {$found} nových konfigurací.", 'success');
         } catch (\Exception $e) {
-            ConsoleService::log("Job: Discovery selhalo s chybou: " . $e->getMessage(), 'error');
+            ConsoleService::log('Job: Discovery selhalo s chybou: '.$e->getMessage(), 'error');
             throw $e;
         }
     }

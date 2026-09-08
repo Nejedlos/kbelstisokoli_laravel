@@ -6,13 +6,14 @@ use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use Filament\Auth\Http\Responses\Contracts\PasswordResetResponse;
 use Filament\Auth\Pages\PasswordReset\ResetPassword as BaseResetPassword;
 use Filament\Facades\Filament;
-use Filament\Models\Contracts\FilamentUser;
 use Filament\Notifications\Notification;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\CanResetPassword;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -40,7 +41,7 @@ class ResetPassword extends BaseResetPassword
         $status = Password::broker(Filament::getAuthPasswordBroker())->reset(
             $this->getCredentialsFromFormData($data),
             function (CanResetPassword|Model|Authenticatable $user) use ($data): void {
-                \Illuminate\Support\Facades\Log::info('User password reset via Filament', [
+                Log::info('User password reset via Filament', [
                     'user_id' => $user->id,
                     'email' => $user->email,
                     'password_length' => strlen($data['password']),
@@ -51,7 +52,7 @@ class ResetPassword extends BaseResetPassword
                     $user->getRememberTokenName() => Str::random(60),
                 ])->save();
 
-                \Illuminate\Support\Facades\Log::info('Password hash after save (Filament)', [
+                Log::info('Password hash after save (Filament)', [
                     'user_id' => $user->id,
                     'hash_prefix' => substr($user->getAuthPassword(), 0, 10),
                     'check_ok' => Hash::check($data['password'], $user->getAuthPassword()),
@@ -82,12 +83,12 @@ class ResetPassword extends BaseResetPassword
 
     protected string $view = 'filament.admin.auth.reset-password';
 
-    public function getHeading(): string|\Illuminate\Contracts\Support\Htmlable
+    public function getHeading(): string|Htmlable
     {
         return __('Nové heslo');
     }
 
-    public function getSubheading(): string|\Illuminate\Contracts\Support\Htmlable
+    public function getSubheading(): string|Htmlable
     {
         return __('Resetujte si nastavení a naskočte zpět do hry.');
     }

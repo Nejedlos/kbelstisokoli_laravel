@@ -6,9 +6,11 @@ use App\Filament\Resources\CronLogs\Pages\ListCronLogs;
 use App\Filament\Resources\CronLogs\Schemas\CronLogForm;
 use App\Filament\Resources\CronLogs\Tables\CronLogsTable;
 use App\Models\CronLog;
+use App\Support\IconHelper;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 
 class CronLogResource extends Resource
 {
@@ -19,9 +21,9 @@ class CronLogResource extends Resource
         return __('admin.resources.cron_log.plural_label');
     }
 
-    public static function getNavigationIcon(): string|\Illuminate\Contracts\Support\Htmlable|null
+    public static function getNavigationIcon(): string|Htmlable|null
     {
-        return \App\Support\IconHelper::get(\App\Support\IconHelper::CRON_LOGS);
+        return IconHelper::get(IconHelper::CRON_LOGS);
     }
 
     public static function getNavigationGroup(): ?string

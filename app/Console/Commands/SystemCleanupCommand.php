@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\MaintenanceCleanupJob;
 use Illuminate\Console\Command;
 
 class SystemCleanupCommand extends Command
@@ -26,7 +27,7 @@ class SystemCleanupCommand extends Command
     public function handle(): void
     {
         $this->info('Dispatching maintenance cleanup job...');
-        \App\Jobs\MaintenanceCleanupJob::dispatch();
+        MaintenanceCleanupJob::dispatch();
         $this->info('Job dispatched successfully.');
     }
 }

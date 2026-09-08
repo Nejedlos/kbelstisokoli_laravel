@@ -4,7 +4,6 @@ namespace App\Notifications\Auth;
 
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Password;
 
 class UserInvitationNotification extends ResetPasswordNotification
 {
@@ -30,7 +29,7 @@ class UserInvitationNotification extends ResetPasswordNotification
                     'email' => $notifiable->getEmailForPasswordReset(),
                 ], false);
 
-                $url = $appUrl . $relativeUrl;
+                $url = $appUrl.$relativeUrl;
             }
         }
 

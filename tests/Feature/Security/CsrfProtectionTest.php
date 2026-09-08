@@ -36,7 +36,7 @@ class CsrfProtectionTest extends TestCase
         // protože middleware je v BaseTestCase nebo Traits vypnutý.
 
         // Zkusíme ověřit přítomnost middlewaru v routě.
-        $route = collect(\Route::getRoutes())->first(function($route) {
+        $route = collect(\Route::getRoutes())->first(function ($route) {
             return $route->uri() === 'feedback' && in_array('POST', $route->methods());
         });
 

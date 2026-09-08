@@ -338,8 +338,7 @@ class AiTextEnhancer
         ?string $location = null,
         ?string $startsAt = null,
         ?string $endsAt = null
-    ): array
-    {
+    ): array {
         $title = trim($title);
         $description = trim($description);
         $type = trim($type);
@@ -402,8 +401,7 @@ class AiTextEnhancer
         ?string $location = null,
         ?string $startsAt = null,
         ?string $endsAt = null
-    ): array
-    {
+    ): array {
         $system = "Jsi zkušený basketbalový copywriter pro klub 'Kbelští sokoli'.
 Tvým úkolem je vytvořit atraktivní a dynamický popis pro klubovou akci.
 

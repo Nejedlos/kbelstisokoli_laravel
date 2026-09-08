@@ -27,3 +27,6 @@ Sekce **Logy úloh** uchovává historii všech běhů. Pokud systém vykazuje n
 ### Varování pro administrátory
 - **Nemažte úlohy:** Pokud úlohu smažete, přestane se daná část systému aktualizovat. Pokud ji chcete jen dočasně zastavit, použijte pole "Aktivní".
 - **Zacyklení:** Pokud spustíte ručně úlohu, která již běží, systém ji zařadí do fronty. Nepouštějte tutéž úlohu vícekrát za sebou v krátkém intervalu.
+
+### Dočasný výpadek schránky pro DMARC reporty
+Pokud import DMARC reportů hlásí `[UNAVAILABLE] Temporary authentication failure`, poštovní server dočasně nedokázal ověřit přihlášení. Detail zůstává uložen u DMARC schránky a v logu importu; již zaznamenaná chyba připojení nemá vyvolat další aplikační hlášení při ukončení požadavku. Další plánovaný import připojení zkusí znovu. Při opakovaném selhávání ověřte dostupnost schránky u poskytovatele a její přístupové údaje. Samotné toto hlášení není důvodem k okamžité změně hesla.

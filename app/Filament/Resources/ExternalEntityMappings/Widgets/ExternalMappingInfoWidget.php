@@ -8,5 +8,5 @@ class ExternalMappingInfoWidget extends Widget
 {
     protected string $view = 'filament.resources.external-entity-mappings.info-alert';
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 }

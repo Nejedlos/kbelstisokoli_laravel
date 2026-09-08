@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Enums\MembershipStatus;
 use Illuminate\Auth\Events\Login;
 
 class UpdateLastLoginAt
@@ -25,8 +26,8 @@ class UpdateLastLoginAt
         ];
 
         // Automatická aktivace uživatele při prvním přihlášení do systému
-        if ($user->membership_status === \App\Enums\MembershipStatus::Pending) {
-            $updates['membership_status'] = \App\Enums\MembershipStatus::Active;
+        if ($user->membership_status === MembershipStatus::Pending) {
+            $updates['membership_status'] = MembershipStatus::Active;
         }
 
         $user->update($updates);

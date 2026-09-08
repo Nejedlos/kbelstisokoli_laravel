@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Gallery;
 use App\Models\Page;
 use App\Models\Post;
+use App\Services\BrandingService;
 use Illuminate\Http\Response;
 
 class SitemapController extends Controller
@@ -40,7 +41,7 @@ class SitemapController extends Controller
 
     public function robots(): Response
     {
-        $settings = app(\App\Services\BrandingService::class)->getSettings();
+        $settings = app(BrandingService::class)->getSettings();
         $index = filter_var($settings['seo_robots_index'] ?? true, FILTER_VALIDATE_BOOLEAN);
 
         $robots = "User-agent: *\n";

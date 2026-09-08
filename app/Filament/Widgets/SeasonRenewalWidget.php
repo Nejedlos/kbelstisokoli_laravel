@@ -2,7 +2,12 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\Attendance;
+use App\Models\ChargePaymentAllocation;
+use App\Models\CronLog;
+use App\Models\FinanceCharge;
 use App\Models\Season;
+use App\Models\User;
 use App\Models\UserSeasonConfig;
 use Filament\Widgets\Widget;
 
@@ -45,7 +50,7 @@ class SeasonRenewalWidget extends Widget
 
         // --- ZDRAVÍ SYSTÉMU ---
         // 1. Docházka: Mismatche za posledních 30 dní
-        $mismatchesCount = \App\Models\Attendance::where('is_mismatch', true)
+        $mismatchesCount = Attendance::where('is_mismatch', true)
             ->where('updated_at', '>=', now()->subDays(30))
             ->count();
 
@@ -53,20 +58,20 @@ class SeasonRenewalWidget extends Widget
         $currentSeason = Season::where('is_active', true)->first();
         $usersWithoutConfig = 0;
         if ($currentSeason) {
-            $usersWithoutConfig = \App\Models\User::where('is_active', true)
+            $usersWithoutConfig = User::where('is_active', true)
                 ->whereDoesntHave('userSeasonConfigs', fn ($q) => $q->where('season_id', $currentSeason->id))
                 ->count();
         }
 
         // 3. Finance: Celkový neuhrazený dluh (otevřené poplatky)
-        $totalDebt = \App\Models\FinanceCharge::whereNotIn('status', ['cancelled'])->sum('amount_total')
-                   - \App\Models\ChargePaymentAllocation::sum('amount');
+        $totalDebt = FinanceCharge::whereNotIn('status', ['cancelled'])->sum('amount_total')
+                   - ChargePaymentAllocation::sum('amount');
 
         // 4. Cron: (Best effort jako v SystemHealthWidget)
         $cronOk = false;
         $lastCronRun = null;
-        if (class_exists(\App\Models\CronLog::class)) {
-            $last = \App\Models\CronLog::query()->latest('created_at')->first();
+        if (class_exists(CronLog::class)) {
+            $last = CronLog::query()->latest('created_at')->first();
             if ($last) {
                 $lastCronRun = $last->created_at ?? $last->occurred_at ?? null;
             }

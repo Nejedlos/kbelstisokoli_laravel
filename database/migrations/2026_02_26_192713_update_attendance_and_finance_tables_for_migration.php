@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -11,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (\Illuminate\Support\Facades\DB::getDriverName() === 'sqlite') {
+        if (DB::getDriverName() === 'sqlite') {
             if (Schema::hasColumn('attendances', 'status') && ! Schema::hasColumn('attendances', 'planned_status')) {
                 Schema::table('attendances', function (Blueprint $table) {
                     $table->renameColumn('status', 'planned_status');
@@ -45,56 +46,56 @@ return new class extends Migration
             return;
         }
 
-        $prefix = \Illuminate\Support\Facades\DB::getTablePrefix();
+        $prefix = DB::getTablePrefix();
 
         // Attendances
         $tableAtt = $prefix.'attendances';
         try {
             // Rename status -> planned_status
-            $columnStatus = \Illuminate\Support\Facades\DB::select("SHOW COLUMNS FROM {$tableAtt} LIKE 'status'");
-            $columnPlanned = \Illuminate\Support\Facades\DB::select("SHOW COLUMNS FROM {$tableAtt} LIKE 'planned_status'");
+            $columnStatus = DB::select("SHOW COLUMNS FROM {$tableAtt} LIKE 'status'");
+            $columnPlanned = DB::select("SHOW COLUMNS FROM {$tableAtt} LIKE 'planned_status'");
             if (! empty($columnStatus) && empty($columnPlanned)) {
-                \Illuminate\Support\Facades\DB::statement("ALTER TABLE {$tableAtt} CHANGE status planned_status VARCHAR(255)");
+                DB::statement("ALTER TABLE {$tableAtt} CHANGE status planned_status VARCHAR(255)");
             }
 
             // actual_status
-            $columnActual = \Illuminate\Support\Facades\DB::select("SHOW COLUMNS FROM {$tableAtt} LIKE 'actual_status'");
+            $columnActual = DB::select("SHOW COLUMNS FROM {$tableAtt} LIKE 'actual_status'");
             if (empty($columnActual)) {
-                \Illuminate\Support\Facades\DB::statement("ALTER TABLE {$tableAtt} ADD COLUMN actual_status VARCHAR(255) NULL AFTER planned_status");
+                DB::statement("ALTER TABLE {$tableAtt} ADD COLUMN actual_status VARCHAR(255) NULL AFTER planned_status");
             }
 
             // is_mismatch
-            $columnMismatch = \Illuminate\Support\Facades\DB::select("SHOW COLUMNS FROM {$tableAtt} LIKE 'is_mismatch'");
+            $columnMismatch = DB::select("SHOW COLUMNS FROM {$tableAtt} LIKE 'is_mismatch'");
             if (empty($columnMismatch)) {
-                \Illuminate\Support\Facades\DB::statement("ALTER TABLE {$tableAtt} ADD COLUMN is_mismatch TINYINT(1) DEFAULT 0 NOT NULL AFTER actual_status");
+                DB::statement("ALTER TABLE {$tableAtt} ADD COLUMN is_mismatch TINYINT(1) DEFAULT 0 NOT NULL AFTER actual_status");
             }
 
             // metadata
-            $columnMetadata = \Illuminate\Support\Facades\DB::select("SHOW COLUMNS FROM {$tableAtt} LIKE 'metadata'");
+            $columnMetadata = DB::select("SHOW COLUMNS FROM {$tableAtt} LIKE 'metadata'");
             if (empty($columnMetadata)) {
-                \Illuminate\Support\Facades\DB::statement("ALTER TABLE {$tableAtt} ADD COLUMN metadata LONGTEXT NULL AFTER responded_at");
+                DB::statement("ALTER TABLE {$tableAtt} ADD COLUMN metadata LONGTEXT NULL AFTER responded_at");
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
         }
 
         // Finance Charges
         $tableCharges = $prefix.'finance_charges';
         try {
-            $columnMetadata = \Illuminate\Support\Facades\DB::select("SHOW COLUMNS FROM {$tableCharges} LIKE 'metadata'");
+            $columnMetadata = DB::select("SHOW COLUMNS FROM {$tableCharges} LIKE 'metadata'");
             if (empty($columnMetadata)) {
-                \Illuminate\Support\Facades\DB::statement("ALTER TABLE {$tableCharges} ADD COLUMN metadata LONGTEXT NULL AFTER created_by_id");
+                DB::statement("ALTER TABLE {$tableCharges} ADD COLUMN metadata LONGTEXT NULL AFTER created_by_id");
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
         }
 
         // Finance Payments
         $tablePayments = $prefix.'finance_payments';
         try {
-            $columnMetadata = \Illuminate\Support\Facades\DB::select("SHOW COLUMNS FROM {$tablePayments} LIKE 'metadata'");
+            $columnMetadata = DB::select("SHOW COLUMNS FROM {$tablePayments} LIKE 'metadata'");
             if (empty($columnMetadata)) {
-                \Illuminate\Support\Facades\DB::statement("ALTER TABLE {$tablePayments} ADD COLUMN metadata LONGTEXT NULL AFTER recorded_by_id");
+                DB::statement("ALTER TABLE {$tablePayments} ADD COLUMN metadata LONGTEXT NULL AFTER recorded_by_id");
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
         }
     }
 
@@ -103,7 +104,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        if (\Illuminate\Support\Facades\DB::getDriverName() === 'sqlite') {
+        if (DB::getDriverName() === 'sqlite') {
             Schema::table('finance_payments', function (Blueprint $table) {
                 $table->dropColumn('metadata');
             });
@@ -120,14 +121,14 @@ return new class extends Migration
             return;
         }
 
-        $prefix = \Illuminate\Support\Facades\DB::getTablePrefix();
+        $prefix = DB::getTablePrefix();
         try {
-            \Illuminate\Support\Facades\DB::statement("ALTER TABLE {$prefix}finance_payments DROP COLUMN IF EXISTS metadata");
-            \Illuminate\Support\Facades\DB::statement("ALTER TABLE {$prefix}finance_charges DROP COLUMN IF EXISTS metadata");
-            \Illuminate\Support\Facades\DB::statement("ALTER TABLE {$prefix}attendances DROP COLUMN IF EXISTS is_mismatch");
-            \Illuminate\Support\Facades\DB::statement("ALTER TABLE {$prefix}attendances DROP COLUMN IF EXISTS actual_status");
-            \Illuminate\Support\Facades\DB::statement("ALTER TABLE {$prefix}attendances CHANGE planned_status status VARCHAR(255)");
-        } catch (\Throwable $e) {
+            DB::statement("ALTER TABLE {$prefix}finance_payments DROP COLUMN IF EXISTS metadata");
+            DB::statement("ALTER TABLE {$prefix}finance_charges DROP COLUMN IF EXISTS metadata");
+            DB::statement("ALTER TABLE {$prefix}attendances DROP COLUMN IF EXISTS is_mismatch");
+            DB::statement("ALTER TABLE {$prefix}attendances DROP COLUMN IF EXISTS actual_status");
+            DB::statement("ALTER TABLE {$prefix}attendances CHANGE planned_status status VARCHAR(255)");
+        } catch (Throwable $e) {
         }
     }
 };

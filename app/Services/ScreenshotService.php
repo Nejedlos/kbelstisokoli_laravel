@@ -2,21 +2,26 @@
 
 namespace App\Services;
 
+use Exception;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Spatie\Browsershot\Browsershot;
-use Exception;
 
 class ScreenshotService
 {
     protected ?string $driver;
+
     protected ?string $url;
+
     protected ?string $token;
+
     protected int $timeout;
+
     protected array $browsershotConfig;
+
     protected ?string $wkhtmlPath;
 
     public function __construct()
@@ -56,11 +61,11 @@ class ScreenshotService
         $ttl = $options['ttl'] ?? 300; // 5 minutes
         $selector = $options['selector'] ?? '#snapshot-root';
         $viewport = $options['viewport'] ?? ['width' => 1280, 'height' => 720];
-        $fullPage = (bool)($options['fullPage'] ?? false);
+        $fullPage = (bool) ($options['fullPage'] ?? false);
 
         // 1) Create one-time token and cache DOM
         $token = Str::random(40);
-        Log::debug('[ScreenshotService] Generating snapshot token', array_merge($logContext, ['token' => substr($token, 0, 8) . '...']));
+        Log::debug('[ScreenshotService] Generating snapshot token', array_merge($logContext, ['token' => substr($token, 0, 8).'...']));
 
         Cache::put("fb_snap_{$token}", [
             'dom' => $dom,
@@ -80,7 +85,7 @@ class ScreenshotService
             Log::debug('[ScreenshotService] Calling remote API (Playwright)', [
                 'service_url' => $this->url,
                 'target_url' => $targetUrl,
-                'token_prefix' => substr($this->token, 0, 10) . '...',
+                'token_prefix' => substr($this->token, 0, 10).'...',
                 'timeout' => $this->timeout,
                 'fullPage' => $fullPage,
                 'selector' => $selector,
@@ -91,19 +96,19 @@ class ScreenshotService
                 ->withToken($this->token)
                 ->timeout($this->timeout)
                 ->post($this->url, [
-                    'url'      => $targetUrl,
+                    'url' => $targetUrl,
                     'fullPage' => $fullPage,
-                    'width'    => (int) $viewport['width'],
-                    'height'   => (int) $viewport['height'],
+                    'width' => (int) $viewport['width'],
+                    'height' => (int) $viewport['height'],
                     'selector' => $selector,
-                    'headers'  => $headers,
-                    'type'     => 'png',
+                    'headers' => $headers,
+                    'type' => 'png',
                 ]);
 
             if ($response->successful()) {
                 $imageContent = $response->body();
                 $base64 = base64_encode($imageContent);
-                $dataUrl = 'data:image/png;base64,' . $base64;
+                $dataUrl = 'data:image/png;base64,'.$base64;
 
                 Log::info('[ScreenshotService] Screenshot captured successfully via remote service', array_merge($logContext, [
                     'size' => strlen($imageContent),
@@ -119,20 +124,21 @@ class ScreenshotService
             }
 
             Log::warning('[ScreenshotService] Remote Screenshot API Error, trying local fallback', array_merge($logContext, [
-                'status'  => $response->status(),
-                'url'     => $targetUrl
+                'status' => $response->status(),
+                'url' => $targetUrl,
             ]));
 
         } catch (Exception $e) {
             Log::warning('[ScreenshotService] Remote Screenshot Service Exception, trying local fallback', array_merge($logContext, [
                 'error' => $e->getMessage(),
-                'url'   => $targetUrl
+                'url' => $targetUrl,
             ]));
         }
 
         // 4) Local Fallback (WkHtmlToImage or local Playwright)
         try {
             Log::info('[ScreenshotService] Attempting local fallback (wkhtmltoimage)', $logContext);
+
             return $this->captureLocallyWithWkHtmlToImage($dom, $options);
         } catch (Exception $localEx) {
             Log::error('[ScreenshotService] Local fallback also failed', array_merge($logContext, ['error' => $localEx->getMessage()]));
@@ -151,6 +157,7 @@ class ScreenshotService
                 // Převod zpět z base64 data_url na binární data
                 return base64_decode(explode(',', $result['data_url'])[1]);
             }
+
             return null;
         }
 
@@ -165,7 +172,7 @@ class ScreenshotService
             Log::debug('[ScreenshotService] Calling remote API (URL)', [
                 'service_url' => $this->url,
                 'target_url' => $targetUrl,
-                'token_prefix' => substr($this->token, 0, 10) . '...',
+                'token_prefix' => substr($this->token, 0, 10).'...',
                 'timeout' => $this->timeout,
                 'headers' => array_keys($headers),
             ]);
@@ -175,31 +182,33 @@ class ScreenshotService
                 ->timeout($this->timeout)
                 ->retry(2, 5000)
                 ->post($this->url, array_merge([
-                    'url'      => $targetUrl,
+                    'url' => $targetUrl,
                     'fullPage' => false,
-                    'width'    => 1280,
-                    'height'   => 720,
-                    'headers'  => $headers,
-                    'type'     => 'png',
+                    'width' => 1280,
+                    'height' => 720,
+                    'headers' => $headers,
+                    'type' => 'png',
                 ], $options));
 
             if ($response->successful()) {
                 Log::info('[ScreenshotService] Screenshot captured successfully via remote service (URL)');
+
                 return $response->body();
             }
 
             Log::error('[ScreenshotService] Remote Screenshot API Error (URL)', [
-                'status'  => $response->status(),
+                'status' => $response->status(),
                 'response' => $response->body(),
-                'url'     => $targetUrl
+                'url' => $targetUrl,
             ]);
 
             return null;
         } catch (Exception $e) {
             Log::error('[ScreenshotService] Remote Screenshot Service Exception (URL)', [
                 'error' => $e->getMessage(),
-                'url'   => $targetUrl
+                'url' => $targetUrl,
             ]);
+
             return null;
         }
     }
@@ -211,20 +220,21 @@ class ScreenshotService
     {
         $logContext = ['driver' => 'wkhtmltoimage'];
 
-        if (!is_executable($this->wkhtmlPath)) {
+        if (! is_executable($this->wkhtmlPath)) {
             Log::error('[ScreenshotService] wkhtmltoimage not found or not executable', array_merge($logContext, ['path' => $this->wkhtmlPath]));
+
             // Try to use captureLocally (Playwright) as last local hope
             return $this->captureLocally($dom, $options);
         }
 
         try {
             $viewport = $options['viewport'] ?? ['width' => 1280, 'height' => 720];
-            $tempHtml = storage_path('app/temp-screenshot-' . Str::random(10) . '.html');
-            $tempPng = storage_path('app/temp-screenshot-' . Str::random(10) . '.png');
+            $tempHtml = storage_path('app/temp-screenshot-'.Str::random(10).'.html');
+            $tempPng = storage_path('app/temp-screenshot-'.Str::random(10).'.png');
 
             // Přidáme základní HTML strukturu a head pokud chybí
             $html = $dom;
-            if (!str_contains($dom, '<html')) {
+            if (! str_contains($dom, '<html')) {
                 $head = $options['context']['head'] ?? '';
                 $bodyClass = $options['context']['body_class'] ?? '';
                 $bodyStyle = $options['context']['body_style'] ?? '';
@@ -238,7 +248,7 @@ class ScreenshotService
             $headers = $this->prepareHeaders($options);
             $headerCmd = '';
             foreach ($headers as $name => $value) {
-                $headerCmd .= ' --custom-header ' . escapeshellarg($name) . ' ' . escapeshellarg($value);
+                $headerCmd .= ' --custom-header '.escapeshellarg($name).' '.escapeshellarg($value);
             }
 
             $command = sprintf(
@@ -262,10 +272,10 @@ class ScreenshotService
                 Log::warning('[ScreenshotService] wkhtmltoimage warnings/errors', array_merge($logContext, ['output' => $errorMsg]));
             }
 
-            if (!file_exists($tempPng) || filesize($tempPng) < 100) {
-                 @unlink($tempHtml);
-                 @unlink($tempPng);
-                 throw new \Exception("wkhtmltoimage failed to produce image file.");
+            if (! file_exists($tempPng) || filesize($tempPng) < 100) {
+                @unlink($tempHtml);
+                @unlink($tempPng);
+                throw new Exception('wkhtmltoimage failed to produce image file.');
             }
 
             $imageContent = file_get_contents($tempPng);
@@ -275,15 +285,16 @@ class ScreenshotService
             $base64 = base64_encode($imageContent);
 
             return [
-                'data_url' => 'data:image/png;base64,' . $base64,
+                'data_url' => 'data:image/png;base64,'.$base64,
                 'mime' => 'image/png',
                 'width' => (int) $viewport['width'],
                 'height' => (int) $viewport['height'],
                 'path' => null,
             ];
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('[ScreenshotService] wkhtmltoimage exception', ['error' => $e->getMessage()]);
+
             // Fallback to local Playwright if it fails (unlikely to work on Webglobe but good as fallback)
             return $this->captureLocally($dom, $options);
         }
@@ -311,14 +322,14 @@ class ScreenshotService
             }
 
             // Příprava argumentů pro JS script
-            $tempFile = storage_path('app/temp-screenshot-' . Str::random(10) . '.png');
+            $tempFile = storage_path('app/temp-screenshot-'.Str::random(10).'.png');
             $jsOptions = [
-                'width'          => (int) $viewport['width'],
-                'height'         => (int) $viewport['height'],
+                'width' => (int) $viewport['width'],
+                'height' => (int) $viewport['height'],
                 'executablePath' => $this->browsershotConfig['chrome_path'] ?? null,
-                'headers'        => $headers,
-                'selector'       => $options['selector'] ?? null,
-                'waitUntil'      => 'networkidle'
+                'headers' => $headers,
+                'selector' => $options['selector'] ?? null,
+                'waitUntil' => 'networkidle',
             ];
 
             $nodeBin = $this->browsershotConfig['node_path'] ?? 'node';
@@ -344,10 +355,10 @@ class ScreenshotService
             $returnVar = 0;
             exec($command, $output, $returnVar);
 
-            if ($returnVar !== 0 || !file_exists($tempFile)) {
+            if ($returnVar !== 0 || ! file_exists($tempFile)) {
                 $errorMsg = implode("\n", $output);
                 Log::error('[ScreenshotService] Local capture failed', array_merge($logContext, ['error' => $errorMsg]));
-                throw new \Exception("Local screenshot failed: " . $errorMsg);
+                throw new Exception('Local screenshot failed: '.$errorMsg);
             }
 
             $imageContent = file_get_contents($tempFile);
@@ -356,14 +367,14 @@ class ScreenshotService
             $base64 = base64_encode($imageContent);
 
             return [
-                'data_url' => 'data:image/png;base64,' . $base64,
+                'data_url' => 'data:image/png;base64,'.$base64,
                 'mime' => 'image/png',
                 'width' => (int) $viewport['width'],
                 'height' => (int) $viewport['height'],
                 'path' => null,
             ];
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('[ScreenshotService] local capture exception', ['error' => $e->getMessage()]);
             throw $e;
         }
@@ -399,12 +410,12 @@ class ScreenshotService
         $queryParams['screenshot'] = '1';
         $newQuery = http_build_query($queryParams);
 
-        return (isset($parsed['scheme']) ? $parsed['scheme'] . '://' : '') .
-               (isset($parsed['host']) ? $parsed['host'] : '') .
-               (isset($parsed['port']) ? ':' . $parsed['port'] : '') .
-               (isset($parsed['path']) ? $parsed['path'] : '') .
-               ($newQuery ? '?' . $newQuery : '') .
-               (isset($parsed['fragment']) ? '#' . $parsed['fragment'] : '');
+        return (isset($parsed['scheme']) ? $parsed['scheme'].'://' : '').
+               (isset($parsed['host']) ? $parsed['host'] : '').
+               (isset($parsed['port']) ? ':'.$parsed['port'] : '').
+               (isset($parsed['path']) ? $parsed['path'] : '').
+               ($newQuery ? '?'.$newQuery : '').
+               (isset($parsed['fragment']) ? '#'.$parsed['fragment'] : '');
     }
 
     /**
@@ -431,7 +442,7 @@ class ScreenshotService
             // Přidáme cestu k node binárce do PATH, aby Browsershot mohl spustit node i npm
             $nodeBinDir = dirname($this->browsershotConfig['node_path']);
             $currentPath = getenv('PATH') ?: '/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin';
-            $browsershot->setIncludePath($nodeBinDir . PATH_SEPARATOR . '/opt/homebrew/bin' . PATH_SEPARATOR . '/usr/local/bin' . PATH_SEPARATOR . $currentPath);
+            $browsershot->setIncludePath($nodeBinDir.PATH_SEPARATOR.'/opt/homebrew/bin'.PATH_SEPARATOR.'/usr/local/bin'.PATH_SEPARATOR.$currentPath);
         }
 
         if ($this->browsershotConfig['npm_path'] ?? null) {

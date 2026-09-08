@@ -2,17 +2,17 @@
 
 namespace App\Console\Commands;
 
-use App\Models\ExternalTeamSeasonConfig;
+use App\Models\BasketballMatch;
 use App\Models\ExternalImportRun;
+use App\Models\ExternalTeamSeasonConfig;
 use App\Models\Season;
 use App\Models\Team;
 use App\Services\Stats\Contracts\StatFetcherInterface;
-use App\Services\Stats\Extractors\CzBasketball\TeamRosterExtractor;
 use App\Services\Stats\Extractors\CzBasketball\PlayerDetailExtractor;
+use App\Services\Stats\Extractors\CzBasketball\TeamRosterExtractor;
 use App\Services\Stats\Sync\PlayerSyncService;
 use App\Services\Stats\Sync\RosterSyncService;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Log;
 
 class AppSyncPlayerPhotosCommand extends Command
 {
@@ -63,6 +63,7 @@ class AppSyncPlayerPhotosCommand extends Command
                 $query->where('team_id', $team->id);
             } else {
                 $this->error("Tým '{$teamInput}' nebyl nalezen.");
+
                 return 0;
             }
         }
@@ -73,11 +74,12 @@ class AppSyncPlayerPhotosCommand extends Command
                 $query->where('season_id', $season->id);
             } else {
                 $this->error("Sezóna '{$seasonInput}' nebyla nalezena.");
+
                 return 0;
             }
         }
 
-        if (!$teamInput && !$seasonInput) {
+        if (! $teamInput && ! $seasonInput) {
             $query->where('is_enabled', true);
         }
 
@@ -121,10 +123,12 @@ class AppSyncPlayerPhotosCommand extends Command
                     $configs = collect([$config->load(['team', 'season'])]);
                 } else {
                     $this->warn('Nenalezeny žádné povolené konfigurace týmů/sezón a ani mapování pro automatické vytvoření.');
+
                     return 0;
                 }
             } else {
                 $this->warn('Nenalezeny žádné povolené konfigurace týmů/sezón.');
+
                 return 0;
             }
         }
@@ -183,15 +187,17 @@ class AppSyncPlayerPhotosCommand extends Command
         $bar->finish();
         $mainRun->finish();
         $this->newLine();
-        $this->info("Hotovo. Logy naleznete v storage/logs/laravel.log");
-        $this->info("Tip: Pokud na produkci chybí fotky, prověřte cestu: " . public_path('uploads'));
+        $this->info('Hotovo. Logy naleznete v storage/logs/laravel.log');
+        $this->info('Tip: Pokud na produkci chybí fotky, prověřte cestu: '.public_path('uploads'));
+
         return 0;
     }
 
     protected function syncFromRoster($config, $extractor, $playerDetailExtractor, $playerSyncService, $rosterSyncService, $fetcher, $force, $playerDelay)
     {
         if (empty($config->team_season_url)) {
-            $this->warn("  - Chybí URL soupisky, přeskakuji.");
+            $this->warn('  - Chybí URL soupisky, přeskakuji.');
+
             return;
         }
 
@@ -201,12 +207,13 @@ class AppSyncPlayerPhotosCommand extends Command
             $extracted = $extractor->extract($html);
             $tableDto = $extracted['data'] ?? null;
 
-            if (!$tableDto || empty($tableDto->rows)) {
-                $this->warn("    - Soupiska je prázdná nebo nebyla nalezena.");
+            if (! $tableDto || empty($tableDto->rows)) {
+                $this->warn('    - Soupiska je prázdná nebo nebyla nalezena.');
+
                 return;
             }
 
-            $this->info("    - Nalezeno " . count($tableDto->rows) . " záznamů na soupisce.");
+            $this->info('    - Nalezeno '.count($tableDto->rows).' záznamů na soupisce.');
 
             $count = 0;
             foreach ($tableDto->rows as $row) {
@@ -214,32 +221,39 @@ class AppSyncPlayerPhotosCommand extends Command
                 $name = $row->values['player_name'] ?? $row->rowLabel ?? null;
                 $photoUrl = $row->values['photo_url'] ?? null;
 
-                if (!$extId || !$name) continue;
+                if (! $extId || ! $name) {
+                    continue;
+                }
 
-                if (!$photoUrl) {
+                if (! $photoUrl) {
                     try {
                         $detailHtml = $fetcher->fetch("https://cz.basketball/hrac/{$extId}");
                         $detail = $playerDetailExtractor->extract($detailHtml);
                         $photoUrl = $detail['data']['photo_url'] ?? null;
-                    } catch (\Throwable $e) {}
+                    } catch (\Throwable $e) {
+                    }
                 }
 
-                if (!$photoUrl) continue;
+                if (! $photoUrl) {
+                    continue;
+                }
 
                 $user = $rosterSyncService->findOrCreateUserForExternalPlayer($extId, $name, $config);
                 if ($user) {
                     $playerSyncService->syncPhoto($user, $photoUrl, $force, [
                         'season_id' => $config->season_id,
                         'team_id' => $config->team_id,
-                        'added_from' => 'command_roster_sync'
+                        'added_from' => 'command_roster_sync',
                     ]);
                     $count++;
-                    if ($playerDelay > 0) usleep($playerDelay * 1000);
+                    if ($playerDelay > 0) {
+                        usleep($playerDelay * 1000);
+                    }
                 }
             }
             $this->info("    - Staženo/ověřeno {$count} fotek ze soupisky.");
         } catch (\Exception $e) {
-            $this->error("    - Chyba při synchronizaci soupisky: " . $e->getMessage());
+            $this->error('    - Chyba při synchronizaci soupisky: '.$e->getMessage());
         }
     }
 
@@ -247,7 +261,7 @@ class AppSyncPlayerPhotosCommand extends Command
     {
         $this->info("  - Procházím nejlepší hráče v zápasech týmu {$config->team->name}...");
 
-        $matches = \App\Models\BasketballMatch::where('team_id', $config->team_id)
+        $matches = BasketballMatch::where('team_id', $config->team_id)
             ->where('season_id', $config->season_id)
             ->whereNotNull('metadata')
             ->get();
@@ -255,7 +269,9 @@ class AppSyncPlayerPhotosCommand extends Command
         $count = 0;
         foreach ($matches as $match) {
             $bestPlayers = $match->metadata['best_players_external'] ?? $match->metadata['best_players'] ?? [];
-            if (empty($bestPlayers)) continue;
+            if (empty($bestPlayers)) {
+                continue;
+            }
 
             $matchLabel = "Zápas #{$match->id}";
             if (isset($match->metadata['match_number'])) {
@@ -264,7 +280,9 @@ class AppSyncPlayerPhotosCommand extends Command
             $this->info("    - {$matchLabel}");
 
             foreach ($bestPlayers as $category => $data) {
-                if (!is_array($data)) continue;
+                if (! is_array($data)) {
+                    continue;
+                }
 
                 // Určíme, která strana je naše a která soupeřova
                 // $match->is_home: true = home je náš, false = away je náš
@@ -276,7 +294,7 @@ class AppSyncPlayerPhotosCommand extends Command
 
                 if (isset($data['away']) && is_array($data['away'])) {
                     $playerData = $data['away'];
-                    $isOur = !$match->is_home;
+                    $isOur = ! $match->is_home;
                     $this->processMatchPlayer($playerData, $isOur, $config, $playerSyncService, $rosterSyncService, $force, $playerDelay, $count);
                 }
             }
@@ -290,7 +308,9 @@ class AppSyncPlayerPhotosCommand extends Command
         $name = $playerData['name'] ?? null;
         $photoUrl = $playerData['photo_url'] ?? null;
 
-        if (!$extId || !$name || !$photoUrl) return;
+        if (! $extId || ! $name || ! $photoUrl) {
+            return;
+        }
 
         if ($isOur) {
             $user = $rosterSyncService->findOrCreateUserForExternalPlayer($extId, $name, $config);
@@ -298,7 +318,7 @@ class AppSyncPlayerPhotosCommand extends Command
                 $playerSyncService->syncPhoto($user, $photoUrl, $force, [
                     'season_id' => $config->season_id,
                     'team_id' => $config->team_id,
-                    'added_from' => 'command_match_sync'
+                    'added_from' => 'command_match_sync',
                 ]);
                 $count++;
             }
@@ -307,7 +327,9 @@ class AppSyncPlayerPhotosCommand extends Command
             $count++;
         }
 
-        if ($playerDelay > 0) usleep($playerDelay * 1000);
+        if ($playerDelay > 0) {
+            usleep($playerDelay * 1000);
+        }
     }
 
     /**

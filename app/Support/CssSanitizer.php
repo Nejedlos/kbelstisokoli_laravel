@@ -12,6 +12,7 @@ class CssSanitizer
     public static function sanitizeCssValue(string $value): string
     {
         $v = self::convertUnsupportedColorFunctions($value);
+
         // Další jednoduché fallbacky lze přidat později
         return $v;
     }

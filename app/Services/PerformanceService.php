@@ -23,9 +23,9 @@ class PerformanceService
         // Pokud jsme na produkci bez debugu, vynutíme scénář ultra jako základní,
         // pokud v DB není nic nastaveno nebo pokud je tam výslovně standard a není to vynuceno v .env
         if (app()->isProduction() && ! config('app.debug') && ! config('performance.scenario')) {
-             if (empty($settings['perf_scenario']) || $settings['perf_scenario'] === 'standard') {
-                 $scenario = 'ultra';
-             }
+            if (empty($settings['perf_scenario']) || $settings['perf_scenario'] === 'standard') {
+                $scenario = 'ultra';
+            }
         }
 
         config([

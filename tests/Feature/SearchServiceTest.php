@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\AiDocument;
 use App\Services\SearchService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -13,7 +14,7 @@ class SearchServiceTest extends TestCase
     public function test_search_returns_results_without_type_error()
     {
         // Vytvoření testovacího AI dokumentu
-        \App\Models\AiDocument::create([
+        AiDocument::create([
             'section' => 'frontend',
             'title' => 'Nábor dětí',
             'content' => 'Hledáme nové sokolíky do našich oddílů.',
@@ -36,7 +37,7 @@ class SearchServiceTest extends TestCase
     public function test_search_posts_returns_results_without_type_error()
     {
         // Vytvoření testovacího AI dokumentu
-        \App\Models\AiDocument::create([
+        AiDocument::create([
             'section' => 'frontend',
             'title' => 'Nový trenér',
             'content' => 'Máme nového trenéra pro mladší žáky. Detailní informace o novém trenérovi.',
@@ -60,7 +61,7 @@ class SearchServiceTest extends TestCase
     public function test_search_respects_sections()
     {
         // Frontend dokument
-        \App\Models\AiDocument::create([
+        AiDocument::create([
             'section' => 'frontend',
             'title' => 'Veřejná stránka',
             'content' => 'Obsah veřejné stránky o basketbalu.',
@@ -73,7 +74,7 @@ class SearchServiceTest extends TestCase
         ]);
 
         // Member dokument
-        \App\Models\AiDocument::create([
+        AiDocument::create([
             'section' => 'member',
             'title' => 'Členská stránka',
             'content' => 'Obsah pro přihlášené členy klubu.',
@@ -86,7 +87,7 @@ class SearchServiceTest extends TestCase
         ]);
 
         // Admin dokument
-        \App\Models\AiDocument::create([
+        AiDocument::create([
             'section' => 'admin',
             'title' => 'Admin nastavení',
             'content' => 'Konfigurace systému pro správce.',

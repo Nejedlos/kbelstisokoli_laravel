@@ -5,13 +5,12 @@ namespace App\Filament\Resources\Partners\Schemas;
 use App\Support\IconHelper;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -24,7 +23,7 @@ class PartnerForm
             ->components([
                 Grid::make(3)
                     ->schema([
-                        Section::make(new HtmlString(IconHelper::render(IconHelper::INFO) . ' Základní informace'))
+                        Section::make(new HtmlString(IconHelper::render(IconHelper::INFO).' Základní informace'))
                             ->schema([
                                 Grid::make(2)
                                     ->schema([
@@ -81,7 +80,7 @@ class PartnerForm
                             ])
                             ->columnSpan(2),
 
-                        Section::make(new HtmlString(IconHelper::render(IconHelper::SETTINGS) . ' Stav a řazení'))
+                        Section::make(new HtmlString(IconHelper::render(IconHelper::SETTINGS).' Stav a řazení'))
                             ->schema([
                                 Toggle::make('is_active')
                                     ->label('Aktivní')
@@ -99,7 +98,7 @@ class PartnerForm
                             ->columnSpan(1),
                     ]),
 
-                Section::make(new HtmlString(IconHelper::render(IconHelper::IMAGE) . ' Logo partnera'))
+                Section::make(new HtmlString(IconHelper::render(IconHelper::IMAGE).' Logo partnera'))
                     ->schema([
                         Grid::make(2)
                             ->schema([
@@ -115,16 +114,19 @@ class PartnerForm
                                         $webpPath = $get('logo_path_webp');
                                         if ($webpPath) {
                                             $baseName = pathinfo($webpPath, PATHINFO_FILENAME);
-                                            return $baseName . '.' . $file->getClientOriginalExtension();
+
+                                            return $baseName.'.'.$file->getClientOriginalExtension();
                                         }
 
                                         $name = $get('slug.cs') ?: Str::slug($get('name.cs') ?: 'partner');
-                                        return (string) str($name . '-' . time() . '.' . $file->getClientOriginalExtension());
+
+                                        return (string) str($name.'-'.time().'.'.$file->getClientOriginalExtension());
                                     })
                                     ->live()
                                     ->afterStateUpdated(function ($state, $set, $get) {
-                                        if (!$state) {
+                                        if (! $state) {
                                             $set('logo_path_webp', null);
+
                                             return;
                                         }
 
@@ -136,16 +138,16 @@ class PartnerForm
 
                                         $name = $get('slug.cs') ?: Str::slug($get('name.cs') ?: 'partner');
                                         $timestamp = time();
-                                        $baseName = $name . '-' . $timestamp;
+                                        $baseName = $name.'-'.$timestamp;
                                         $extension = strtolower($file->getClientOriginalExtension());
 
                                         $targetDir = public_path('assets/img/partners');
-                                        if (!file_exists($targetDir)) {
+                                        if (! file_exists($targetDir)) {
                                             mkdir($targetDir, 0755, true);
                                         }
 
-                                        $webpPath = $targetDir . '/' . $baseName . '.webp';
-                                        $relativeWebpPath = 'assets/img/partners/' . $baseName . '.webp';
+                                        $webpPath = $targetDir.'/'.$baseName.'.webp';
+                                        $relativeWebpPath = 'assets/img/partners/'.$baseName.'.webp';
 
                                         try {
                                             $sourcePath = $file->getRealPath();
@@ -182,7 +184,7 @@ class PartnerForm
                             ]),
                     ]),
 
-                Section::make(new HtmlString(IconHelper::render(IconHelper::GLOBE) . ' Texty a překlady'))
+                Section::make(new HtmlString(IconHelper::render(IconHelper::GLOBE).' Texty a překlady'))
                     ->schema([
                         Grid::make(2)
                             ->schema([
@@ -206,7 +208,7 @@ class PartnerForm
                             ]),
                     ]),
 
-                Section::make(new HtmlString(IconHelper::render(IconHelper::BRANDING) . ' Umístění na webu'))
+                Section::make(new HtmlString(IconHelper::render(IconHelper::BRANDING).' Umístění na webu'))
                     ->schema([
                         Grid::make(3)
                             ->schema([

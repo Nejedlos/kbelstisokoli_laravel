@@ -2,9 +2,9 @@
 
 namespace App\Services\Prediction;
 
+use App\Jobs\ComputeMatchPredictionJob;
 use App\Models\BasketballMatch;
 use App\Models\TeamEloRating;
-use App\Jobs\ComputeMatchPredictionJob;
 
 class EloService
 {
@@ -17,7 +17,7 @@ class EloService
      */
     public function updateFromMatch(BasketballMatch $match): void
     {
-        if (!$match->score_home || !$match->score_away || !$match->opponent_id) {
+        if (! $match->score_home || ! $match->score_away || ! $match->opponent_id) {
             return;
         }
 

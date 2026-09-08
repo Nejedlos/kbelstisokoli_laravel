@@ -2,7 +2,21 @@
 
 namespace Database\Seeders;
 
+use App\Models\Attendance;
+use App\Models\BasketballMatch;
+use App\Models\ClubEvent;
+use App\Models\ExternalPlayerMatch;
+use App\Models\MatchPrediction;
+use App\Models\Opponent;
+use App\Models\Season;
+use App\Models\StatisticRow;
+use App\Models\StatisticSet;
+use App\Models\Team;
+use App\Models\Training;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class EventMigrationSeeder extends Seeder
 {
@@ -22,41 +36,41 @@ class EventMigrationSeeder extends Seeder
 
         if ($isFresh) {
             $this->command->warn('Režim FRESH: Mažu existující události (zápasy, tréninky, klubové akce, statistiky a docházku)...');
-            \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
+            Schema::disableForeignKeyConstraints();
 
             // Smažeme všechna data v cílových tabulkách, abychom začali s čistým štítem
             // Toto vymaže i data, která nebyla migrována z legacy (včetně statistik a docházky)
-            \App\Models\StatisticRow::truncate();
-            \App\Models\StatisticSet::truncate();
-            \App\Models\Attendance::truncate();
-            \App\Models\MatchPrediction::truncate();
-            \App\Models\ExternalPlayerMatch::truncate();
+            StatisticRow::truncate();
+            StatisticSet::truncate();
+            Attendance::truncate();
+            MatchPrediction::truncate();
+            ExternalPlayerMatch::truncate();
 
-            \App\Models\BasketballMatch::truncate();
-            \Illuminate\Support\Facades\DB::table('basketball_match_team')->truncate();
+            BasketballMatch::truncate();
+            DB::table('basketball_match_team')->truncate();
 
-            \App\Models\Training::truncate();
-            \Illuminate\Support\Facades\DB::table('team_training')->truncate();
+            Training::truncate();
+            DB::table('team_training')->truncate();
 
-            \App\Models\ClubEvent::truncate();
-            \Illuminate\Support\Facades\DB::table('club_event_team')->truncate();
+            ClubEvent::truncate();
+            DB::table('club_event_team')->truncate();
 
-            \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
+            Schema::enableForeignKeyConstraints();
             $this->command->info('Data byla smazána.');
         }
 
         $this->command->info('Načítám zápasy a tréninky ze staré DB...');
 
         try {
-            $oldEvents = \Illuminate\Support\Facades\DB::connection('old_mysql')->table('zapasy')->get();
-            $seasons = \App\Models\Season::all()->keyBy('name');
-            $teamC = \App\Models\Team::where('slug', 'muzi-c')->first();
-            $teamE = \App\Models\Team::where('slug', 'muzi-e')->first();
+            $oldEvents = DB::connection('old_mysql')->table('zapasy')->get();
+            $seasons = Season::all()->keyBy('name');
+            $teamC = Team::where('slug', 'muzi-c')->first();
+            $teamE = Team::where('slug', 'muzi-e')->first();
 
             // Načtení existujících událostí do paměti pro zamezení JSON dotazům v databázi
-            $existingMatches = \App\Models\BasketballMatch::all()->keyBy(fn ($m) => $m->metadata['legacy_z_id'] ?? null)->forget(null);
-            $existingTrainings = \App\Models\Training::all()->keyBy(fn ($t) => $t->metadata['legacy_z_id'] ?? null)->forget(null);
-            $existingClubEvents = \App\Models\ClubEvent::all()->keyBy(fn ($e) => $e->metadata['legacy_z_id'] ?? null)->forget(null);
+            $existingMatches = BasketballMatch::all()->keyBy(fn ($m) => $m->metadata['legacy_z_id'] ?? null)->forget(null);
+            $existingTrainings = Training::all()->keyBy(fn ($t) => $t->metadata['legacy_z_id'] ?? null)->forget(null);
+            $existingClubEvents = ClubEvent::all()->keyBy(fn ($e) => $e->metadata['legacy_z_id'] ?? null)->forget(null);
 
             if (! $teamC || ! $teamE) {
                 $this->command->error('Týmy C nebo E nebyly nalezeny.');
@@ -74,7 +88,7 @@ class EventMigrationSeeder extends Seeder
 
                     // Pokud u historického záznamu chybí název sezóny, odvodíme jej podle data (sezóna začíná 1. září)
                     if (! $seasonName && $old->datum) {
-                        $date = \Carbon\Carbon::parse($old->datum);
+                        $date = Carbon::parse($old->datum);
                         $year = $date->year;
                         if ($date->month < 9) {
                             $seasonName = ($year - 1).'/'.$year;
@@ -87,7 +101,7 @@ class EventMigrationSeeder extends Seeder
                     if ($seasonName) {
                         $season = $seasons->get($seasonName);
                         if (! $season) {
-                            $season = \App\Models\Season::updateOrCreate(['name' => $seasonName], ['is_active' => false]);
+                            $season = Season::updateOrCreate(['name' => $seasonName], ['is_active' => false]);
                             $seasons->put($seasonName, $season);
                         }
                     } else {
@@ -110,7 +124,7 @@ class EventMigrationSeeder extends Seeder
                     if (strlen($time) === 4 && str_contains($time, ':')) {
                         $time = '0'.$time;
                     }
-                    $scheduledAt = \Carbon\Carbon::parse($old->datum.' '.$time);
+                    $scheduledAt = Carbon::parse($old->datum.' '.$time);
 
                     $matchTypes = ['MI', 'PO', 'PRATEL'];
                     if (in_array($old->druh, $matchTypes)) {
@@ -150,7 +164,7 @@ class EventMigrationSeeder extends Seeder
         $opponentName = trim($old->souper);
         $opponentId = null;
         if ($opponentName) {
-            $opponent = \App\Models\Opponent::firstOrCreate(['name' => $opponentName]);
+            $opponent = Opponent::firstOrCreate(['name' => $opponentName]);
             $opponentId = $opponent->id;
         }
 
@@ -200,8 +214,8 @@ class EventMigrationSeeder extends Seeder
             'metadata' => ['legacy_z_id' => (int) $old->id],
         ];
 
-        if (! $existing && $scheduledAt && !empty($teamIds)) {
-            $existing = \App\Models\BasketballMatch::where('team_id', $teamIds[0])
+        if (! $existing && $scheduledAt && ! empty($teamIds)) {
+            $existing = BasketballMatch::where('team_id', $teamIds[0])
                 ->where('season_id', $seasonId)
                 ->where('scheduled_at', '>=', $scheduledAt->copy()->subMinutes(120)->toDateTimeString())
                 ->where('scheduled_at', '<=', $scheduledAt->copy()->addMinutes(120)->toDateTimeString())
@@ -217,7 +231,7 @@ class EventMigrationSeeder extends Seeder
             $existing->update($matchData);
             $match = $existing;
         } else {
-            $match = \App\Models\BasketballMatch::create($matchData);
+            $match = BasketballMatch::create($matchData);
         }
 
         $match->team_id = $teamIds[0] ?? null;
@@ -235,8 +249,8 @@ class EventMigrationSeeder extends Seeder
             'metadata' => ['legacy_z_id' => (int) $old->id],
         ];
 
-        if (! $existing && $scheduledAt && !empty($teamIds)) {
-            $existing = \App\Models\Training::whereHas('teams', function ($q) use ($teamIds) {
+        if (! $existing && $scheduledAt && ! empty($teamIds)) {
+            $existing = Training::whereHas('teams', function ($q) use ($teamIds) {
                 $q->whereIn('teams.id', $teamIds);
             })
                 ->where('starts_at', '>=', $scheduledAt->copy()->subMinutes(60)->toDateTimeString())
@@ -252,7 +266,7 @@ class EventMigrationSeeder extends Seeder
             $existing->update($trainingData);
             $training = $existing;
         } else {
-            $training = \App\Models\Training::create($trainingData);
+            $training = Training::create($trainingData);
         }
 
         $training->teams()->syncWithoutDetaching($teamIds);
@@ -264,13 +278,13 @@ class EventMigrationSeeder extends Seeder
         $event = $existing;
 
         if (! $event && $scheduledAt) {
-            $event = \App\Models\ClubEvent::where('starts_at', '>=', $scheduledAt->copy()->subMinutes(60)->toDateTimeString())
+            $event = ClubEvent::where('starts_at', '>=', $scheduledAt->copy()->subMinutes(60)->toDateTimeString())
                 ->where('starts_at', '<=', $scheduledAt->copy()->addMinutes(60)->toDateTimeString())
                 ->first();
         }
 
         if (! $event) {
-            $event = new \App\Models\ClubEvent;
+            $event = new ClubEvent;
             $event->metadata = ['legacy_z_id' => (int) $old->id];
         } else {
             $metadata = $event->metadata ?? [];

@@ -5,6 +5,7 @@ namespace App\Actions\Fortify;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Contracts\ResetsUserPasswords;
@@ -24,7 +25,7 @@ class ResetUserPassword implements ResetsUserPasswords
             'password' => $this->passwordRules(),
         ])->validate();
 
-        \Illuminate\Support\Facades\Log::info('User password reset via Fortify', [
+        Log::info('User password reset via Fortify', [
             'user_id' => $user->id,
             'email' => $user->email,
             'password_length' => strlen($input['password']),
@@ -36,7 +37,7 @@ class ResetUserPassword implements ResetsUserPasswords
             'onboarding_completed_at' => $user->onboarding_completed_at ?? now(),
         ])->save();
 
-        \Illuminate\Support\Facades\Log::info('Password hash after save', [
+        Log::info('Password hash after save', [
             'user_id' => $user->id,
             'hash_prefix' => substr($user->password, 0, 10),
             'check_ok' => Hash::check($input['password'], $user->password),

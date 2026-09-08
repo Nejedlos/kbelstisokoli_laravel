@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Galleries\RelationManagers;
 
+use App\Models\Gallery;
 use App\Models\PhotoPool;
 use App\Services\GalleryService;
 use Filament\Actions\Action;
@@ -91,7 +92,7 @@ class MediaAssetsRelationManager extends RelationManager
                         TextInput::make('count')->label('Počet fotek')->numeric()->default(20)->minValue(1)->maxValue(200),
                     ])
                     ->action(function (array $data, GalleryService $service) {
-                        /** @var \App\Models\Gallery $gallery */
+                        /** @var Gallery $gallery */
                         $gallery = $this->getOwnerRecord();
                         $added = $service->fillFromPoolRandom($gallery, (int) ($data['count'] ?? 20), $data['photo_pool_id'] ?? null);
                         $this->notify('success', "$added fotek přidáno z poolu.");

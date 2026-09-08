@@ -4,6 +4,7 @@ namespace App\Livewire\Public;
 
 use App\Models\Season;
 use App\Models\Team;
+use App\Services\Member\MemberContext;
 use App\Services\Stats\TeamStatsService;
 use Livewire\Component;
 
@@ -27,7 +28,7 @@ class TeamSeasonStats extends Component
 
         // Pokud je teamId null a jsme v členské sekci (request začíná clenska-sekce), zkusíme MemberContext
         if (! $teamId && request()->is('clenska-sekce/*')) {
-            $teamId = app(\App\Services\Member\MemberContext::class)->getActiveTeamId();
+            $teamId = app(MemberContext::class)->getActiveTeamId();
         }
 
         $this->teamId = $teamId ?? Team::first()?->id;

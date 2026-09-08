@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\CronTasks\Tables;
 
 use App\Jobs\RunCronTaskJob;
+use App\Support\IconHelper;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -58,7 +59,7 @@ class CronTasksTable
             ->actions([
                 Action::make('run_now')
                     ->label('Spustit nyní')
-                    ->icon(\App\Support\IconHelper::get(\App\Support\IconHelper::PLAY))
+                    ->icon(IconHelper::get(IconHelper::PLAY))
                     ->color('warning')
                     ->requiresConfirmation()
                     ->action(function ($record) {

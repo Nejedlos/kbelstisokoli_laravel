@@ -3,6 +3,7 @@
 namespace Tests\Feature\Member;
 
 use App\Models\PlayerProfile;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class ProfileTest extends TestCase
@@ -95,7 +96,7 @@ class ProfileTest extends TestCase
         $response->assertSessionHas('status');
 
         $user->refresh();
-        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('New-password-123', $user->password));
+        $this->assertTrue(Hash::check('New-password-123', $user->password));
     }
 
     /**

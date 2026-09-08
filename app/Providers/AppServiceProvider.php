@@ -2,15 +2,68 @@
 
 namespace App\Providers;
 
-use Livewire\Livewire;
+use App\Livewire\Public\HeroEvents;
+use App\Livewire\Public\StandingsTable;
+use App\Livewire\Public\TeamSeasonStats;
+use App\Models\Announcement;
+use App\Models\BasketballMatch;
+use App\Models\ClubCompetition;
+use App\Models\ClubEvent;
+use App\Models\Gallery;
+use App\Models\HelpArticle;
+use App\Models\HelpCategory;
+use App\Models\HelpFaq;
+use App\Models\HelpQuickAction;
+use App\Models\MediaAsset;
+use App\Models\Menu;
+use App\Models\MenuItem;
+use App\Models\Opponent;
+use App\Models\Page;
+use App\Models\PageBlock;
+use App\Models\Partner;
+use App\Models\PhotoPool;
+use App\Models\Post;
+use App\Models\PostCategory;
+use App\Models\Setting;
+use App\Models\StatisticRow;
+use App\Models\Team;
+use App\Models\Training;
+use App\Models\UserSeasonConfig;
+use App\Notifications\Auth\ResetPasswordNotification;
+use App\Notifications\Auth\VerifyEmailNotification;
+use App\Observers\MatchPredictionObserver;
+use App\Observers\PerformanceObserver;
+use App\Observers\UserSeasonConfigObserver;
+use App\Services\AuditLogService;
+use App\Services\BrandingService;
+use App\Services\Communication\CommunicationService;
+use App\Services\Member\MemberContext;
+use App\Services\PerformanceService;
+use App\Services\SeoService;
+use App\Services\Stats\Contracts\StatFetcherInterface;
+use App\Services\Stats\Contracts\StatNormalizerInterface;
+use App\Services\Stats\Fetchers\CzBasketballFetcher;
+use App\Services\Stats\Legacy\LegacyFileClassifier;
+use App\Services\Stats\Legacy\LegacyImportService;
+use App\Services\Stats\Normalizers\OpenAiNormalizer;
+use App\Services\Stats\Sync\MatchSyncService;
+use App\Services\Stats\Sync\OpponentSyncService;
+use App\Services\Stats\Sync\RosterSyncService;
+use App\Services\Stats\Sync\StatisticSetService;
+use App\Services\Stats\Sync\StatisticSyncService;
+use BezhanSalleh\LanguageSwitch\LanguageSwitch;
+use Filament\Auth\Notifications\ResetPassword;
+use Filament\Auth\Notifications\VerifyEmail;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Foundation\Vite;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Validation\Rules\Password;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
+use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -30,46 +83,46 @@ class AppServiceProvider extends ServiceProvider
                 : $rule;
         });
         $this->app->bind(
-            \Filament\Auth\Notifications\ResetPassword::class,
-            \App\Notifications\Auth\ResetPasswordNotification::class
+            ResetPassword::class,
+            ResetPasswordNotification::class
         );
 
         $this->app->bind(
-            \Filament\Auth\Notifications\VerifyEmail::class,
-            \App\Notifications\Auth\VerifyEmailNotification::class
+            VerifyEmail::class,
+            VerifyEmailNotification::class
         );
 
-        $this->app->singleton(\App\Services\AuditLogService::class, function ($app) {
-            return new \App\Services\AuditLogService;
+        $this->app->singleton(AuditLogService::class, function ($app) {
+            return new AuditLogService;
         });
 
-        $this->app->singleton(\App\Services\BrandingService::class, function ($app) {
-            return new \App\Services\BrandingService;
+        $this->app->singleton(BrandingService::class, function ($app) {
+            return new BrandingService;
         });
 
-        $this->app->singleton(\App\Services\PerformanceService::class);
+        $this->app->singleton(PerformanceService::class);
 
-        $this->app->singleton(\App\Services\Communication\CommunicationService::class);
+        $this->app->singleton(CommunicationService::class);
 
-        $this->app->singleton(\App\Services\Member\MemberContext::class);
+        $this->app->singleton(MemberContext::class);
 
         $this->app->bind(
-            \App\Services\Stats\Contracts\StatFetcherInterface::class,
-            \App\Services\Stats\Fetchers\CzBasketballFetcher::class
+            StatFetcherInterface::class,
+            CzBasketballFetcher::class
         );
 
         $this->app->bind(
-            \App\Services\Stats\Contracts\StatNormalizerInterface::class,
-            \App\Services\Stats\Normalizers\OpenAiNormalizer::class
+            StatNormalizerInterface::class,
+            OpenAiNormalizer::class
         );
 
-        $this->app->singleton(\App\Services\Stats\Sync\RosterSyncService::class);
-        $this->app->singleton(\App\Services\Stats\Sync\StatisticSetService::class);
-        $this->app->singleton(\App\Services\Stats\Sync\OpponentSyncService::class);
-        $this->app->singleton(\App\Services\Stats\Sync\MatchSyncService::class);
-        $this->app->singleton(\App\Services\Stats\Sync\StatisticSyncService::class);
-        $this->app->singleton(\App\Services\Stats\Legacy\LegacyFileClassifier::class);
-        $this->app->singleton(\App\Services\Stats\Legacy\LegacyImportService::class);
+        $this->app->singleton(RosterSyncService::class);
+        $this->app->singleton(StatisticSetService::class);
+        $this->app->singleton(OpponentSyncService::class);
+        $this->app->singleton(MatchSyncService::class);
+        $this->app->singleton(StatisticSyncService::class);
+        $this->app->singleton(LegacyFileClassifier::class);
+        $this->app->singleton(LegacyImportService::class);
 
         // Robustní fix pro Vite manifest na Webglobe hostingu (subdomény vs. root)
         $this->app->singleton(Vite::class, function ($app) {
@@ -111,21 +164,21 @@ class AppServiceProvider extends ServiceProvider
     {
         // 1. Explicitní registrace Livewire komponent pro zajištění správné discovery v produkci (zejména pro lazy loading)
         // Musí proběhnout co nejdříve, před případnými chybami v bootování ostatních služeb
-        if (class_exists(\Livewire\Livewire::class)) {
+        if (class_exists(Livewire::class)) {
             // Registrujeme obě varianty názvů (pomlčkovou pro náš kód, tečkovou pro standardní Livewire discovery)
-            Livewire::component('public-hero-events', \App\Livewire\Public\HeroEvents::class);
-            Livewire::component('public.hero-events', \App\Livewire\Public\HeroEvents::class);
+            Livewire::component('public-hero-events', HeroEvents::class);
+            Livewire::component('public.hero-events', HeroEvents::class);
 
-            Livewire::component('public-standings-table', \App\Livewire\Public\StandingsTable::class);
-            Livewire::component('public.standings-table', \App\Livewire\Public\StandingsTable::class);
+            Livewire::component('public-standings-table', StandingsTable::class);
+            Livewire::component('public.standings-table', StandingsTable::class);
 
-            Livewire::component('public-team-season-stats', \App\Livewire\Public\TeamSeasonStats::class);
-            Livewire::component('public.team-season-stats', \App\Livewire\Public\TeamSeasonStats::class);
+            Livewire::component('public-team-season-stats', TeamSeasonStats::class);
+            Livewire::component('public.team-season-stats', TeamSeasonStats::class);
         }
 
         // Vynucení kořenové URL podle konfigurace pro správné generování odkazů v mailech a CLI
         if ($appUrl = config('app.url')) {
-            \Illuminate\Support\Facades\URL::forceRootUrl($appUrl);
+            URL::forceRootUrl($appUrl);
         }
 
         // Zvýšení paměťového limitu pro administrativu (zpracování velkých obrázků)
@@ -165,11 +218,11 @@ class AppServiceProvider extends ServiceProvider
             }
         });
 
-        \App\Models\UserSeasonConfig::observe(\App\Observers\UserSeasonConfigObserver::class);
+        UserSeasonConfig::observe(UserSeasonConfigObserver::class);
 
         // Načtení a aplikace výkonnostních nastavení z DB (pouze pokud neběžíme v konzoli nebo neběžíme optimize)
         if (! $this->app->runningInConsole() || $this->app->runningUnitTests()) {
-            app(\App\Services\PerformanceService::class)->bootSettings();
+            app(PerformanceService::class)->bootSettings();
         }
 
         // Deaktivace Telescope na produkci, pokud není explicitně vynucen přes TELESCOPE_ENABLED=true
@@ -179,7 +232,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         // Vlastní Blade direktiva pro fragment caching
-        \Illuminate\Support\Facades\Blade::directive('cacheFragment', function ($expression) {
+        Blade::directive('cacheFragment', function ($expression) {
             return "<?php
                 \$__cache_args = [{$expression}];
                 \$__cache_key = \$__cache_args[0] ?? 'fragment_'.md5(request()->fullUrl());
@@ -198,7 +251,7 @@ class AppServiceProvider extends ServiceProvider
             ?>";
         });
 
-        \Illuminate\Support\Facades\Blade::directive('endCacheFragment', function () {
+        Blade::directive('endCacheFragment', function () {
             return '<?php
                 endif;
                 if (!$__skip_render) {
@@ -211,21 +264,21 @@ class AppServiceProvider extends ServiceProvider
             ?>';
         });
 
-        \Illuminate\Support\Facades\Blade::directive('wireNavigate', function () {
+        Blade::directive('wireNavigate', function () {
             return "<?php echo config('performance.features.livewire_navigate', false) ? 'wire:navigate' : ''; ?>";
         });
 
         Schema::defaultStringLength(191);
 
         // LanguageSwitch configuration updated for v5
-        \BezhanSalleh\LanguageSwitch\LanguageSwitch::configureUsing(function (\BezhanSalleh\LanguageSwitch\LanguageSwitch $switch) {
+        LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
             $switch
                 ->locales(['cs', 'en'])
                 ->visible(
                     outsidePanels: true,
                     insidePanels: false,
                 )
-                ->outsidePanelsRenderHook(\Filament\View\PanelsRenderHook::BODY_START);
+                ->outsidePanelsRenderHook(PanelsRenderHook::BODY_START);
         });
 
         // Optimalizovaná registrace observerů - pouze pro zápisové požadavky
@@ -244,38 +297,38 @@ class AppServiceProvider extends ServiceProvider
     protected function registerObservers(): void
     {
         $models = [
-            \App\Models\Post::class,
-            \App\Models\BasketballMatch::class,
-            \App\Models\Team::class,
-            \App\Models\Training::class,
-            \App\Models\Setting::class,
-            \App\Models\Page::class,
-            \App\Models\PageBlock::class,
-            \App\Models\Menu::class,
-            \App\Models\MenuItem::class,
-            \App\Models\Announcement::class,
-            \App\Models\MediaAsset::class,
-            \App\Models\Gallery::class,
-            \App\Models\PhotoPool::class,
-            \App\Models\HelpCategory::class,
-            \App\Models\HelpArticle::class,
-            \App\Models\HelpFaq::class,
-            \App\Models\HelpQuickAction::class,
-            \App\Models\Partner::class,
-            \App\Models\Opponent::class,
-            \App\Models\PostCategory::class,
-            \App\Models\ClubCompetition::class,
-            \App\Models\ClubEvent::class,
+            Post::class,
+            BasketballMatch::class,
+            Team::class,
+            Training::class,
+            Setting::class,
+            Page::class,
+            PageBlock::class,
+            Menu::class,
+            MenuItem::class,
+            Announcement::class,
+            MediaAsset::class,
+            Gallery::class,
+            PhotoPool::class,
+            HelpCategory::class,
+            HelpArticle::class,
+            HelpFaq::class,
+            HelpQuickAction::class,
+            Partner::class,
+            Opponent::class,
+            PostCategory::class,
+            ClubCompetition::class,
+            ClubEvent::class,
         ];
 
         foreach ($models as $model) {
             if (class_exists($model)) {
-                $model::observe(\App\Observers\PerformanceObserver::class);
+                $model::observe(PerformanceObserver::class);
             }
         }
 
-        \App\Models\BasketballMatch::observe(\App\Observers\MatchPredictionObserver::class);
-        \App\Models\StatisticRow::observe(\App\Observers\MatchPredictionObserver::class);
+        BasketballMatch::observe(MatchPredictionObserver::class);
+        StatisticRow::observe(MatchPredictionObserver::class);
     }
 
     /**
@@ -291,7 +344,7 @@ class AppServiceProvider extends ServiceProvider
             'auth.*',
             'errors.*',
             'filament-panels::layout',
-            'filament-panels::pages.*'
+            'filament-panels::pages.*',
         ];
 
         View::composer($targets, function ($view) {
@@ -307,8 +360,8 @@ class AppServiceProvider extends ServiceProvider
                 return;
             }
 
-            $brandingService = app(\App\Services\BrandingService::class);
-            $communicationService = app(\App\Services\Communication\CommunicationService::class);
+            $brandingService = app(BrandingService::class);
+            $communicationService = app(CommunicationService::class);
 
             $audience = (str_starts_with($viewName, 'member.') || str_contains($viewName, 'filament-panels::')) ? 'member' : 'public';
             try {
@@ -354,7 +407,7 @@ class AppServiceProvider extends ServiceProvider
 
             // SEO pouze pro veřejné layouty
             if ($audience === 'public' && ! isset($view->seo)) {
-                $seoService = app(\App\Services\SeoService::class);
+                $seoService = app(SeoService::class);
                 $model = $view->page ?? $view->post ?? $view->news ?? $view->team ?? $view->gallery ?? $view->pool ?? null;
                 $view->with('seo', $seoService->getMetadata($model));
             }

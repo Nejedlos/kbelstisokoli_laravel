@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Models\ExternalImportRun;
+use App\Models\Season;
 use App\Models\User;
 use App\Services\Stats\Sync\PlayerSyncService;
 use Illuminate\Console\Command;
@@ -60,15 +62,16 @@ class StatsSyncPlayersCommand extends Command
 
         if ($users->isEmpty()) {
             $this->warn('Nebyli nalezeni žádní hráči s externím mapováním.');
+
             return 0;
         }
 
         $this->info("Nalezeno {$users->count()} hráčů k synchronizaci.");
 
         // Vytvoření hlavního běhu pro UI
-        $mainRun = \App\Models\ExternalImportRun::start(
+        $mainRun = ExternalImportRun::start(
             'czbasketball',
-            \App\Models\Season::where('is_active', true)->first()?->id ?? 0,
+            Season::where('is_active', true)->first()?->id ?? 0,
             $this->option('team_id'),
             $this->option('excesive') ? 'player_sync_excesive' : 'player_sync_batch',
             null
@@ -172,13 +175,14 @@ class StatsSyncPlayersCommand extends Command
             'failed_count' => $users->count() - $successCount - $skippedCount,
         ]);
 
-        $this->info("Synchronizace dokončena.");
+        $this->info('Synchronizace dokončena.');
         $this->line("<fg=green>Úspěšně: {$successCount}</>");
         $this->line("<fg=yellow>Přeskočeno: {$skippedCount}</>");
-        $this->line("<fg=red>Selhalo: " . ($users->count() - $successCount - $skippedCount) . "</>");
+        $this->line('<fg=red>Selhalo: '.($users->count() - $successCount - $skippedCount).'</>');
 
         return 0;
     }
+
     /**
      * Vyčistí stav aplikace, aby se ušetřila paměť a předešlo se "zaseknutí".
      */

@@ -5,7 +5,6 @@ namespace App\Services;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
-use Symfony\Component\Yaml\Yaml;
 
 class HelpService
 {
@@ -21,14 +20,14 @@ class HelpService
         $locale = $locale ?: config('app.fallback_locale', 'cs');
         $this->basePath = base_path("docs/help/{$locale}");
 
-        if (!File::isDirectory($this->basePath)) {
-            $this->basePath = base_path("docs/help/cs");
+        if (! File::isDirectory($this->basePath)) {
+            $this->basePath = base_path('docs/help/cs');
         }
     }
 
     public function getTree(): Collection
     {
-        if (!File::isDirectory($this->basePath)) {
+        if (! File::isDirectory($this->basePath)) {
             return collect();
         }
 
@@ -57,7 +56,7 @@ class HelpService
 
         foreach ($files as $file) {
             $fileName = $file->getFilename();
-            if ($fileName === 'README.md' || !Str::endsWith($fileName, '.md')) {
+            if ($fileName === 'README.md' || ! Str::endsWith($fileName, '.md')) {
                 continue;
             }
 
@@ -81,15 +80,15 @@ class HelpService
         $fullPath = base_path($relativePath);
 
         // Security check - ensure path is within help directory
-        if (!Str::startsWith(realpath($fullPath), base_path('docs/help'))) {
+        if (! Str::startsWith(realpath($fullPath), base_path('docs/help'))) {
             // Try within current locale
-            $fullPath = $this->basePath . '/' . ltrim($relativePath, '/');
-            if (!File::exists($fullPath)) {
+            $fullPath = $this->basePath.'/'.ltrim($relativePath, '/');
+            if (! File::exists($fullPath)) {
                 return null;
             }
         }
 
-        if (!File::exists($fullPath) || !File::isFile($fullPath)) {
+        if (! File::exists($fullPath) || ! File::isFile($fullPath)) {
             return null;
         }
 
@@ -118,7 +117,7 @@ class HelpService
         $allFiles = File::allFiles($this->basePath);
 
         foreach ($allFiles as $file) {
-            if (!Str::endsWith($file->getFilename(), '.md')) {
+            if (! Str::endsWith($file->getFilename(), '.md')) {
                 continue;
             }
 
@@ -145,12 +144,13 @@ class HelpService
         $name = Str::replaceLast('.md', '', $name);
         $name = preg_replace('/^\d+-/', '', $name); // Remove leading numbers (01-, 02-)
         $name = str_replace('-', ' ', $name);
+
         return Str::ucfirst($name);
     }
 
     protected function getRelativePath(string $fullPath): string
     {
-        return Str::after($fullPath, base_path() . '/');
+        return Str::after($fullPath, base_path().'/');
     }
 
     protected function getExcerpt(string $content, string $query): string
@@ -163,8 +163,12 @@ class HelpService
 
         $excerpt = mb_substr($content, $start, $length);
 
-        if ($start > 0) $excerpt = '...' . $excerpt;
-        if ($start + $length < mb_strlen($content)) $excerpt .= '...';
+        if ($start > 0) {
+            $excerpt = '...'.$excerpt;
+        }
+        if ($start + $length < mb_strlen($content)) {
+            $excerpt .= '...';
+        }
 
         return $excerpt;
     }
@@ -180,7 +184,7 @@ class HelpService
         }
 
         // Try README.md H1
-        $readmePath = $directory . '/README.md';
+        $readmePath = $directory.'/README.md';
         if (File::exists($readmePath)) {
             $content = File::get($readmePath);
             if (preg_match('/^#\s+(.+)$/m', $content, $matches)) {
@@ -193,7 +197,7 @@ class HelpService
 
     protected function getFileName(string $path): string
     {
-        if (!File::exists($path)) {
+        if (! File::exists($path)) {
             return $this->formatName(basename($path));
         }
 
@@ -207,7 +211,7 @@ class HelpService
 
     protected function getFileDescription(string $path): string
     {
-        if (!File::exists($path)) {
+        if (! File::exists($path)) {
             return '';
         }
 
@@ -215,6 +219,7 @@ class HelpService
         // Remove H1 title and return first paragraph
         $content = preg_replace('/^#\s+.+$/m', '', $content);
         $content = trim($content);
+
         return Str::limit(strip_tags(Str::markdown($content)), 120);
     }
 
@@ -228,12 +233,13 @@ class HelpService
             return $translated;
         }
 
-        $readmePath = $directory . '/README.md';
+        $readmePath = $directory.'/README.md';
         if (File::exists($readmePath)) {
             $content = File::get($readmePath);
             // Remove H1 title and return first paragraph
             $content = preg_replace('/^#\s+.+$/m', '', $content);
             $content = trim($content);
+
             return Str::limit(strip_tags(Str::markdown($content)), 120);
         }
 

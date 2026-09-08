@@ -10,6 +10,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class ClubEventsTable
 {
@@ -20,8 +21,9 @@ class ClubEventsTable
             ->columns([
                 TextColumn::make('title')
                     ->label('Název')
-                    ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
+                    ->searchable(query: function ($query, string $search): Builder {
                         $locale = app()->getLocale();
+
                         return $query->where("title->{$locale}", 'LIKE', "%{$search}%");
                     })
                     ->sortable()
@@ -48,8 +50,9 @@ class ClubEventsTable
                     ->placeholder('Celý klub')
                     ->badge()
                     ->state(fn ($record) => $record->teams->reject(fn ($team) => $team->category === 'all')->pluck('name'))
-                    ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
+                    ->searchable(query: function ($query, string $search): Builder {
                         $locale = app()->getLocale();
+
                         return $query->whereHas('teams', fn ($q) => $q->where("name->{$locale}", 'LIKE', "%{$search}%"));
                     }),
                 TextColumn::make('starts_at')

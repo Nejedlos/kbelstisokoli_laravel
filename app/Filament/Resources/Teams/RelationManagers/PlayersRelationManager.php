@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Teams\RelationManagers;
 
 use App\Filament\Resources\Users\UserResource;
+use App\Models\PlayerProfile;
 use App\Support\IconHelper;
 use Filament\Actions\Action;
 use Filament\Actions\AttachAction;
@@ -19,20 +20,23 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Support\HtmlString;
 
 class PlayersRelationManager extends RelationManager
 {
     protected static string $relationship = 'players';
 
-    protected function modifyQueryUsing(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
+    protected function modifyQueryUsing(Builder $query): Builder
     {
         return $query->with(['user', 'user.externalMappings'])
-            ->where("player_profiles.is_active", true)
-            ->whereHas('user', fn ($q) => $q->where("users.is_active", true));
+            ->where('player_profiles.is_active', true)
+            ->whereHas('user', fn ($q) => $q->where('users.is_active', true));
     }
 
-    public static function getTitle(\Illuminate\Database\Eloquent\Model $ownerRecord, string $pageClass): string
+    public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
         return __('admin.resources.team.fields.players');
     }
@@ -75,7 +79,7 @@ class PlayersRelationManager extends RelationManager
                     ->formatStateUsing(fn ($state, $record) => new HtmlString(
                         ($record->user?->externalMappings->isNotEmpty()
                             ? '<i class="fa-light fa-cloud-arrow-down fa-fw text-info mr-1" title="Synchronizováno z externího zdroje"></i> '
-                            : '') . e($state)
+                            : '').e($state)
                     ))
                     ->url(fn ($record): string => UserResource::getUrl('edit', ['record' => $record->user_id]))
                     ->searchable()
@@ -105,11 +109,11 @@ class PlayersRelationManager extends RelationManager
                     ->icon(IconHelper::render(IconHelper::PLUS))
                     ->visible(fn (): bool => auth()->user()->can('manage_rosters'))
                     ->preloadRecordSelect()
-                    ->recordSelectOptionsQuery(function (\Illuminate\Database\Eloquent\Builder $query) {
+                    ->recordSelectOptionsQuery(function (Builder $query) {
                         return $query
-                            ->join('users', "player_profiles.user_id", '=', "users.id")
-                            ->select("player_profiles.*", "users.name as user_name_title")
-                            ->orderBy("users.name");
+                            ->join('users', 'player_profiles.user_id', '=', 'users.id')
+                            ->select('player_profiles.*', 'users.name as user_name_title')
+                            ->orderBy('users.name');
                     })
                     ->recordTitleAttribute('user.name')
                     ->recordSelectSearchColumns(['user.name'])
@@ -128,7 +132,7 @@ class PlayersRelationManager extends RelationManager
                             ->label(__('Hráč je na soupisce'))
                             ->default(false),
                     ])
-                    ->after(function (\App\Models\PlayerProfile $record, array $data, RelationManager $livewire) {
+                    ->after(function (PlayerProfile $record, array $data, RelationManager $livewire) {
                         if ($data['is_primary_team'] ?? false) {
                             $currentTeamId = $livewire->getOwnerRecord()->id;
 
@@ -169,7 +173,7 @@ class PlayersRelationManager extends RelationManager
                         Checkbox::make('is_on_roster')
                             ->label(__('Hráč je na soupisce')),
                     ])
-                    ->after(function (\App\Models\PlayerProfile $record, array $data, RelationManager $livewire) {
+                    ->after(function (PlayerProfile $record, array $data, RelationManager $livewire) {
                         $currentTeamId = $livewire->getOwnerRecord()->id;
 
                         if ($data['is_primary_team'] ?? false) {
@@ -197,7 +201,7 @@ class PlayersRelationManager extends RelationManager
                     ->label(__('admin.resources.team.actions.detach'))
                     ->icon(IconHelper::render(IconHelper::TRASH))
                     ->visible(fn (): bool => auth()->user()->can('manage_rosters'))
-                    ->after(function (\App\Models\PlayerProfile $record, RelationManager $livewire) {
+                    ->after(function (PlayerProfile $record, RelationManager $livewire) {
                         if ($record->primary_team_id === $livewire->getOwnerRecord()->id) {
                             $record->update(['primary_team_id' => null]);
                         }
@@ -207,7 +211,7 @@ class PlayersRelationManager extends RelationManager
                 BulkActionGroup::make([
                     DetachBulkAction::make()
                         ->label(__('admin.resources.team.actions.detach_selected'))
-                        ->after(function (\Illuminate\Support\Collection $records, RelationManager $livewire) {
+                        ->after(function (Collection $records, RelationManager $livewire) {
                             $teamId = $livewire->getOwnerRecord()->id;
                             foreach ($records as $record) {
                                 if ($record->primary_team_id === $teamId) {

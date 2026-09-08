@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Security;
 
+use App\Filament\Pages\Auth\ResetPassword;
 use App\Models\AuditLog;
 use App\Models\User;
-use App\Filament\Pages\Auth\ResetPassword;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Livewire\Livewire;

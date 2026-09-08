@@ -6,6 +6,7 @@ use App\Models\AiRequestLog;
 use App\Models\AiSetting;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 
 class AiSettingsService
@@ -123,7 +124,7 @@ class AiSettingsService
             ], $data));
         } catch (\Throwable $e) {
             // Logování by nemělo shodit aplikaci
-            \Illuminate\Support\Facades\Log::error('AI Log Error: '.$e->getMessage());
+            Log::error('AI Log Error: '.$e->getMessage());
         }
     }
 

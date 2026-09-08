@@ -1,4 +1,5 @@
 <?php
+
 header('Content-Type: application/json');
 
 $opcache_status = function_exists('opcache_get_status') ? opcache_get_status(true) : 'Not available';

@@ -10,6 +10,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class AnnouncementsTable
 {
@@ -26,15 +27,17 @@ class AnnouncementsTable
                         'success' => 'success',
                         default => 'info',
                     })
-                    ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
+                    ->searchable(query: function ($query, string $search): Builder {
                         $locale = app()->getLocale();
+
                         return $query->where("title->{$locale}", 'LIKE', "%{$search}%");
                     }),
                 TextColumn::make('message')
                     ->label('Zpráva')
                     ->limit(50)
-                    ->searchable(query: function ($query, string $search): \Illuminate\Database\Eloquent\Builder {
+                    ->searchable(query: function ($query, string $search): Builder {
                         $locale = app()->getLocale();
+
                         return $query->where("message->{$locale}", 'LIKE', "%{$search}%");
                     }),
                 TextColumn::make('audience')

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Teams\Schemas;
 
+use App\Models\ExternalStatSource;
 use App\Support\IconHelper;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -10,6 +11,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 
 class TeamForm
 {
@@ -24,7 +26,7 @@ class TeamForm
                             ->required()
                             ->maxLength(255)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (string $operation, $state, $set) => $operation === 'create' ? $set('slug', \Illuminate\Support\Str::slug($state)) : null),
+                            ->afterStateUpdated(fn (string $operation, $state, $set) => $operation === 'create' ? $set('slug', Str::slug($state)) : null),
                         TextInput::make('name.en')
                             ->label('Team name (EN)')
                             ->maxLength(255),
@@ -64,7 +66,7 @@ class TeamForm
                             ->schema([
                                 Select::make('source_key')
                                     ->label('Zdroj')
-                                    ->options(\App\Models\ExternalStatSource::all()->pluck('name', 'slug'))
+                                    ->options(ExternalStatSource::all()->pluck('name', 'slug'))
                                     ->default('czbasketball')
                                     ->required()
                                     ->searchable(),

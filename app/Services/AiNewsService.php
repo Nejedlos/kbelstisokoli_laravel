@@ -6,7 +6,6 @@ use App\Models\BasketballMatch;
 use App\Models\ClubEvent;
 use App\Models\Post;
 use App\Models\PostCategory;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -26,6 +25,7 @@ class AiNewsService
 
         if (! ($settings['enabled'] ?? true)) {
             Log::warning('AI News Generation: AI is disabled in settings.');
+
             return null;
         }
 
@@ -33,6 +33,7 @@ class AiNewsService
 
         if ($this->isDataEmpty($data)) {
             Log::info('AI News Generation: No significant data found for the last/next week.');
+
             return null;
         }
 
@@ -155,7 +156,8 @@ class AiNewsService
             return $content;
 
         } catch (\Throwable $e) {
-            Log::error('AI News Generation Error: ' . $e->getMessage());
+            Log::error('AI News Generation Error: '.$e->getMessage());
+
             return null;
         }
     }
@@ -167,7 +169,7 @@ class AiNewsService
     {
         $prompt = "Zde jsou data z klubu Kbelští sokoli za uplynulý týden a výhled na příští týden (dnešní datum: {$data['current_date']}):\n\n";
 
-        if (!empty($data['recent_matches'])) {
+        if (! empty($data['recent_matches'])) {
             $prompt .= "ODEHRANÉ ZÁPASY:\n";
             foreach ($data['recent_matches'] as $m) {
                 $prompt .= "- {$m['date']}: {$m['team']} vs {$m['opponent']} -> {$m['score']} ({$m['result']})\n";
@@ -175,7 +177,7 @@ class AiNewsService
             $prompt .= "\n";
         }
 
-        if (!empty($data['upcoming_matches'])) {
+        if (! empty($data['upcoming_matches'])) {
             $prompt .= "NADCHÁZEJÍCÍ ZÁPASY:\n";
             foreach ($data['upcoming_matches'] as $m) {
                 $prompt .= "- {$m['date']}: {$m['team']} vs {$m['opponent']} (Místo: {$m['location']})\n";
@@ -183,7 +185,7 @@ class AiNewsService
             $prompt .= "\n";
         }
 
-        if (!empty($data['events'])) {
+        if (! empty($data['events'])) {
             $prompt .= "DALŠÍ UDÁLOSTI:\n";
             foreach ($data['events'] as $e) {
                 $prompt .= "- {$e['date']}: {$e['title']} ({$e['type']}, Místo: {$e['location']})\n";
@@ -191,7 +193,7 @@ class AiNewsService
             $prompt .= "\n";
         }
 
-        $prompt .= "Napiš článek, který shrne tyto události. Zaměř se na úspěchy, pozvi fanoušky na nadcházející zápasy a informuj o akcích v klubu. Piš v češtině i angličtině.";
+        $prompt .= 'Napiš článek, který shrne tyto události. Zaměř se na úspěchy, pozvi fanoušky na nadcházející zápasy a informuj o akcích v klubu. Piš v češtině i angličtině.';
 
         return $prompt;
     }
@@ -204,7 +206,7 @@ class AiNewsService
         $category = PostCategory::where('slug', 'aktuality')->first()
             ?? PostCategory::where('id', 1)->first(); // Fallback na ID 1 (Obecné)
 
-        $post = new Post();
+        $post = new Post;
         $post->category_id = $category?->id;
         $post->setTranslation('title', 'cs', $aiData['title_cs'] ?? 'Týdenní přehled sokolů');
         $post->setTranslation('title', 'en', $aiData['title_en'] ?? 'Weekly Falcons Overview');
@@ -212,7 +214,7 @@ class AiNewsService
         $post->setTranslation('excerpt', 'en', $aiData['excerpt_en'] ?? '');
         $post->setTranslation('content', 'cs', $aiData['content_cs'] ?? '');
         $post->setTranslation('content', 'en', $aiData['content_en'] ?? '');
-        $post->slug = Str::slug($aiData['title_cs'] ?? 'tydenni-prehled-' . now()->format('Y-W'));
+        $post->slug = Str::slug($aiData['title_cs'] ?? 'tydenni-prehled-'.now()->format('Y-W'));
         $post->status = 'published';
         $post->is_visible = true;
         $post->publish_at = now();
