@@ -8,6 +8,9 @@ use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Foundation\Vite;
+use Illuminate\Support\Facades\Vite as ViteFacade;
+use Illuminate\Support\HtmlString;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -44,6 +47,14 @@ abstract class TestCase extends BaseTestCase
         }
 
         parent::setUp();
+
+        ViteFacade::swap(new class extends Vite
+        {
+            public function __invoke($entrypoints, $buildDirectory = null)
+            {
+                return new HtmlString('');
+            }
+        });
 
         $this->seed(PermissionSeeder::class);
         $this->seed(RoleSeeder::class);

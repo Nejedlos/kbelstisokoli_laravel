@@ -297,7 +297,7 @@ Tato chyba znamená, že se k sestavení assetů (Vite) používá příliš sta
 ## GitHub Workflow
 Na GitHub se nahrává pouze zdrojový kód. Soubory jako `.env`, `vendor/`, `node_modules/` a buildované soubory v `public/build/` jsou ignorovány (dle standardu).
 
-Workflow `.github/workflows/lint.yml` při pull requestu a pushi do `main` sestaví Vite assety, spustí Pint a celou PHP testovací sadu. Po úspěšném pushi do `main` následně nasadí přes SSH přesně ověřený commit do GitHub Environment `production`. Soubory `.env` na produkci nemění; její konfigurace zůstává spravovaná mimo CI.
+Workflow `.github/workflows/lint.yml` při pull requestu a pushi do `main` spustí Pint a celou PHP testovací sadu. Po úspěšném pushi do `main` následně nasadí přes SSH přesně ověřený commit do GitHub Environment `production`. Soubory `.env` na produkci nemění; její konfigurace zůstává spravovaná mimo CI.
 
 Před prvním automatickým nasazením uložte v Environment `production` tyto Secrets:
 
