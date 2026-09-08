@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
@@ -14,6 +15,10 @@ use Tests\TestCase;
 class FeedbackSystemTest extends TestCase
 {
     use RefreshDatabase;
+
+    private string $feedbackManifestPath;
+
+    private ?string $originalFeedbackManifest;
 
     protected function setUp(): void
     {
@@ -25,6 +30,26 @@ class FeedbackSystemTest extends TestCase
 
         Mail::fake();
         Storage::fake('local');
+
+        $this->feedbackManifestPath = public_path('build/manifest.json');
+        $this->originalFeedbackManifest = File::exists($this->feedbackManifestPath)
+            ? File::get($this->feedbackManifestPath)
+            : null;
+        File::ensureDirectoryExists(dirname($this->feedbackManifestPath));
+        File::put($this->feedbackManifestPath, json_encode([
+            'resources/js/feedback-widget.js' => ['file' => 'assets/feedback-widget-test.js'],
+        ]));
+    }
+
+    protected function tearDown(): void
+    {
+        if ($this->originalFeedbackManifest === null) {
+            File::delete($this->feedbackManifestPath);
+        } else {
+            File::put($this->feedbackManifestPath, $this->originalFeedbackManifest);
+        }
+
+        parent::tearDown();
     }
 
     public function test_guest_does_not_see_widget_on_production_host(): void
