@@ -35,7 +35,7 @@ managed_assets_root="$deploy_root/managed-assets"
 managed_assets_path="$managed_assets_root/$ASSETS_SHA"
 managed_assets_prepare="$managed_assets_root/.prepare-$ASSETS_SHA-$$"
 public_release_entries=(
-    assets build js css fonts vendor images
+    assets build js css fonts images
     android-chrome-192x192.png android-chrome-512x512.png apple-touch-icon.png
     favicon-16x16.png favicon-32x32.png favicon.ico
     llms.txt manifest.json robots.txt site.webmanifest sitemap.xml

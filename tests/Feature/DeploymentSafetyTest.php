@@ -67,6 +67,7 @@ class DeploymentSafetyTest extends TestCase
         $this->assertStringContainsString('favicon.ico', $deployment);
         $this->assertStringContainsString('robots.txt', $deployment);
         $this->assertStringContainsString('site.webmanifest', $deployment);
+        $this->assertStringNotContainsString('assets build js css fonts vendor images', $deployment);
         $this->assertStringContainsString('mv -Tf "$deploy_root/.current-$RELEASE_SHA" "$current_link"', $deployment);
         $this->assertStringContainsString('rollback_bootstrap', $deployment);
         $this->assertStringContainsString('X-App-Release: $RELEASE_SHA', $deployment);
