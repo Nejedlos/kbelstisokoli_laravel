@@ -11,12 +11,16 @@ class DeploymentSafetyTest extends TestCase
         $workflow = file_get_contents(base_path('.github/workflows/lint.yml'));
 
         $this->assertStringContainsString('php artisan test --parallel --processes=4 --compact', $workflow);
+        $this->assertStringContainsString('runs-on: [self-hosted, macOS, ARM64, kbelstisokoli-deploy]', $workflow);
+        $this->assertStringContainsString('timeout-minutes: 20', $workflow);
         $this->assertSame(1, substr_count($workflow, 'npm run build'));
         $this->assertStringContainsString('PRODUCTION_PUBLIC_PATH: ${{ secrets.PRODUCTION_PUBLIC_PATH }}', $workflow);
         $this->assertStringContainsString('scripts/package-production-release.sh "$GITHUB_SHA"', $workflow);
         $this->assertStringContainsString('scripts/package-production-assets.sh "$assets_sha"', $workflow);
         $this->assertStringContainsString('rm -f bootstrap/cache/*.php', $workflow);
         $this->assertStringContainsString('scripts/upload-production-release.sh', $workflow);
+        $this->assertStringContainsString('$RUNNER_TEMP/deploy-ssh', $workflow);
+        $this->assertStringNotContainsString('> ~/.ssh/id_ed25519', $workflow);
         $this->assertStringNotContainsString('rsync ', $workflow);
         $this->assertStringNotContainsString('git reset --hard', $workflow);
         $this->assertStringNotContainsString('git fetch', $workflow);
@@ -39,6 +43,8 @@ class DeploymentSafetyTest extends TestCase
         $this->assertStringContainsString('if [ "$status" -ne 255 ]; then', $upload);
         $this->assertStringContainsString('remote_release_checksum', $upload);
         $this->assertStringContainsString('StrictHostKeyChecking=yes', $upload);
+        $this->assertStringContainsString('IdentitiesOnly=yes', $upload);
+        $this->assertStringContainsString('UserKnownHostsFile=', $upload);
         $this->assertStringContainsString('remote_bash', $upload);
         $this->assertStringContainsString('bash -lc', $upload);
 

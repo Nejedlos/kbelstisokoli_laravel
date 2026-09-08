@@ -52,7 +52,8 @@ jobs:
 
   validate-build-deploy:
     if: github.event_name == 'push'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, macOS, ARM64, kbelstisokoli-deploy]
+    timeout-minutes: 20
     environment: production
     concurrency:
       group: production-deploy
@@ -132,10 +133,8 @@ jobs:
           php artisan package:discover --ansi
           php artisan filament:upgrade
           scripts/package-production-release.sh "$GITHUB_SHA" "$RUNNER_TEMP/release-$GITHUB_SHA.tgz"
-          sha256sum "$RUNNER_TEMP/release-$GITHUB_SHA.tgz" > "$RUNNER_TEMP/release-$GITHUB_SHA.sha256"
           assets_sha=$(git rev-parse HEAD:public/assets)
           scripts/package-production-assets.sh "$assets_sha" "$RUNNER_TEMP/assets-$assets_sha.tar"
-          sha256sum "$RUNNER_TEMP/assets-$assets_sha.tar" > "$RUNNER_TEMP/assets-$assets_sha.sha256"
           echo "ASSETS_SHA=$assets_sha" >> "$GITHUB_ENV"
 
       - name: Configure SSH
@@ -143,11 +142,14 @@ jobs:
           PRODUCTION_SSH_PRIVATE_KEY: ${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}
           PRODUCTION_SSH_KNOWN_HOSTS: ${{ secrets.PRODUCTION_SSH_KNOWN_HOSTS }}
         run: |
-          install -m 700 -d ~/.ssh
-          printf '%s\n' "$PRODUCTION_SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          printf '%s\n' "$PRODUCTION_SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/known_hosts
+          ssh_directory="$RUNNER_TEMP/deploy-ssh"
+          install -m 700 -d "$ssh_directory"
+          printf '%s\n' "$PRODUCTION_SSH_PRIVATE_KEY" > "$ssh_directory/id_ed25519"
+          chmod 600 "$ssh_directory/id_ed25519"
+          printf '%s\n' "$PRODUCTION_SSH_KNOWN_HOSTS" > "$ssh_directory/known_hosts"
+          chmod 600 "$ssh_directory/known_hosts"
+          echo "PRODUCTION_SSH_KEY=$ssh_directory/id_ed25519" >> "$GITHUB_ENV"
+          echo "PRODUCTION_SSH_KNOWN_HOSTS_FILE=$ssh_directory/known_hosts" >> "$GITHUB_ENV"
 
       - name: Upload and promote release atomically
         env:

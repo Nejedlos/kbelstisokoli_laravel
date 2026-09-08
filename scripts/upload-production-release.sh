@@ -72,6 +72,24 @@ assets_checksum=$(sha256_file "$assets_source")
 ssh_options=(-4 -p "$PRODUCTION_SSH_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -o ConnectionAttempts=1 -o ServerAliveInterval=15 -o ServerAliveCountMax=4)
 scp_options=(-4 -P "$PRODUCTION_SSH_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -o ConnectionAttempts=1 -o ServerAliveInterval=15 -o ServerAliveCountMax=4)
 
+if [ -n "${PRODUCTION_SSH_KEY:-}" ]; then
+    if [ ! -f "$PRODUCTION_SSH_KEY" ]; then
+        echo "Configured production SSH key is missing." >&2
+        exit 1
+    fi
+    ssh_options+=(-i "$PRODUCTION_SSH_KEY" -o IdentitiesOnly=yes)
+    scp_options+=(-i "$PRODUCTION_SSH_KEY" -o IdentitiesOnly=yes)
+fi
+
+if [ -n "${PRODUCTION_SSH_KNOWN_HOSTS_FILE:-}" ]; then
+    if [ ! -f "$PRODUCTION_SSH_KNOWN_HOSTS_FILE" ]; then
+        echo "Configured production known_hosts file is missing." >&2
+        exit 1
+    fi
+    ssh_options+=(-o "UserKnownHostsFile=$PRODUCTION_SSH_KNOWN_HOSTS_FILE")
+    scp_options+=(-o "UserKnownHostsFile=$PRODUCTION_SSH_KNOWN_HOSTS_FILE")
+fi
+
 remote_bash() {
     local remote_command=$1
 
