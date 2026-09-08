@@ -26,6 +26,20 @@ git push origin main
 
 Workflow `Validate and deploy` provede validaci i deployment. Není potřeba přihlašovat se na server ani spouštět `app:deploy`.
 
+Přenos přes SSH opakuje pouze chyby spojení. Před opakovaným přenosem porovná SHA-256 již nahraného archivu, takže po krátkém výpadku neposílá znovu kompletní soubor. Chybu migrace, validace nebo health checku neopakuje a serverový skript provede rollback.
+
+### Nouzové nasazení přímo z pracovního počítače
+
+Pokud validace v GitHub Actions projde, ale spojení mezi GitHubem a Webglobe opakovaně selže, lze tentýž commit nahrát přes místní SSH:
+
+```bash
+scripts/deploy-production-from-local.sh --ci-validated
+```
+
+Přepínač `--ci-validated` použijte jen tehdy, když krok `Validate code` pro přesný commit úspěšně proběhl. Skript i tak lokálně sestaví produkční frontend. Bez přepínače spustí také Pint a celou paralelní testovací sadu. V obou režimech vyžaduje čistou větev `main`, ověří shodu s `origin/main`, vytvoří stejné neměnné archivy a použije stejný atomický serverový skript, checksumy, sdílená data, rollback a health check jako GitHub Actions.
+
+Výchozí SSH cíl odpovídá tomuto projektu. Lze jej dočasně přepsat proměnnými `PRODUCTION_SSH_HOST`, `PRODUCTION_SSH_PORT`, `PRODUCTION_SSH_USER`, `PRODUCTION_PATH` a `PRODUCTION_PUBLIC_PATH`. Přihlašovací údaje se do repozitáře neukládají; používá se místní SSH klíč a povinná kontrola `known_hosts`.
+
 ### Ruční návrat aplikace
 
 Symlink `secret/deploy/previous` ukazuje na verzi aktivní před posledním úspěšným přepnutím. Návrat se provádí pouze při vědomé produkční údržbě atomickou výměnou `current`; před návratem je nutné ověřit kompatibilitu již provedených databázových migrací.

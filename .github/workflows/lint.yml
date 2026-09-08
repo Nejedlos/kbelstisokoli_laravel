@@ -149,29 +149,7 @@ jobs:
           printf '%s\n' "$PRODUCTION_SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
 
-      - name: Upload immutable release inputs
-        env:
-          PRODUCTION_SSH_HOST: ${{ secrets.PRODUCTION_SSH_HOST }}
-          PRODUCTION_SSH_PORT: ${{ secrets.PRODUCTION_SSH_PORT }}
-          PRODUCTION_SSH_USER: ${{ secrets.PRODUCTION_SSH_USER }}
-          PRODUCTION_PATH: ${{ secrets.PRODUCTION_PATH }}
-        run: |
-          remote="$PRODUCTION_SSH_USER@$PRODUCTION_SSH_HOST"
-          incoming="$PRODUCTION_PATH/deploy/incoming"
-          ssh -4 -p "$PRODUCTION_SSH_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes "$remote" "mkdir -p $(printf '%q' "$incoming")"
-          scp -P "$PRODUCTION_SSH_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes \
-            "$RUNNER_TEMP/release-$GITHUB_SHA.tgz" scripts/deploy-production-release.sh \
-            "$remote:$incoming/"
-          managed_assets="$PRODUCTION_PATH/deploy/managed-assets/$ASSETS_SHA"
-          if ssh -4 -p "$PRODUCTION_SSH_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes "$remote" "test -d $(printf '%q' "$managed_assets")"
-          then
-            echo "Public assets $ASSETS_SHA are already present on production."
-          else
-            scp -P "$PRODUCTION_SSH_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes \
-              "$RUNNER_TEMP/assets-$ASSETS_SHA.tar" "$remote:$incoming/"
-          fi
-
-      - name: Promote release atomically
+      - name: Upload and promote release atomically
         env:
           PRODUCTION_SSH_HOST: ${{ secrets.PRODUCTION_SSH_HOST }}
           PRODUCTION_SSH_PORT: ${{ secrets.PRODUCTION_SSH_PORT }}
@@ -179,12 +157,6 @@ jobs:
           PRODUCTION_PATH: ${{ secrets.PRODUCTION_PATH }}
           PRODUCTION_PUBLIC_PATH: ${{ secrets.PRODUCTION_PUBLIC_PATH }}
         run: |
-          remote="$PRODUCTION_SSH_USER@$PRODUCTION_SSH_HOST"
-          incoming="$PRODUCTION_PATH/deploy/incoming"
-          archive="$incoming/release-$GITHUB_SHA.tgz"
-          assets_archive="$incoming/assets-$ASSETS_SHA.tar"
-          script="$incoming/deploy-production-release.sh"
-          checksum=$(cut -d ' ' -f 1 "$RUNNER_TEMP/release-$GITHUB_SHA.sha256")
-          assets_checksum=$(cut -d ' ' -f 1 "$RUNNER_TEMP/assets-$ASSETS_SHA.sha256")
-          ssh -4 -p "$PRODUCTION_SSH_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes "$remote" \
-            "PRODUCTION_PATH=$(printf '%q' "$PRODUCTION_PATH") PRODUCTION_PUBLIC_PATH=$(printf '%q' "$PRODUCTION_PUBLIC_PATH") RELEASE_SHA=$(printf '%q' "$GITHUB_SHA") RELEASE_ARCHIVE=$(printf '%q' "$archive") RELEASE_CHECKSUM=$(printf '%q' "$checksum") ASSETS_SHA=$(printf '%q' "$ASSETS_SHA") ASSETS_ARCHIVE=$(printf '%q' "$assets_archive") ASSETS_CHECKSUM=$(printf '%q' "$assets_checksum") HEALTH_URL=https://kbelstisokoli.cz PHP_BINARY=php8.4 bash $(printf '%q' "$script")"
+          scripts/upload-production-release.sh \
+            "$GITHUB_SHA" "$RUNNER_TEMP/release-$GITHUB_SHA.tgz" \
+            "$ASSETS_SHA" "$RUNNER_TEMP/assets-$ASSETS_SHA.tar"

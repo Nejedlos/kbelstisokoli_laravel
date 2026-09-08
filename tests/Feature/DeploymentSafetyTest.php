@@ -15,10 +15,8 @@ class DeploymentSafetyTest extends TestCase
         $this->assertStringContainsString('PRODUCTION_PUBLIC_PATH: ${{ secrets.PRODUCTION_PUBLIC_PATH }}', $workflow);
         $this->assertStringContainsString('scripts/package-production-release.sh "$GITHUB_SHA"', $workflow);
         $this->assertStringContainsString('scripts/package-production-assets.sh "$assets_sha"', $workflow);
-        $this->assertStringContainsString('Public assets $ASSETS_SHA are already present on production.', $workflow);
         $this->assertStringContainsString('rm -f bootstrap/cache/*.php', $workflow);
-        $this->assertStringContainsString('scripts/deploy-production-release.sh', $workflow);
-        $this->assertStringContainsString('HEALTH_URL=https://kbelstisokoli.cz', $workflow);
+        $this->assertStringContainsString('scripts/upload-production-release.sh', $workflow);
         $this->assertStringNotContainsString('rsync ', $workflow);
         $this->assertStringNotContainsString('git reset --hard', $workflow);
         $this->assertStringNotContainsString('git fetch', $workflow);
@@ -33,6 +31,19 @@ class DeploymentSafetyTest extends TestCase
         $this->assertStringContainsString('| gzip -1 > "$output_archive"', $packaging);
         $this->assertStringContainsString("--exclude='./resources/icons'", $packaging);
         $this->assertStringContainsString("--exclude='./public/assets'", $packaging);
+
+        $upload = file_get_contents(base_path('scripts/upload-production-release.sh'));
+        $this->assertStringContainsString('deploy-production-release.sh', $upload);
+        $this->assertStringContainsString('are already present on production.', $upload);
+        $this->assertStringContainsString('ConnectTimeout=20', $upload);
+        $this->assertStringContainsString('if [ "$status" -ne 255 ]; then', $upload);
+        $this->assertStringContainsString('remote_release_checksum', $upload);
+        $this->assertStringContainsString('StrictHostKeyChecking=yes', $upload);
+
+        $localFallback = file_get_contents(base_path('scripts/deploy-production-from-local.sh'));
+        $this->assertStringContainsString('Local fallback deploy requires a clean working tree.', $localFallback);
+        $this->assertStringContainsString('Local main must exactly match origin/main.', $localFallback);
+        $this->assertStringContainsString('scripts/upload-production-release.sh', $localFallback);
     }
 
     public function test_release_promotion_preserves_persistent_paths_and_has_rollback_guards(): void
