@@ -13,6 +13,9 @@ class DeploymentSafetyTest extends TestCase
         $this->assertStringContainsString('php artisan test --parallel --processes=4 --compact', $workflow);
         $this->assertStringContainsString('runs-on: [self-hosted, macOS, ARM64, kbelstisokoli-deploy]', $workflow);
         $this->assertStringContainsString('timeout-minutes: 20', $workflow);
+        $this->assertStringContainsString('Verify self-hosted toolchain', $workflow);
+        $this->assertStringContainsString('version_compare(PHP_VERSION, "8.4.0", "<")', $workflow);
+        $this->assertStringContainsString('process.versions.node', $workflow);
         $this->assertSame(1, substr_count($workflow, 'npm run build'));
         $this->assertStringContainsString('PRODUCTION_PUBLIC_PATH: ${{ secrets.PRODUCTION_PUBLIC_PATH }}', $workflow);
         $this->assertStringContainsString('scripts/package-production-release.sh "$GITHUB_SHA"', $workflow);

@@ -90,19 +90,23 @@ jobs:
           mkdir -p bootstrap/cache storage/framework/{cache/data,sessions,testing,views}
           chmod -R 775 bootstrap/cache storage/framework
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.4'
-          extensions: mbstring, dom, curl, libxml, zlib
-          coverage: none
-
-      - name: Cache Composer downloads
-        uses: actions/cache@v4
-        with:
-          path: ~/.composer/cache/files
-          key: composer-${{ runner.os }}-php84-${{ hashFiles('composer.lock') }}
-          restore-keys: composer-${{ runner.os }}-php84-
+      - name: Verify self-hosted toolchain
+        run: |
+          php -r '
+            if (version_compare(PHP_VERSION, "8.4.0", "<")) {
+                fwrite(STDERR, "PHP 8.4 or newer is required.\n");
+                exit(1);
+            }
+            $missing = array_diff(["mbstring", "dom", "curl", "libxml", "zlib"], get_loaded_extensions());
+            if ($missing !== []) {
+                fwrite(STDERR, "Missing PHP extensions: ".implode(", ", $missing)."\n");
+                exit(1);
+            }
+          '
+          composer --version
+          node -e 'if (Number(process.versions.node.split(".")[0]) < 22) process.exit(1)'
+          node --version
+          npm --version
 
       - name: Install dependencies
         run: composer install --no-progress --prefer-dist
@@ -112,12 +116,6 @@ jobs:
           vendor/bin/pint --test
           php artisan config:clear --ansi
           php artisan test --parallel --processes=4 --compact
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: npm
 
       - name: Build production assets once
         env:
