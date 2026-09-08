@@ -127,6 +127,7 @@ jobs:
 
       - name: Prepare production dependencies and release archive
         run: |
+          rm -f bootstrap/cache/*.php
           composer install --no-dev --no-progress --prefer-dist --optimize-autoloader --no-scripts
           php artisan package:discover --ansi
           php artisan filament:upgrade

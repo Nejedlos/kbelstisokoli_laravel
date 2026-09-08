@@ -16,6 +16,7 @@ class DeploymentSafetyTest extends TestCase
         $this->assertStringContainsString('scripts/package-production-release.sh "$GITHUB_SHA"', $workflow);
         $this->assertStringContainsString('scripts/package-production-assets.sh "$assets_sha"', $workflow);
         $this->assertStringContainsString('Public assets $ASSETS_SHA are already present on production.', $workflow);
+        $this->assertStringContainsString('rm -f bootstrap/cache/*.php', $workflow);
         $this->assertStringContainsString('scripts/deploy-production-release.sh', $workflow);
         $this->assertStringContainsString('HEALTH_URL=https://kbelstisokoli.cz', $workflow);
         $this->assertStringNotContainsString('rsync ', $workflow);
