@@ -1,7 +1,7 @@
 <table align="center" width="600" cellpadding="0" cellspacing="0" role="presentation" style="margin: 0 auto; padding: 0; width: 600px; text-align: center;">
     <tr>
         <td>
-            <a href="{{ config('email_branding.brand_url') }}" style="display: inline-block; text-decoration: none;">
+            <a href="{{ config('email_branding.brand_url') }}" aria-label="{{ config('email_branding.brand_name') }}" style="display: inline-block; text-decoration: none;">
                 <img src="{{ config('email_branding.logo_url') }}"
                      width="{{ config('email_branding.logo_width') }}"
                      alt="{{ config('email_branding.logo_alt') }}"
