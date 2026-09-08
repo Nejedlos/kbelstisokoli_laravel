@@ -34,7 +34,7 @@ return [
         ],
         'deploy' => [
             'label' => 'Produkce: Nasadit (Deploy)',
-            'desc' => 'Spustí kompletní deployment proces na produkční server přes Envoy.',
+            'desc' => 'Nasadí kód, závislosti, Vite build, migrace a cache bez importu provozních dat.',
         ],
         'sync' => [
             'label' => 'Produkce: Synchronizovat',

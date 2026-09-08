@@ -44,17 +44,6 @@ class ProductionDeployCommand extends Command
         $token = $prodEnv['PROD_GIT_TOKEN'] ?? config('app.prod_git_token', env('PROD_GIT_TOKEN'));
         $publicPath = $prodEnv['PROD_PUBLIC_PATH'] ?? config('app.prod_public_path', env('PROD_PUBLIC_PATH'));
 
-        // Performance config from env
-        $perfConfig = [
-            'telescope_enabled' => $prodEnv['PROD_TELESCOPE_ENABLED'] ?? env('PROD_TELESCOPE_ENABLED', 'false'),
-            'perf_scenario' => $prodEnv['PROD_PERF_SCENARIO'] ?? env('PROD_PERF_SCENARIO', 'ultra'),
-            'perf_full_page_cache' => $prodEnv['PROD_PERF_FULL_PAGE_CACHE'] ?? env('PROD_PERF_FULL_PAGE_CACHE', 'true'),
-            'perf_fragment_cache' => $prodEnv['PROD_PERF_FRAGMENT_CACHE'] ?? env('PROD_PERF_FRAGMENT_CACHE', 'true'),
-            'perf_html_minify' => $prodEnv['PROD_PERF_HTML_MINIFY'] ?? env('PROD_PERF_HTML_MINIFY', 'true'),
-            'perf_lw_navigate' => $prodEnv['PROD_PERF_LW_NAVIGATE'] ?? env('PROD_PERF_LW_NAVIGATE', 'true'),
-            'log_level' => $prodEnv['PROD_LOG_LEVEL'] ?? env('PROD_LOG_LEVEL', 'warning'),
-        ];
-
         if (! $host || ! $user || ! $path) {
             error('❌ Chybí konfigurace produkce v .env. Spusťte prosím: php artisan app:production:setup');
 
@@ -97,62 +86,6 @@ class ProductionDeployCommand extends Command
             }
         }
 
-        // DB config from env
-        $dbConfig = [
-            'db_connection' => $prodEnv['PROD_DB_CONNECTION'] ?? config('app.prod_db_connection', env('PROD_DB_CONNECTION')),
-            'db_host' => $prodEnv['PROD_DB_HOST'] ?? config('app.prod_db_host', env('PROD_DB_HOST')),
-            'db_port' => $prodEnv['PROD_DB_PORT'] ?? config('app.prod_db_port', env('PROD_DB_PORT')),
-            'db_database' => $prodEnv['PROD_DB_DATABASE'] ?? config('app.prod_db_database', env('PROD_DB_DATABASE')),
-            'db_username' => $prodEnv['PROD_DB_USERNAME'] ?? config('app.prod_db_username', env('PROD_DB_USERNAME')),
-            'db_password' => $prodEnv['PROD_DB_PASSWORD'] ?? config('app.prod_db_password', env('PROD_DB_PASSWORD')),
-            'db_prefix' => $prodEnv['PROD_DB_PREFIX'] ?? config('app.prod_db_prefix', env('PROD_DB_PREFIX')),
-        ];
-
-        $mailConfig = [
-            'mail_mailer' => $prodEnv['PROD_MAIL_MAILER'] ?? config('app.prod_mail_mailer', env('PROD_MAIL_MAILER')),
-            'mail_host' => $prodEnv['PROD_MAIL_HOST'] ?? config('app.prod_mail_host', env('PROD_MAIL_HOST')),
-            'mail_port' => $prodEnv['PROD_MAIL_PORT'] ?? config('app.prod_mail_port', env('PROD_MAIL_PORT')),
-            'mail_username' => $prodEnv['PROD_MAIL_USERNAME'] ?? config('app.prod_mail_username', env('PROD_MAIL_USERNAME')),
-            'mail_password' => $prodEnv['PROD_MAIL_PASSWORD'] ?? config('app.prod_mail_password', env('PROD_MAIL_PASSWORD')),
-            'mail_encryption' => $prodEnv['PROD_MAIL_ENCRYPTION'] ?? config('app.prod_mail_encryption', env('PROD_MAIL_ENCRYPTION')),
-            'mail_from_address' => $prodEnv['PROD_MAIL_FROM_ADDRESS'] ?? config('app.prod_mail_from_address', env('PROD_MAIL_FROM_ADDRESS')),
-            'mail_from_name' => $prodEnv['PROD_MAIL_FROM_NAME'] ?? config('app.prod_mail_from_name', env('PROD_MAIL_FROM_NAME')),
-        ];
-
-        $currentPassword = $prodEnv['PROD_DB_PASSWORD'] ?? config('app.prod_db_password', env('PROD_DB_PASSWORD'));
-        $dbConfig['db_password'] = $currentPassword;
-
-        if (! $this->option('ai-test')) {
-            if ($currentPassword) {
-                $choice = select(
-                    label: 'Jak chcete naložit s heslem k produkční databázi?',
-                    options: [
-                        'keep' => 'Použít uložené heslo ('.str_repeat('*', 8).')',
-                        'new' => 'Zadat nové heslo',
-                    ],
-                    default: 'keep'
-                );
-
-                if ($choice === 'new') {
-                    $dbConfig['db_password'] = password(
-                        label: 'Zadejte nové heslo k produkční databázi:',
-                        required: true
-                    );
-                }
-            } else {
-                $dbConfig['db_password'] = password(
-                    label: 'Zadejte heslo k produkční databázi:',
-                    required: true
-                );
-            }
-
-            if ($dbConfig['db_password'] !== $currentPassword) {
-                if (confirm('Chcete nové heslo uložit do lokálního .env?', true)) {
-                    $this->updateEnv(['PROD_DB_PASSWORD' => $dbConfig['db_password']]);
-                }
-            }
-        }
-
         // Ověření dostupnosti binárek na serveru před spuštěním
         info('🔍 Ověřuji dostupnost binárek na serveru...');
         $checkPhp = Process::run("ssh -p {$port} {$user}@{$host} '{$phpBinary} -v'");
@@ -162,11 +95,11 @@ class ProductionDeployCommand extends Command
             return self::FAILURE;
         }
 
-        // Pokud je nodeBinary jen 'node', zkusíme v session najít v18+ verzi,
+        // Pokud je nodeBinary jen 'node', zkusíme v session najít verzi 20+,
         // protože i když je v PATH, může tam být dřív v14 (častý problém na Webglobe).
         if ($nodeBinary === 'node') {
-            info('🔍 Hledám optimální verzi Node.js (v18+)...');
-            $findNode = Process::run("ssh -p {$port} {$user}@{$host} 'for n in $(which -a node22 node20 node18 node); do if \$n -v | grep -qE \"v(18|2[0-9])\"; then echo \$n; break; fi; done'");
+            info('🔍 Hledám optimální verzi Node.js (v20+)...');
+            $findNode = Process::run("ssh -p {$port} {$user}@{$host} 'if [ -s \"\$HOME/.nvm/nvm.sh\" ]; then . \"\$HOME/.nvm/nvm.sh\"; fi; for n in \$(which -a node22 node20 node); do if \$n -e \"process.exit(Number(process.versions.node.split(\\\".\\\")[0]) >= 20 ? 0 : 1)\"; then echo \$n; break; fi; done'");
             if ($findNode->successful() && ! empty(trim($findNode->output()))) {
                 $nodeBinary = trim($findNode->output());
                 info("✅ Použiji Node: {$nodeBinary}");
@@ -213,28 +146,6 @@ class ProductionDeployCommand extends Command
                 $params[] = '--public_path='.escapeshellarg($publicPath);
             }
 
-            if (file_exists(base_path('.env.production'))) {
-                $params[] = '--env_contents='.escapeshellarg(base64_encode(file_get_contents(base_path('.env.production'))));
-            }
-
-            foreach ($dbConfig as $key => $value) {
-                if ($value !== null) {
-                    $params[] = "--{$key}=".escapeshellarg($value);
-                }
-            }
-
-            foreach ($mailConfig as $key => $value) {
-                if ($value !== null) {
-                    $params[] = "--{$key}=".escapeshellarg($value);
-                }
-            }
-
-            foreach ($perfConfig as $key => $value) {
-                if ($value !== null) {
-                    $params[] = "--{$key}=".escapeshellarg($value);
-                }
-            }
-
             $command = base_path('vendor/bin/envoy').' run deploy '.implode(' ', $params);
 
             $process = Process::forever()->run($command, function (string $type, string $output) {
@@ -249,13 +160,8 @@ class ProductionDeployCommand extends Command
                 $this->line(' ✅ Vyčištění systémové mezipaměti');
                 $this->line(' ✅ Instalace PHP závislostí (Composer)');
                 $this->line(' ✅ Spuštění idempotentních databázových migrací');
-                $this->line(' ✅ Spuštění idempotentního seedování (včetně 2FA)');
-                $this->line(' ✅ Aktualizace .env konfigurace');
-                $this->line(' ✅ Propojení veřejné složky a oprava index.php');
                 $this->line(' ✅ Instalace a sestavení assetů (NPM & Vite)');
-                $this->line(' ✅ Synchronizace ikon (Font Awesome Pro)');
                 $this->line(' ✅ Optimalizace aplikace (config/route cache)');
-                $this->line(' ✅ Reindexace AI vyhledávání');
 
                 break;
             } else {

@@ -28,7 +28,7 @@ Příkaz se vás interaktivně zeptá na následující údaje (které se pokus�
 - **SSH port** (výchozí `22`, u Webglobe často `20001`). Specifická „brána“, přes kterou se SSH připojuje.
 - **SSH uživatele** (např. `ssh-588875`). Jméno, pod kterým se budou na serveru spouštět všechny instalační a aktualizační příkazy.
 - **PHP binárka:** *Vylepšeno:* Systém se nejprve připojí k serveru a automaticky se pokusí najít nejvhodnější verzi PHP (8.4+). Tuto verzi vám pak nabídne jako výchozí hodnotu, kterou stačí potvrdit.
-- **Node.js binárka:** *Vylepšeno:* Systém se nejprve připojí k serveru a automaticky se pokusí najít nejvhodnější verzi Node.js (18.0+), která je potřeba pro Vite 6 a Tailwind v4. Na Webglobe typicky najde `node20`, `node18` nebo použije výchozí `node`.
+- **Node.js binárka:** Systém se pokusí najít Node.js 20+ potřebné pro Vite 7; v neinteraktivním SSH načte i `nvm`. Na Webglobe typicky najde `node22`, `node20` nebo použije výchozí `node`.
 - **Kontrola spojení a klíčů:** Příkaz automaticky otestuje, zda se lze k serveru připojit bez hesla. Pokud ne, nabídne vám automatické vygenerování a nahrání SSH klíče na server. K tomu budete jednou vyzváni k zadání hesla k serveru.
 - **Kontrola požadavků:** Po potvrzení binárek systém provede finální revizi a potvrdí dostupnost Gitu, Composeru a NPM.
 - **Adresáře projektu (Interaktivní prohlížeč):** *Novinka:* Příkaz obsahuje vestavěný prohlížeč souborů na serveru.
@@ -50,15 +50,15 @@ php artisan app:deploy
 
 Tento příkaz automaticky:
 1. Ověří verzi zvolené PHP binárky na serveru (musí být 8.4.0+).
-2. Provede `git fetch` a `git reset --hard` (vynutí stav odpovídající repozitáři, případné lokální změny na serveru budou zahozeny).
+2. Provede `git fetch` a `git reset --hard` pro sledované soubory; zachová přitom produkční `.env`, uploady i jiné nesledované soubory.
 3. Spustí `composer install` (s využitím zvolené PHP binárky, optimalizovaný pro produkci).
-4. Synchronizuje veřejné soubory do zvoleného veřejného adresáře a zajistí správné cesty v `index.php`.
-5. Spustí migrace databáze (`migrate --force`) a automaticky provede seedování (`app:seed --force`).
-6. Nainstaluje NPM balíčky a sestaví assety (`npm run build`).
-7. Synchronizuje ikony a optimalizuje cache aplikace.
+4. Provede `npm ci` a sestaví assety (`npm run build`).
+5. Spustí pouze idempotentní migrace (`migrate --force`) a znovu vytvoří Laravel cache.
+
+Pravidelné nasazení nikdy nespouští seedery, import statistik, financí nebo uživatelů, synchronizaci ikon, AI reindexaci ani `app:sync`.
 
 ### 3. Synchronizace dat (Sync)
-Příkaz `app:sync` slouží k agregované synchronizaci všech datových zdrojů. Je součástí automatizovaného nasazení, ale lze jej spustit i samostatně.
+Příkaz `app:sync` je samostatná údržbová operace pro agregovanou synchronizaci dat. Není součástí nasazení a spouští se pouze vědomě při plánované správě dat.
 
 ```bash
 php artisan app:sync [--freshseed] [--stats] [--usersync]
@@ -80,12 +80,13 @@ Tento režim je ideální, pokud se chcete **vyhnout instalaci Node.js/NPM na se
    ```bash
    php artisan app:local:prepare
    ```
-   *Tento příkaz automaticky nainstaluje NPM balíčky, sestaví assety (Vite build), synchronizuje ikony a pročistí lokální cache.*
+   *Tento příkaz provede `npm ci` a sestaví assety (Vite build); nemění ikony, cache ani data.*
 2. Přes **FTP klienta** (např. FileZilla, WinSCP nebo IDE) nahrajte změněné soubory na server do **funkčního adresáře**. Nezapomeňte nahrát i složku `public/build/`.
-   *Tip: Pokud vyplníte údaje `PROD_FTP_*` v `.env`, příkaz `app:sync` se o nahrání assetů pokusí automaticky.*
-3. Následně ve svém počítači spusťte příkaz:
+3. Na serveru po nahrání spusťte pouze:
    ```bash
-   php artisan app:sync
+   php8.4 artisan migrate --force --no-interaction
+   php8.4 artisan filament:optimize
+   php8.4 artisan optimize --no-interaction
    ```
 
 #### B) Pouze sestavení a nahrání assetů (Rychlá volba)
@@ -96,7 +97,7 @@ Pokud máte nastaven SSH přístup, použijte tento moderní a rychlý příkaz:
 php artisan assets:deploy
 ```
 Tento příkaz:
-1. Lokálně spustí `npm run build` a synchronizuje ikony (`app:icons:sync`).
+1. Lokálně spustí `npm run build`; ikony synchronizuje jen s výslovným přepínačem `--with-icons`.
 2. Smaže staré assety na produkci, aby nedocházelo ke kolizím verzí.
 3. Bezpečně nahraje složku `public/build` (a volitelně `public/assets` s přepínačem `--with-assets`) přes SCP. Příkaz je optimalizován pro velké objemy dat (vysoký timeout).
 4. Automaticky vymaže cache pohledů a systémovou cache na produkci přes SSH.
@@ -142,8 +143,8 @@ Tím se Laravelu 12 sdělí, aby nepoužíval moderní sloupce v dotazech na `in
 
 Všechny stávající migrace byly k 25. 2. 2026 upraveny tak, aby byly s tímto omezením kompatibilní. Pokud v budoucnu narazíte na chybu `SQLSTATE[42000]: Syntax error or access violation: 1064 ... for column ... json`, je to právě kvůli tomuto omezení.
 
-Oba příkazy (`app:production:setup`, `app:deploy` i `app:sync`) jsou vybaveny **automatickou detekcí verzí**.
-- Pokud je v konfiguraci nastaveno obecné `node`, systém se při každém běhu pokusí na serveru najít verzi 18+ (např. `node20`, `node18` nebo `/usr/bin/node`).
+Oba příkazy (`app:production:setup` a `app:deploy`) jsou vybaveny **automatickou detekcí verzí**.
+- Pokud je v konfiguraci nastaveno obecné `node`, systém se při každém běhu pokusí na serveru najít verzi 20+ (např. `node22`, `node20` nebo `/usr/bin/node`).
 - To řeší specifický problém hostingu Webglobe, kde v různých SSH session může být různé pořadí v `PATH` a výchozí `node` může být zastaralý (v14).
 - Pokud systém automaticky najde lepší verzi, vypíše informaci `✅ Použiji: /cesta/k/binarce`.
 
@@ -195,7 +196,6 @@ cd /home/html/kbelstisokoli.cz/public_html/secret
 # Vynucení čistého stavu z Gitu
 git fetch origin
 git reset --hard origin/main  # Nahraďte vaší větví
-git clean -fd
 
 # Optimalizace aplikace (používat vždy php8.4)
 php8.4 artisan optimize:clear
@@ -221,7 +221,6 @@ Pokud chcete nasadit novou verzi ručně, připojte se přes SSH a proveďte (po
 cd /cesta/k/projektu
 git fetch origin main
 git reset --hard origin/main
-git clean -df
 git prune
 php8.4 (which composer) install --no-interaction --optimize-autoloader --no-dev
 php8.4 artisan migrate --force
@@ -271,11 +270,10 @@ node -v
 which node
 
 # Nyní již můžete bezpečně sestavit assety
-npm install
+npm ci
 npm run build
 # ------------------------------------------------------------------------
 
-php8.4 artisan app:icons:sync
 php8.4 artisan optimize
 ```
 

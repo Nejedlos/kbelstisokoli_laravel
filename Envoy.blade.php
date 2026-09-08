@@ -100,7 +100,6 @@
         git prune
         git fetch origin main
         git reset --hard origin/main
-        git clean -df
     fi
 
     echo "Preparing .env file..."
@@ -277,7 +276,7 @@
         exit 1
     fi
 
-    npm install
+    npm ci --no-audit --no-fund
 
         echo "Building assets..."
         npm run build
@@ -290,27 +289,14 @@
     mkdir -p storage/logs
     chmod -R 777 storage bootstrap/cache || true
 
-    echo "Cleaning up cache..."
-    rm -f bootstrap/cache/*.php
-    {{ $php }} artisan config:clear
-    {{ $php }} artisan cache:clear
+    echo "Clearing Laravel caches..."
+    {{ $php }} artisan optimize:clear --no-interaction
 
     echo "Running idempotent database migrations..."
-    {{ $php }} artisan migrate --force
-
-    echo "Running application synchronization..."
-    {{ $php }} artisan app:sync --force --no-interaction {{ $v_freshseed_opt }} {{ $v_usersync_opt }} {{ $v_stats_opt }}
+    {{ $php }} artisan migrate --force --no-interaction
 
     {{ $php }} artisan filament:optimize
-    {{ $php }} artisan livewire:publish --assets --force
-    # Livewire discover na produkci nepoužíváme, spoléháme na explicitní registraci v AppServiceProvider
-    # {{ $php }} artisan livewire:discover
-    {{ $php }} artisan cache:clear
-    {{ $php }} artisan view:clear
-    {{ $php }} artisan view:cache
-    {{ $php }} artisan icons:cache
-    {{ $php }} artisan optimize:cache
-    {{ $php }} artisan system:cleanup
+    {{ $php }} artisan optimize --no-interaction
 
     # Zajištění, aby build a assety byly v subdoméně, ale i pro PHP dostupné v public_path()
     if [ "{{ $v_pub }}" != "" ] && [ "{{ $target_public }}" != "{{ $v_path }}/public" ]; then
@@ -332,24 +318,6 @@
         fi
     fi
 
-    if [ "{{ $noai }}" != "1" ]; then
-        echo "Reindexing AI..."
-        {{ $php }} artisan ai:index --locale=all --enrich --no-interaction
-    fi
-
-    # Reset OpCache for Web (via temporary file) - Provedeno po všech změnách a synchronizaci
-    echo "Resetting OpCache (final)..."
-    echo "PD9waHAgaWYgKGZ1bmN0aW9uX2V4aXN0cygnb3BjYWNoZV9yZXNldCcpKSB7IG9wY2FjaGVfcmVzZXQoKTsgZWNobyAnT0snOyB9IGVsc2UgeyBlY2hvICdOL0EnOyB9" | base64 -d > public/opcache_reset.php
-    # Pokud máme externí public_path, zkopírujeme soubor i tam
-    if [ "{{ $v_pub }}" != "" ] && [ "{{ $target_public }}" != "{{ $v_path }}/public" ]; then
-        cp -f public/opcache_reset.php "{{ $public_path }}/opcache_reset.php"
-    fi
-    curl -s -L "https://kbelstisokoli.cz/opcache_reset.php" || true
-    rm -f public/opcache_reset.php
-    if [ "{{ $v_pub }}" != "" ] && [ "{{ $target_public }}" != "{{ $v_path }}/public" ]; then
-        rm -f "{{ $public_path }}/opcache_reset.php"
-    fi
-
     echo "✅ Setup finished successfully!"
 @endtask
 
@@ -365,89 +333,24 @@
     cd {{ $path }}
     git fetch origin main
     git reset --hard origin/main
-    git clean -df
 
-    echo "Preparing .env file..."
-    if [ ! -z "{{ $v_env_contents }}" ]; then
-        echo "Updating .env from provided contents..."
-        echo "{{ $v_env_contents }}" | base64 -d > .env
+    if [ ! -f .env ]; then
+        echo "❌ Production .env is missing. Restore it before deployment."
+        exit 1
     fi
 
-    echo "Updating .env configuration..."
-    {{ $php }} -r '
-        $envFile = ".env";
-        if (!file_exists($envFile)) { exit(0); }
-        $lines = explode("\n", trim(file_get_contents($envFile)));
-        $vars = [
-            "APP_ENV" => "production",
-            "APP_DEBUG" => "false",
-        ];
-        if ("{{ $db_database_b64 }}") {
-            $vars["DB_CONNECTION"] = base64_decode("{{ $db_connection_b64 }}");
-            $vars["DB_HOST"] = base64_decode("{{ $db_host_b64 }}");
-            $vars["DB_PORT"] = base64_decode("{{ $db_port_b64 }}");
-            $vars["DB_DATABASE"] = base64_decode("{{ $db_database_b64 }}");
-            $vars["DB_USERNAME"] = base64_decode("{{ $db_username_b64 }}");
-            $vars["DB_PASSWORD"] = base64_decode("{{ $db_password_b64 }}");
+    # Load nvm explicitly because non-interactive SSH sessions do not load it.
+    if [ -s "$HOME/.nvm/nvm.sh" ]; then
+        . "$HOME/.nvm/nvm.sh"
+    fi
 
-            if ("{{ $db_version_b64 }}") {
-                $vars["DB_VERSION"] = base64_decode("{{ $db_version_b64 }}");
-            }
-            if ("{{ $db_mariadb_b64 }}") {
-                $vars["DB_MARIADB"] = base64_decode("{{ $db_mariadb_b64 }}");
-            }
-
-            if ("{{ $db_prefix_b64 }}") {
-                $vars["DB_PREFIX"] = base64_decode("{{ $db_prefix_b64 }}");
-            }
-        }
-        if ("{{ $public_path_b64 }}") {
-            $vars["APP_PUBLIC_PATH"] = base64_decode("{{ $public_path_b64 }}");
-        }
-
-        if ("{{ $mail_mailer_b64 }}") { $vars["MAIL_MAILER"] = base64_decode("{{ $mail_mailer_b64 }}"); }
-        if ("{{ $mail_host_b64 }}") { $vars["MAIL_HOST"] = base64_decode("{{ $mail_host_b64 }}"); }
-        if ("{{ $mail_port_b64 }}") { $vars["MAIL_PORT"] = base64_decode("{{ $mail_port_b64 }}"); }
-        if ("{{ $mail_username_b64 }}") { $vars["MAIL_USERNAME"] = base64_decode("{{ $mail_username_b64 }}"); }
-        if ("{{ $mail_password_b64 }}") { $vars["MAIL_PASSWORD"] = base64_decode("{{ $mail_password_b64 }}"); }
-        if ("{{ $mail_encryption_b64 }}") { $vars["MAIL_ENCRYPTION"] = base64_decode("{{ $mail_encryption_b64 }}"); }
-        if ("{{ $mail_from_address_b64 }}") { $vars["MAIL_FROM_ADDRESS"] = base64_decode("{{ $mail_from_address_b64 }}"); }
-        if ("{{ $mail_from_name_b64 }}") { $vars["MAIL_FROM_NAME"] = base64_decode("{{ $mail_from_name_b64 }}"); }
-
-        if ("{{ $telescope_enabled_b64 }}") { $vars["TELESCOPE_ENABLED"] = base64_decode("{{ $telescope_enabled_b64 }}"); }
-        if ("{{ $perf_scenario_b64 }}") { $vars["PERF_SCENARIO"] = base64_decode("{{ $perf_scenario_b64 }}"); }
-        if ("{{ $perf_full_page_cache_b64 }}") { $vars["PERF_FULL_PAGE_CACHE"] = base64_decode("{{ $perf_full_page_cache_b64 }}"); }
-        if ("{{ $perf_fragment_cache_b64 }}") { $vars["PERF_FRAGMENT_CACHE"] = base64_decode("{{ $perf_fragment_cache_b64 }}"); }
-        if ("{{ $perf_html_minify_b64 }}") { $vars["PERF_HTML_MINIFY"] = base64_decode("{{ $perf_html_minify_b64 }}"); }
-        if ("{{ $perf_lw_navigate_b64 }}") { $vars["PERF_LW_NAVIGATE"] = base64_decode("{{ $perf_lw_navigate_b64 }}"); }
-        if ("{{ $log_level_b64 }}") { $vars["LOG_LEVEL"] = base64_decode("{{ $log_level_b64 }}"); }
-        $vars["DEBUGBAR_ENABLED"] = "false";
-
-        foreach ($vars as $key => $value) {
-            $found = false;
-            $safeValue = str_replace([\"\\\\\", \"\\\"\", \"$\"], [\"\\\\\\\\\", \"\\\\\\\"\", \"\\\\$\"], $value);
-            foreach ($lines as &$line) {
-                if (strpos(trim($line), \"$key=\") === 0) {
-                    $line = \"$key=\\\"$safeValue\\\"\";
-                    $found = true;
-                    break;
-                }
-            }
-            if (!$found) {
-                $lines[] = \"$key=\\\"$safeValue\\\"\";
-            }
-        }
-        file_put_contents($envFile, implode(\"\\n\", $lines) . \"\\n\");
-    '
-    echo "✅ .env updated."
-
-    # Try to find Node 18+ for building assets if needed
+    # Vite 7 requires Node.js 20 or newer.
     NODE_BIN_PATH=""
-    for n in node22 node20 node18 node; do
+    for n in node22 node20 node; do
         if which $n > /dev/null 2>&1; then
             BIN=$(which $n)
             VER=$($BIN -v 2>/dev/null | sed "s/v//")
-            if [ "$(printf "%s\n" "18.0.0" "$VER" | sort -V | head -n1)" = "18.0.0" ]; then
+            if [ "$(printf "%s\n" "20.0.0" "$VER" | sort -V | head -n1)" = "20.0.0" ]; then
                 NODE_BIN_PATH=$BIN
                 break
             fi
@@ -463,11 +366,12 @@
         if [ ! -z "{{ $fontawesome_token }}" ]; then
             export FONTAWESOME_TOKEN="{{ $fontawesome_token }}"
         fi
-        echo "Running npm install and build..."
-        npm install --no-save
+        echo "Running npm ci and build..."
+        npm ci --no-audit --no-fund
         npm run build
     else
-        echo "⚠️  Compatible Node.js (>=18) not found. Skipping npm build. Use local build and push manifest.json."
+        echo "❌ Compatible Node.js (>=20) not found. Deployment stopped before migrations."
+        exit 1
     fi
 
     echo "Ensuring storage and cache directories exist and are writable..."
@@ -483,26 +387,14 @@
     rm -f bootstrap/cache/*.php
     {{ $php }} $COMPOSER_BIN install --no-interaction --prefer-dist --optimize-autoloader --no-dev
 
-    echo "Cleaning up cache..."
-    {{ $php }} artisan config:clear
-    {{ $php }} artisan cache:clear
+    echo "Clearing Laravel caches..."
+    {{ $php }} artisan optimize:clear --no-interaction
 
     echo "Running idempotent database migrations..."
-    {{ $php }} artisan migrate --force
-
-    echo "Running application synchronization..."
-    {{ $php }} artisan app:sync --force --no-interaction {{ $v_freshseed_opt }} {{ $v_usersync_opt }} {{ $v_stats_opt }}
+    {{ $php }} artisan migrate --force --no-interaction
 
     {{ $php }} artisan filament:optimize
-    {{ $php }} artisan livewire:publish --assets --force
-    # Livewire discover na produkci nepoužíváme, spoléháme na explicitní registraci v AppServiceProvider
-    # {{ $php }} artisan livewire:discover
-    {{ $php }} artisan cache:clear
-    {{ $php }} artisan view:clear
-    {{ $php }} artisan view:cache
-    {{ $php }} artisan icons:cache
-    {{ $php }} artisan optimize:cache
-    {{ $php }} artisan system:cleanup
+    {{ $php }} artisan optimize --no-interaction
 
     # Zajištění, aby build a assety byly v subdoméně, ale i pro PHP dostupné v public_path()
     if [ "{{ $v_pub }}" != "" ] && [ "{{ $target_public }}" != "{{ $v_path }}/public" ]; then
@@ -525,24 +417,6 @@
             echo "Syncing root files to custom public path..."
             find . -maxdepth 1 -type f ! -name "index.php" ! -name "index.production.php" -exec cp -f {} "{{ $public_path }}/" \;
         fi
-    fi
-
-    if [ "{{ $noai }}" != "1" ]; then
-        echo "Reindexing AI..."
-        {{ $php }} artisan ai:index --locale=all --enrich --no-interaction
-    fi
-
-    # Reset OpCache for Web (via temporary file) - Provedeno po všech změnách a synchronizaci
-    echo "Resetting OpCache (final)..."
-    echo "PD9waHAgaWYgKGZ1bmN0aW9uX2V4aXN0cygnb3BjYWNoZV9yZXNldCcpKSB7IG9wY2FjaGVfcmVzZXQoKTsgZWNobyAnT0snOyB9IGVsc2UgeyBlY2hvICdOL0EnOyB9" | base64 -d > public/opcache_reset.php
-    # Pokud máme externí public_path, zkopírujeme soubor i tam
-    if [ "{{ $v_pub }}" != "" ] && [ "{{ $target_public }}" != "{{ $v_path }}/public" ]; then
-        cp -f public/opcache_reset.php "{{ $public_path }}/opcache_reset.php"
-    fi
-    curl -s -L "https://kbelstisokoli.cz/opcache_reset.php" || true
-    rm -f public/opcache_reset.php
-    if [ "{{ $v_pub }}" != "" ] && [ "{{ $target_public }}" != "{{ $v_path }}/public" ]; then
-        rm -f "{{ $public_path }}/opcache_reset.php"
     fi
 
     echo "✅ Deployment finished successfully!"

@@ -21,6 +21,7 @@ class AssetsDeployCommand extends Command
     protected $signature = 'assets:deploy
                             {--with-assets : Nahraje i statické obrázky z public/assets}
                             {--with-livewire : Publikuje a nahraje i Livewire assety}
+                            {--with-icons : Před buildem synchronizuje Font Awesome ikony}
                             {--build-only : Pouze provede build bez nahrání}
                             {--no-build : Přeskočí build a pouze nahraje stávající soubory}';
 
@@ -54,11 +55,12 @@ class AssetsDeployCommand extends Command
 
             info('✅ Assety byly úspěšně sestaveny.');
 
-            // Synchronizace ikon
-            spin(
-                fn () => $this->call('app:icons:sync'),
-                'Synchronizuji ikony...'
-            );
+            if ($this->option('with-icons')) {
+                spin(
+                    fn () => $this->call('app:icons:sync'),
+                    'Synchronizuji ikony...'
+                );
+            }
 
             // Volitelně Livewire
             if ($this->option('with-livewire')) {

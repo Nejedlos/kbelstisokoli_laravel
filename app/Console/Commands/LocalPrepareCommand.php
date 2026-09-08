@@ -22,7 +22,7 @@ class LocalPrepareCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Příprava všeho potřebného na localhostu pro následnou synchronizaci přes FTP (Vite build, ikony, cache).';
+    protected $description = 'Příprava Vite assetů na localhostu pro následné nahrání přes FTP.';
 
     /**
      * Execute the console command.
@@ -33,7 +33,7 @@ class LocalPrepareCommand extends Command
 
         // 1. NPM Install
         spin(function () {
-            $process = Process::run('npm install');
+            $process = Process::run('npm ci --no-audit --no-fund');
             if (! $process->successful()) {
                 throw new \Exception('NPM install selhal: '.$process->errorOutput());
             }
@@ -49,26 +49,14 @@ class LocalPrepareCommand extends Command
         }, 'Sestavuji produkční assety (Vite build)...');
         info('✓ Assety sestaveny (v public/build/).');
 
-        // 3. Icons Sync
-        spin(function () {
-            $this->call('app:icons:sync');
-        }, 'Synchronizuji ikony a generuji cache...');
-        info('✓ Ikony synchronizovány.');
-
-        // 4. Optimize Clear (pro jistotu)
-        spin(function () {
-            $this->call('optimize:clear');
-        }, 'Čistím lokální cache...');
-        info('✓ Lokální cache vyčištěna.');
-
         $this->newLine();
         info('🎉 Vše je připraveno! Nyní můžete nahrát tyto složky na FTP:');
         $this->line('  - public/build/');
         $this->line('  - public/assets/');
         $this->line('  - (a případně změněné PHP soubory v app/, resources/, routes/, atd.)');
         $this->newLine();
-        $this->line('Po nahrání na server nezapomeňte spustit:');
-        $this->info('php artisan app:sync');
+        $this->line('Po nahrání na server spusťte pouze migrace a cache:');
+        $this->info('php artisan migrate --force && php artisan optimize');
 
         return self::SUCCESS;
     }

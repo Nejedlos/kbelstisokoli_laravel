@@ -106,19 +106,23 @@ jobs:
           cd "$PRODUCTION_PATH"
           git fetch --prune origin main
           git reset --hard "$GITHUB_SHA"
-          git clean -df
 
           php8.4 "$(command -v composer)" install --no-interaction --prefer-dist --optimize-autoloader --no-dev
 
+          if [ -s "$HOME/.nvm/nvm.sh" ]; then
+            # Webglobe installs current Node through nvm, which non-interactive SSH does not load itself.
+            . "$HOME/.nvm/nvm.sh"
+          fi
+
           node_binary=""
-          for candidate in node22 node20; do
+          for candidate in node22 node20 node; do
             if command -v "$candidate" >/dev/null 2>&1; then
               node_binary="$(command -v "$candidate")"
               break
             fi
           done
 
-          if [ -z "$node_binary" ]; then
+          if [ -z "$node_binary" ] || ! "$node_binary" -e 'process.exit(Number(process.versions.node.split(".")[0]) >= 20 ? 0 : 1)'; then
             echo "Node.js 20 or newer is required to build Vite 7 assets."
             exit 1
           fi
@@ -132,10 +136,8 @@ jobs:
           "$npm_binary" ci
           "$npm_binary" run build
 
+          php8.4 artisan optimize:clear --no-interaction
           php8.4 artisan migrate --force --no-interaction
-          php8.4 artisan app:sync --force --no-interaction
           php8.4 artisan filament:optimize
-          php8.4 artisan livewire:publish --assets --force
-          php8.4 artisan optimize:cache
-          php8.4 artisan system:cleanup
+          php8.4 artisan optimize --no-interaction
           EOF

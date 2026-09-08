@@ -34,7 +34,7 @@ return [
         ],
         'deploy' => [
             'label' => 'Production: Deploy',
-            'desc' => 'Runs full deployment process to production server via Envoy.',
+            'desc' => 'Deploys code, dependencies, Vite build, migrations, and cache without importing operational data.',
         ],
         'sync' => [
             'label' => 'Production: Synchronize',
