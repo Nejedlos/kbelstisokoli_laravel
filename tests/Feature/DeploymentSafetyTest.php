@@ -10,6 +10,7 @@ class DeploymentSafetyTest extends TestCase
     {
         $workflow = file_get_contents(base_path('.github/workflows/lint.yml'));
 
+        $this->assertStringContainsString('git remote add origin "https://github.com/Nejedlos/kbelstisokoli_laravel.git"', $workflow);
         $this->assertStringContainsString('"$npm_binary" run build', $workflow);
         $this->assertStringContainsString('php8.4 artisan migrate --force --no-interaction', $workflow);
         $this->assertStringNotContainsString('artisan app:sync', $workflow);
