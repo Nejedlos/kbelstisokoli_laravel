@@ -9,10 +9,16 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    environment: production
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
 
       - name: Create required directories
         run: |
@@ -32,6 +38,13 @@ jobs:
 
       - name: Install dependencies
         run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Build frontend assets
+        env:
+          FONTAWESOME_TOKEN: ${{ secrets.FONTAWESOME_TOKEN }}
+        run: |
+          npm ci
+          npm run build
 
       - name: Run Pint
         run: ./vendor/bin/pint --test
