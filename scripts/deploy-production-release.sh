@@ -256,7 +256,8 @@ if [ ! -d "$release_path" ]; then
     fi
 
     ln -s "$PRODUCTION_PATH/.env" "$temporary_release/.env"
-    ln -s "$managed_vendor_path" "$temporary_release/vendor"
+    mkdir "$temporary_release/vendor"
+    cp -al "$managed_vendor_path/." "$temporary_release/vendor/"
     ln -s "$PRODUCTION_PATH/storage" "$temporary_release/storage"
     mkdir -p "$temporary_release/resources"
     ln -s "$PRODUCTION_PATH/resources/icons" "$temporary_release/resources/icons"

@@ -41,7 +41,7 @@ class DeploymentSafetyTest extends TestCase
         $this->assertStringContainsString('compressor=(gzip -1)', $packaging);
         $this->assertStringContainsString('compressor=(pigz -1)', $packaging);
         $this->assertStringContainsString('| "${compressor[@]}" > "$output_archive"', $packaging);
-        $this->assertStringContainsString('COPYFILE_DISABLE=1 tar', $packaging);
+        $this->assertStringContainsString('COPYFILE_DISABLE=1 tar --no-xattrs', $packaging);
         $this->assertStringContainsString("--exclude='./resources/icons'", $packaging);
         $this->assertStringContainsString("--exclude='./public/assets'", $packaging);
         $this->assertStringContainsString("--exclude='./vendor'", $packaging);
@@ -67,6 +67,7 @@ class DeploymentSafetyTest extends TestCase
         $this->assertStringContainsString('VENDOR_CHECKSUM=', $upload);
         $this->assertStringContainsString('remote_bash', $upload);
         $this->assertStringContainsString('bash -lc', $upload);
+        $this->assertStringContainsString('then exit 254', $upload);
 
         $localFallback = file_get_contents(base_path('scripts/deploy-production-from-local.sh'));
         $this->assertStringContainsString('Local fallback deploy requires a clean working tree.', $localFallback);
@@ -86,7 +87,7 @@ class DeploymentSafetyTest extends TestCase
         $this->assertStringContainsString('ln -s "$PRODUCTION_PUBLIC_PATH/uploads" "$temporary_release/public/uploads"', $deployment);
         $this->assertStringContainsString('ln -s "$PRODUCTION_PUBLIC_PATH/storage" "$temporary_release/public/storage"', $deployment);
         $this->assertStringContainsString('ln -s "$managed_assets_path" "$temporary_release/public/assets"', $deployment);
-        $this->assertStringContainsString('ln -s "$managed_vendor_path" "$temporary_release/vendor"', $deployment);
+        $this->assertStringContainsString('cp -al "$managed_vendor_path/." "$temporary_release/vendor/"', $deployment);
         $this->assertStringContainsString('Managed production vendor has an unexpected marker.', $deployment);
         $this->assertStringContainsString('ln -s "$shared_partners" "$extracted_assets/img/partners"', $deployment);
         $this->assertStringContainsString('down --retry=5 --no-interaction', $deployment);

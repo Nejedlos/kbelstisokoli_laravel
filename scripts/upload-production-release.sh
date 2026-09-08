@@ -137,5 +137,5 @@ else
     fi
 fi
 
-remote_bash \
-    "PRODUCTION_PATH=$(printf '%q' "$PRODUCTION_PATH") PRODUCTION_PUBLIC_PATH=$(printf '%q' "$PRODUCTION_PUBLIC_PATH") RELEASE_SHA=$(printf '%q' "$release_sha") RELEASE_ARCHIVE=$(printf '%q' "$release_archive") RELEASE_CHECKSUM=$(printf '%q' "$release_checksum") VENDOR_SHA=$(printf '%q' "$vendor_sha") VENDOR_ARCHIVE=$(printf '%q' "$vendor_archive") VENDOR_CHECKSUM=$(printf '%q' "$vendor_checksum") ASSETS_SHA=$(printf '%q' "$assets_sha") ASSETS_ARCHIVE=$(printf '%q' "$assets_archive") ASSETS_CHECKSUM=$(printf '%q' "$assets_checksum") HEALTH_URL=$(printf '%q' "$health_url") PHP_BINARY=$(printf '%q' "$php_binary") bash $(printf '%q' "$remote_script")"
+deploy_command="PRODUCTION_PATH=$(printf '%q' "$PRODUCTION_PATH") PRODUCTION_PUBLIC_PATH=$(printf '%q' "$PRODUCTION_PUBLIC_PATH") RELEASE_SHA=$(printf '%q' "$release_sha") RELEASE_ARCHIVE=$(printf '%q' "$release_archive") RELEASE_CHECKSUM=$(printf '%q' "$release_checksum") VENDOR_SHA=$(printf '%q' "$vendor_sha") VENDOR_ARCHIVE=$(printf '%q' "$vendor_archive") VENDOR_CHECKSUM=$(printf '%q' "$vendor_checksum") ASSETS_SHA=$(printf '%q' "$assets_sha") ASSETS_ARCHIVE=$(printf '%q' "$assets_archive") ASSETS_CHECKSUM=$(printf '%q' "$assets_checksum") HEALTH_URL=$(printf '%q' "$health_url") PHP_BINARY=$(printf '%q' "$php_binary") bash $(printf '%q' "$remote_script")"
+remote_bash "$deploy_command; status=\$?; if [ \"\$status\" -eq 255 ]; then exit 254; fi; exit \"\$status\""

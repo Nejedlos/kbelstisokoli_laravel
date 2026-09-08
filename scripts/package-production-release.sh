@@ -35,7 +35,7 @@ if command -v pigz >/dev/null 2>&1; then
     compressor=(pigz -1)
 fi
 
-COPYFILE_DISABLE=1 tar -cf - \
+COPYFILE_DISABLE=1 tar --no-xattrs -cf - \
     --exclude='./.git' \
     --exclude='./.github' \
     --exclude='./.env' \

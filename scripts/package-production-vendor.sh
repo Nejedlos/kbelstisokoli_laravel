@@ -32,5 +32,5 @@ cleanup() {
 }
 trap cleanup EXIT
 
-COPYFILE_DISABLE=1 tar -cf - vendor | "${compressor[@]}" > "$output_archive"
+COPYFILE_DISABLE=1 tar --no-xattrs -cf - vendor | "${compressor[@]}" > "$output_archive"
 echo "Packaged production vendor $vendor_sha into $output_archive"
