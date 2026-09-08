@@ -6,7 +6,7 @@
         <div class="bg-slate-50 md:w-32 flex flex-col items-center justify-center py-6 border-b md:border-b-0 md:border-r border-slate-100 group-hover:bg-primary/5 transition-colors">
             <span class="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">{{ $event->starts_at->translatedFormat('M') }}</span>
             <span class="text-3xl font-black text-secondary group-hover:text-primary transition-colors">{{ $event->starts_at->day }}</span>
-            <span class="text-[10px] font-bold text-slate-500 mt-1">{{ $event->starts_at->translatedFormat('l') }}</span>
+            <span class="text-[10px] font-bold text-slate-500 mt-1"><x-weekday-short :date="$event->starts_at" /></span>
         </div>
 
         <!-- Content -->

@@ -65,7 +65,7 @@ class Dashboard extends BaseDashboard
                 'upcoming' => Training::where('starts_at', '>=', now())->count(),
             ],
             'attendance' => class_exists(Attendance::class) ? Attendance::count() : 0,
-            'leads_pending' => Lead::where('status', 'pending')->count(),
+            'leads_pending' => Lead::whereIn('status', Lead::openStatuses())->count(),
             'posts_active' => Post::where('status', 'published')->count(),
             'events_upcoming' => ClubEvent::where('starts_at', '>=', now())->count(),
         ];

@@ -116,9 +116,9 @@
                                 <div>
                                     <div class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-0.5">{{ __('general.date') }}</div>
                                     <div class="font-bold text-secondary">
-                                        {{ $event->starts_at->translatedFormat('j. F Y') }}
+                                        <x-weekday-short :date="$event->starts_at" /> {{ $event->starts_at->translatedFormat('j. F Y') }}
                                         @if($event->ends_at && !$event->starts_at->isSameDay($event->ends_at))
-                                            — {{ $event->ends_at->translatedFormat('j. F Y') }}
+                                            — <x-weekday-short :date="$event->ends_at" /> {{ $event->ends_at->translatedFormat('j. F Y') }}
                                         @endif
                                     </div>
                                 </div>

@@ -23,10 +23,6 @@ class FeedbackSystemTest extends TestCase
         Config::set('feedback.environments', ['testing']);
         Config::set('app.debug', false);
 
-        $manifestPath = public_path('build/manifest.json');
-        $manifestVersion = file_exists($manifestPath) ? filemtime($manifestPath) : '0';
-        Cache::put("feedback_widget_js_url_{$manifestVersion}", 'http://localhost/build/assets/feedback-widget.js', 3600);
-
         Mail::fake();
         Storage::fake('local');
     }

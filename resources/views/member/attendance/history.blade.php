@@ -172,7 +172,10 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-slate-600 font-medium">
-                                    {{ $attendance->attendable?->scheduled_at?->format('d.m.Y H:i') ?? $attendance->attendable?->starts_at?->format('d.m.Y H:i') }}
+                                    @php $eventDate = $attendance->attendable?->scheduled_at ?? $attendance->attendable?->starts_at; @endphp
+                                    @if($eventDate)
+                                        <x-weekday-short :date="$eventDate" /> {{ $eventDate->format('d.m.Y H:i') }}
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 text-center">
                                     <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest {{ $statusColors[$attendance->status] ?? 'bg-slate-100' }}">
@@ -233,7 +236,10 @@
                         <div class="flex flex-wrap items-center justify-between gap-2">
                             <div class="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
                                 <i class="fa-light fa-calendar text-primary text-[10px]"></i>
-                                {{ $attendance->attendable?->scheduled_at?->format('d.m.Y H:i') ?? $attendance->attendable?->starts_at?->format('d.m.Y H:i') }}
+                                @php $eventDate = $attendance->attendable?->scheduled_at ?? $attendance->attendable?->starts_at; @endphp
+                                @if($eventDate)
+                                    <x-weekday-short :date="$eventDate" /> {{ $eventDate->format('d.m.Y H:i') }}
+                                @endif
                             </div>
                             <div class="text-[10px] text-slate-400 italic">
                                 {{ __('member.attendance.table.responded') }}: {{ $attendance->responded_at?->format('d.m. H:i') ?? '-' }}

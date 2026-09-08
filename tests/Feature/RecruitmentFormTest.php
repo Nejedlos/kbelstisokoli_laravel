@@ -3,9 +3,8 @@
 namespace Tests\Feature;
 
 use App\Livewire\RecruitmentForm;
-use App\Mail\RecruitmentFormMail;
+use App\Mail\LeadNotificationMail;
 use App\Models\Lead;
-use App\Models\Setting;
 use App\Models\Team;
 use App\Models\User;
 use App\Services\RecaptchaResult;
@@ -26,9 +25,6 @@ class RecruitmentFormTest extends TestCase
         // Mock Recaptcha
         $recaptchaMock = $this->mock(RecaptchaV3::class);
         $recaptchaMock->shouldReceive('verify')->andReturn(new RecaptchaResult(passed: true));
-
-        // Setup settings
-        Setting::create(['key' => 'admin_contact_email', 'value' => 'admin@example.com']);
 
         // Setup team and coach
         $team = Team::create([
@@ -66,11 +62,10 @@ class RecruitmentFormTest extends TestCase
         $this->assertEquals('muzi-e', $lead->payload['team_slug']);
         $this->assertEquals('Muži E', $lead->payload['team_name']);
 
-        // Verify email was sent to admin and coach pivot email
-        Mail::assertQueued(RecruitmentFormMail::class, function ($mail) use ($lead) {
-            return $mail->hasTo('admin@example.com') &&
-                   $mail->hasTo('coach-pivot@example.com') &&
-                   $mail->leadId === $lead->id;
+        // E-mail is sent directly to the configured technical fallback when no owner is set.
+        Mail::assertSent(LeadNotificationMail::class, function ($mail) use ($lead) {
+            return $mail->hasTo(config('leads.technical_contact_email')) && $mail->lead->is($lead);
         });
+        Mail::assertNotQueued(LeadNotificationMail::class);
     }
 }

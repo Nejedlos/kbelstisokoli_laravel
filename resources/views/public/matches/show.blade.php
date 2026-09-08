@@ -23,7 +23,7 @@
     @endphp
     <x-page-header
         :title="$mainTeamName . ' ' . __('matches.vs') . ' ' . $match->official_opponent_name"
-        :subtitle="$match->scheduled_at->format(__('general.date_time_format')) . ' | ' . ($match->location ?? __('matches.location_not_specified'))"
+        :subtitle="__('general.weekdays_short.' . $match->scheduled_at->dayOfWeekIso) . ' ' . $match->scheduled_at->format(__('general.date_time_format')) . ' | ' . ($match->location ?? __('matches.location_not_specified'))"
         :breadcrumbs="[__('matches.breadcrumbs') => route('public.matches.index'), __('matches.view_detail') => null]"
         image="assets/img/hero/hero-match-detail.webp"
     />
@@ -171,7 +171,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
-                        {{ $match->scheduled_at->format(__('general.date_format')) }}
+                        <x-weekday-short :date="$match->scheduled_at" /> {{ $match->scheduled_at->format(__('general.date_format')) }}
                     </div>
                     <div class="flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">

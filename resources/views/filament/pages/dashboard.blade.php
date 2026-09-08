@@ -129,7 +129,7 @@
                 </div>
 
                 {{-- Leads Card --}}
-                <div class="rounded-3xl bg-white border border-gray-100 shadow-sm p-5 sm:p-6 hover:shadow-md transition-shadow">
+                <a href="{{ \App\Filament\Resources\Leads\LeadResource::getUrl('index', panel: 'admin') }}" class="block rounded-3xl bg-white border border-gray-100 shadow-sm p-5 sm:p-6 hover:shadow-md hover:border-success-200 transition-shadow">
                     <div class="flex items-center justify-between mb-4">
                         <div class="w-10 h-10 rounded-lg bg-success-100 flex items-center justify-center text-success-600">
                             <i class="fa-light fa-address-card text-xl"></i>
@@ -138,7 +138,7 @@
                     </div>
                     <h4 class="font-black text-gray-900 uppercase tracking-tight text-xs sm:text-sm">{{ __('admin/dashboard.kpi.leads_total') }}</h4>
                     <p class="text-[11px] sm:text-xs text-gray-500 mt-1">{{ __('admin/dashboard.kpi.leads_pending_desc', ['count' => $stats['leads_pending']]) }}</p>
-                </div>
+                </a>
 
                 {{-- Posts Card --}}
                 <div class="rounded-3xl bg-white border border-gray-100 shadow-sm p-5 sm:p-6 hover:shadow-md transition-shadow">

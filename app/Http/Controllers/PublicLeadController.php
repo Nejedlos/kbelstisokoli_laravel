@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Lead;
 use App\Rules\RecaptchaV3 as RecaptchaV3Rule;
+use App\Services\LeadWorkflowService;
 use Illuminate\Http\Request;
 
 class PublicLeadController extends Controller
@@ -11,7 +11,7 @@ class PublicLeadController extends Controller
     /**
      * Zpracuje odeslání kontaktního formuláře.
      */
-    public function storeContact(Request $request)
+    public function storeContact(Request $request, LeadWorkflowService $leadWorkflow)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -23,7 +23,7 @@ class PublicLeadController extends Controller
             'g-recaptcha-response' => [new RecaptchaV3Rule('contact_form')],
         ]);
 
-        $lead = Lead::create([
+        $leadWorkflow->create([
             'type' => 'contact',
             'name' => $validated['name'],
             'email' => $validated['email'],
@@ -43,7 +43,7 @@ class PublicLeadController extends Controller
     /**
      * Zpracuje odeslání náborového formuláře.
      */
-    public function storeRecruitment(Request $request)
+    public function storeRecruitment(Request $request, LeadWorkflowService $leadWorkflow)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -55,7 +55,7 @@ class PublicLeadController extends Controller
             'g-recaptcha-response' => [new RecaptchaV3Rule('recruitment_form')],
         ]);
 
-        $lead = Lead::create([
+        $leadWorkflow->create([
             'type' => 'recruitment',
             'name' => $validated['name'],
             'email' => $validated['email'],

@@ -29,7 +29,7 @@
                             <div>
                                 <h4 class="font-bold text-secondary">vs {{ $match->opponent->name }}</h4>
                                 <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                                    {{ $match->scheduled_at->format('d.m. H:i') }} • {{ $match->location ?: __('member.teams.attendance.location_not_specified') }}
+                                    <x-weekday-short :date="$match->scheduled_at" /> {{ $match->scheduled_at->format('d.m. H:i') }} • {{ $match->location ?: __('member.teams.attendance.location_not_specified') }}
                                 </p>
                             </div>
                             <span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-black uppercase tracking-widest text-slate-500">{{ __('member.teams.attendance.match_badge') }}</span>
@@ -70,7 +70,7 @@
                                 <div>
                                     <h4 class="font-bold text-secondary">
                                         {{ $training->display_name }}
-                                        <span class="text-slate-400 font-medium ml-1 text-xs">— {{ $training->starts_at->translatedFormat('l d.m.') }}</span>
+                                        <span class="text-slate-400 font-medium ml-1 text-xs">— <x-weekday-short :date="$training->starts_at" /> {{ $training->starts_at->format('d.m.') }}</span>
                                     </h4>
                                     <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">
                                         {{ $training->starts_at->format('H:i') }}

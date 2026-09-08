@@ -5,8 +5,9 @@ Když se přes web přihlásí nový zájemce, začíná proces jeho integrace d
 ## Krok 1: Práce se zájemcem (Lead)
 1. V levém menu otevřete **Lidé a členové > Náborové leady**.
 2. Zde najdete údaje ze zájemce z formuláře na webu.
-3. Po úvodním kontaktu (např. po zkušebním tréninku) můžete zájemce označit jako "Processed" (zpracovaný).
-4. **Pozor**: Systém neprovádí automatický převod zájemce na uživatele. Uživatele musíte vytvořit ručně.
+3. Nastavte odpovědnou osobu, po úvodním kontaktu označte zájemce jako **V řešení** a případný termín dalšího kontaktu uložte do leadu.
+4. Po rozhodnutí použijte akci **Přijat**, **Nepřijat** nebo **Odloženo**.
+5. **Pozor**: Systém neprovádí automatický převod zájemce na uživatele. Uživatele musíte vytvořit ručně.
 
 ## Krok 2: Vytvoření uživatelského profilu
 1. Přejděte do **Lidé a členové > Uživatelé** a klikněte na **Vytvořit uživatele**.

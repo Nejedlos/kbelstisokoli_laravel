@@ -54,7 +54,7 @@
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div class="flex items-center gap-4 sm:gap-5">
                             <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-slate-50 flex flex-col items-center justify-center text-secondary border border-slate-100 shadow-inner shrink-0">
-                                <span class="text-[10px] sm:text-xs font-black uppercase tracking-tighter text-slate-400 mb-0.5">{{ $time->translatedFormat('M') }}</span>
+                                <span class="text-[10px] sm:text-xs font-black tracking-tighter text-slate-400 mb-0.5"><x-weekday-short :date="$time" /></span>
                                 <span class="text-xl sm:text-2xl font-black leading-none">{{ $time->format('d') }}</span>
                             </div>
                             <div class="min-w-0">

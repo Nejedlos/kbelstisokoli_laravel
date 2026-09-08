@@ -31,6 +31,8 @@ Podporovány jsou obě jazykové mutace (CS/EN) prostřednictvím standardních 
 - `lang/{locale}/member.php`
 - `lang/{locale}/admin.php`
 
+U termínů tréninků, zápasů a klubových akcí se navíc zobrazuje krátký název dne v týdnu. Používá se společná komponenta `x-weekday-short` a překlady v `lang/{locale}/general.php`, aby se formát shodoval na veřejném webu i v členské sekci (např. `Po` / `Mon`).
+
 ## Dynamické odkazování (Smart Linking)
 Systém automaticky detekuje stav přihlášení uživatele na veřejném webu:
 - **Přihlášený uživatel:** Odkazy na tréninky (v Hero sekci na hlavní straně a v seznamu tréninků) vedou přímo do členské sekce na detail docházky daného tréninku.

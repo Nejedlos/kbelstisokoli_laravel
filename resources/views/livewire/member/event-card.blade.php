@@ -94,7 +94,7 @@
 
             <a href="{{ route('member.attendance.show', ['type' => $type, 'id' => $data->id]) }}" class="flex items-center gap-4 sm:gap-5 flex-1 min-w-0 transition-all duration-500">
                 <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-slate-50 flex flex-col items-center justify-center text-secondary leading-none border border-slate-100 shrink-0 group-hover:bg-white group-hover:shadow-md transition-all duration-500">
-                <span class="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5">{{ $time->translatedFormat('M') }}</span>
+                <span class="text-[8px] sm:text-[9px] font-black tracking-widest text-slate-400 mb-0.5"><x-weekday-short :date="$time" /></span>
                 <span class="text-lg sm:text-xl font-black tracking-tight">{{ $time->format('d') }}</span>
             </div>
 

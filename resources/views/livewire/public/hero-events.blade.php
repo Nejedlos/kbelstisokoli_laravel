@@ -17,7 +17,7 @@
 
                         {{-- Date Box --}}
                         <div class="relative flex flex-col items-center justify-center w-16 h-16 shrink-0 rounded-2xl bg-white/5 text-white border border-white/10 group-hover/event:bg-primary group-hover/event:text-white group-hover/event:border-primary transition-all duration-500 shadow-lg">
-                            <span class="text-[11px] font-black uppercase leading-none mb-1.5 opacity-60 group-hover/event:opacity-100 tracking-wider">{{ $event['date']->translatedFormat('D') }}</span>
+                            <span class="text-[11px] font-black leading-none mb-1.5 opacity-60 group-hover/event:opacity-100 tracking-wider"><x-weekday-short :date="$event['date']" /></span>
                             <span class="text-xl font-black leading-none">{{ $event['date']->format('d.m.') }}</span>
                         </div>
 
