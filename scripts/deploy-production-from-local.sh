@@ -71,7 +71,7 @@ if ! git diff --quiet || ! git diff --cached --quiet || [ -n "$(git status --sho
     exit 1
 fi
 
-temporary_root=$(mktemp -d "${TMPDIR:-/tmp}/kbelstisokoli-release.XXXXXX")
+temporary_root=$(mktemp -d "${TMPDIR:-/tmp}/kbelstisokoli-deploy.XXXXXX")
 cleanup() {
     status=$?
     rm -rf "$temporary_root"
@@ -79,28 +79,15 @@ cleanup() {
 }
 trap cleanup EXIT
 
-source_root="$temporary_root/source"
-mkdir -p "$source_root"
-git archive HEAD | tar -x -C "$source_root"
-rm -rf "$source_root/public/build"
-cp -a public/build "$source_root/public/build"
-mkdir -p "$source_root/bootstrap/cache" "$source_root/storage/framework"/{cache/data,sessions,testing,views}
-
-composer install --working-dir="$source_root" --no-dev --no-progress --prefer-dist --optimize-autoloader --no-scripts
-(
-    cd "$source_root"
-    php artisan package:discover --ansi
-    php artisan filament:upgrade
-)
-
 release_archive="$temporary_root/release-$release_sha.tgz"
+vendor_sha=$(scripts/production-vendor-id.sh)
+vendor_archive="$temporary_root/vendor-$vendor_sha.tgz"
 assets_sha=$(git rev-parse HEAD:public/assets)
 assets_archive="$temporary_root/assets-$assets_sha.tar"
-(
-    cd "$source_root"
-    scripts/package-production-release.sh "$release_sha" "$release_archive"
-)
-scripts/package-production-assets.sh "$assets_sha" "$assets_archive"
+scripts/prepare-production-release.sh \
+    "$release_sha" "$release_archive" \
+    "$vendor_sha" "$vendor_archive" \
+    "$assets_sha" "$assets_archive"
 
 export PRODUCTION_SSH_HOST=${PRODUCTION_SSH_HOST:-dw191.webglobe.com}
 export PRODUCTION_SSH_PORT=${PRODUCTION_SSH_PORT:-20001}
@@ -110,7 +97,10 @@ export PRODUCTION_PUBLIC_PATH=${PRODUCTION_PUBLIC_PATH:-/home/html/kbelstisokoli
 export HEALTH_URL=${HEALTH_URL:-https://kbelstisokoli.cz}
 export PHP_BINARY=${PHP_BINARY:-php8.4}
 
-scripts/upload-production-release.sh "$release_sha" "$release_archive" "$assets_sha" "$assets_archive"
+scripts/upload-production-release.sh \
+    "$release_sha" "$release_archive" \
+    "$vendor_sha" "$vendor_archive" \
+    "$assets_sha" "$assets_archive"
 
 live_release=$(curl -fsSI "$HEALTH_URL/up" | tr -d '\r' | awk -F ': ' 'tolower($1) == "x-app-release" { print $2 }' | tail -n 1)
 if [ "$live_release" != "$release_sha" ]; then

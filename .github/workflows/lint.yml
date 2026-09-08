@@ -62,6 +62,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          clean: false
 
       - name: Verify production configuration
         env:
@@ -118,6 +120,7 @@ jobs:
           node -e 'if (Number(process.versions.node.split(".")[0]) < 22) process.exit(1)'
           node --version
           npm --version
+          pigz --version
 
       - name: Install dependencies
         run: composer install --no-progress --prefer-dist
@@ -137,13 +140,13 @@ jobs:
 
       - name: Prepare production dependencies and release archive
         run: |
-          rm -f bootstrap/cache/*.php
-          composer install --no-dev --no-progress --prefer-dist --optimize-autoloader --no-scripts
-          php artisan package:discover --ansi
-          php artisan filament:upgrade
-          scripts/package-production-release.sh "$GITHUB_SHA" "$RUNNER_TEMP/release-$GITHUB_SHA.tgz"
+          vendor_sha=$(scripts/production-vendor-id.sh)
           assets_sha=$(git rev-parse HEAD:public/assets)
-          scripts/package-production-assets.sh "$assets_sha" "$RUNNER_TEMP/assets-$assets_sha.tar"
+          scripts/prepare-production-release.sh \
+            "$GITHUB_SHA" "$RUNNER_TEMP/release-$GITHUB_SHA.tgz" \
+            "$vendor_sha" "$RUNNER_TEMP/vendor-$vendor_sha.tgz" \
+            "$assets_sha" "$RUNNER_TEMP/assets-$assets_sha.tar"
+          echo "VENDOR_SHA=$vendor_sha" >> "$GITHUB_ENV"
           echo "ASSETS_SHA=$assets_sha" >> "$GITHUB_ENV"
 
       - name: Configure SSH
@@ -170,4 +173,5 @@ jobs:
         run: |
           scripts/upload-production-release.sh \
             "$GITHUB_SHA" "$RUNNER_TEMP/release-$GITHUB_SHA.tgz" \
+            "$VENDOR_SHA" "$RUNNER_TEMP/vendor-$VENDOR_SHA.tgz" \
             "$ASSETS_SHA" "$RUNNER_TEMP/assets-$ASSETS_SHA.tar"

@@ -30,7 +30,12 @@ cleanup() {
 }
 trap cleanup EXIT
 
-tar -cf - \
+compressor=(gzip -1)
+if command -v pigz >/dev/null 2>&1; then
+    compressor=(pigz -1)
+fi
+
+COPYFILE_DISABLE=1 tar -cf - \
     --exclude='./.git' \
     --exclude='./.github' \
     --exclude='./.env' \
@@ -41,6 +46,7 @@ tar -cf - \
     --exclude='./*.sql' \
     --exclude='./auth.json' \
     --exclude='./node_modules' \
+    --exclude='./vendor' \
     --exclude='./tests' \
     --exclude='./docs' \
     --exclude='./storage' \
@@ -51,6 +57,6 @@ tar -cf - \
     --exclude='./public/hot' \
     --exclude='./.phpunit.cache' \
     --exclude='./.phpunit.result.cache' \
-    . | gzip -1 > "$output_archive"
+    . | "${compressor[@]}" > "$output_archive"
 
 echo "Packaged release $release_sha into $output_archive"

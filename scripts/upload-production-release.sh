@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [ "$#" -ne 4 ]; then
-    echo "Usage: $0 RELEASE_SHA RELEASE_ARCHIVE ASSETS_SHA ASSETS_ARCHIVE" >&2
+if [ "$#" -ne 6 ]; then
+    echo "Usage: $0 RELEASE_SHA RELEASE_ARCHIVE VENDOR_SHA VENDOR_ARCHIVE ASSETS_SHA ASSETS_ARCHIVE" >&2
     exit 64
 fi
 
@@ -14,17 +14,19 @@ fi
 
 release_sha=$1
 release_source=$2
-assets_sha=$3
-assets_source=$4
+vendor_sha=$3
+vendor_source=$4
+assets_sha=$5
+assets_source=$6
 health_url=${HEALTH_URL:-https://kbelstisokoli.cz}
 php_binary=${PHP_BINARY:-php8.4}
 
-if [[ ! "$release_sha" =~ ^[0-9a-f]{40}$ ]] || [[ ! "$assets_sha" =~ ^[0-9a-f]{40}$ ]]; then
-    echo "Release and assets identifiers must be 40-character lowercase Git hashes." >&2
+if [[ ! "$release_sha" =~ ^[0-9a-f]{40}$ ]] || [[ ! "$vendor_sha" =~ ^[0-9a-f]{40}$ ]] || [[ ! "$assets_sha" =~ ^[0-9a-f]{40}$ ]]; then
+    echo "Release, vendor and assets identifiers must be 40-character lowercase hashes." >&2
     exit 64
 fi
 
-for archive in "$release_source" "$assets_source"; do
+for archive in "$release_source" "$vendor_source" "$assets_source"; do
     if [ ! -f "$archive" ]; then
         echo "Required archive is missing: $archive" >&2
         exit 1
@@ -63,11 +65,14 @@ retry_transport() {
 remote="$PRODUCTION_SSH_USER@$PRODUCTION_SSH_HOST"
 incoming="$PRODUCTION_PATH/deploy/incoming"
 managed_assets="$PRODUCTION_PATH/deploy/managed-assets/$assets_sha"
+managed_vendor="$PRODUCTION_PATH/deploy/managed-vendor/$vendor_sha"
 release_archive="$incoming/release-$release_sha.tgz"
+vendor_archive="$incoming/vendor-$vendor_sha.tgz"
 assets_archive="$incoming/assets-$assets_sha.tar"
 remote_script="$incoming/deploy-production-release.sh"
 script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 release_checksum=$(sha256_file "$release_source")
+vendor_checksum=$(sha256_file "$vendor_source")
 assets_checksum=$(sha256_file "$assets_source")
 ssh_options=(-4 -p "$PRODUCTION_SSH_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -o ConnectionAttempts=1 -o ServerAliveInterval=15 -o ServerAliveCountMax=4)
 scp_options=(-4 -P "$PRODUCTION_SSH_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -o ConnectionAttempts=1 -o ServerAliveInterval=15 -o ServerAliveCountMax=4)
@@ -108,6 +113,18 @@ fi
 
 retry_transport scp "${scp_options[@]}" "$script_dir/deploy-production-release.sh" "$remote:$remote_script"
 
+if remote_bash "test -d $(printf '%q' "$managed_vendor")"; then
+    echo "Production vendor $vendor_sha is already present on production."
+else
+    remote_vendor_checksum=$(remote_bash \
+        "if test -f $(printf '%q' "$vendor_archive"); then sha256sum $(printf '%q' "$vendor_archive") | cut -d ' ' -f 1; else printf missing; fi")
+    if [ "$remote_vendor_checksum" = "$vendor_checksum" ]; then
+        echo "Production vendor archive $vendor_sha is already present on production."
+    else
+        retry_transport scp "${scp_options[@]}" "$vendor_source" "$remote:$vendor_archive"
+    fi
+fi
+
 if remote_bash "test -d $(printf '%q' "$managed_assets")"; then
     echo "Public assets $assets_sha are already present on production."
 else
@@ -121,4 +138,4 @@ else
 fi
 
 remote_bash \
-    "PRODUCTION_PATH=$(printf '%q' "$PRODUCTION_PATH") PRODUCTION_PUBLIC_PATH=$(printf '%q' "$PRODUCTION_PUBLIC_PATH") RELEASE_SHA=$(printf '%q' "$release_sha") RELEASE_ARCHIVE=$(printf '%q' "$release_archive") RELEASE_CHECKSUM=$(printf '%q' "$release_checksum") ASSETS_SHA=$(printf '%q' "$assets_sha") ASSETS_ARCHIVE=$(printf '%q' "$assets_archive") ASSETS_CHECKSUM=$(printf '%q' "$assets_checksum") HEALTH_URL=$(printf '%q' "$health_url") PHP_BINARY=$(printf '%q' "$php_binary") bash $(printf '%q' "$remote_script")"
+    "PRODUCTION_PATH=$(printf '%q' "$PRODUCTION_PATH") PRODUCTION_PUBLIC_PATH=$(printf '%q' "$PRODUCTION_PUBLIC_PATH") RELEASE_SHA=$(printf '%q' "$release_sha") RELEASE_ARCHIVE=$(printf '%q' "$release_archive") RELEASE_CHECKSUM=$(printf '%q' "$release_checksum") VENDOR_SHA=$(printf '%q' "$vendor_sha") VENDOR_ARCHIVE=$(printf '%q' "$vendor_archive") VENDOR_CHECKSUM=$(printf '%q' "$vendor_checksum") ASSETS_SHA=$(printf '%q' "$assets_sha") ASSETS_ARCHIVE=$(printf '%q' "$assets_archive") ASSETS_CHECKSUM=$(printf '%q' "$assets_checksum") HEALTH_URL=$(printf '%q' "$health_url") PHP_BINARY=$(printf '%q' "$php_binary") bash $(printf '%q' "$remote_script")"

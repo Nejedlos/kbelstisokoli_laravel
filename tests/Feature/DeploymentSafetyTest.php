@@ -12,16 +12,18 @@ class DeploymentSafetyTest extends TestCase
 
         $this->assertStringContainsString('php artisan test --parallel --processes=4 --compact', $workflow);
         $this->assertStringContainsString('runs-on: [self-hosted, macOS, ARM64, kbelstisokoli-deploy]', $workflow);
+        $this->assertStringContainsString('clean: false', $workflow);
         $this->assertStringContainsString('timeout-minutes: 20', $workflow);
         $this->assertStringContainsString('Verify self-hosted toolchain', $workflow);
         $this->assertStringContainsString('version_compare(PHP_VERSION, "8.4.0", "<")', $workflow);
         $this->assertStringContainsString('PHP memory_limit must be at least 512M for parallel tests.', $workflow);
         $this->assertStringContainsString('process.versions.node', $workflow);
+        $this->assertStringContainsString('pigz --version', $workflow);
         $this->assertSame(1, substr_count($workflow, 'npm run build'));
         $this->assertStringContainsString('PRODUCTION_PUBLIC_PATH: ${{ secrets.PRODUCTION_PUBLIC_PATH }}', $workflow);
-        $this->assertStringContainsString('scripts/package-production-release.sh "$GITHUB_SHA"', $workflow);
-        $this->assertStringContainsString('scripts/package-production-assets.sh "$assets_sha"', $workflow);
-        $this->assertStringContainsString('rm -f bootstrap/cache/*.php', $workflow);
+        $this->assertStringContainsString('scripts/prepare-production-release.sh', $workflow);
+        $this->assertStringContainsString('scripts/production-vendor-id.sh', $workflow);
+        $this->assertStringContainsString('"$VENDOR_SHA" "$RUNNER_TEMP/vendor-$VENDOR_SHA.tgz"', $workflow);
         $this->assertStringContainsString('scripts/upload-production-release.sh', $workflow);
         $this->assertStringContainsString('$RUNNER_TEMP/deploy-ssh', $workflow);
         $this->assertStringNotContainsString('> ~/.ssh/id_ed25519', $workflow);
@@ -36,9 +38,21 @@ class DeploymentSafetyTest extends TestCase
         $this->assertStringNotContainsString('artisan system:cleanup', $workflow);
 
         $packaging = file_get_contents(base_path('scripts/package-production-release.sh'));
-        $this->assertStringContainsString('| gzip -1 > "$output_archive"', $packaging);
+        $this->assertStringContainsString('compressor=(gzip -1)', $packaging);
+        $this->assertStringContainsString('compressor=(pigz -1)', $packaging);
+        $this->assertStringContainsString('| "${compressor[@]}" > "$output_archive"', $packaging);
+        $this->assertStringContainsString('COPYFILE_DISABLE=1 tar', $packaging);
         $this->assertStringContainsString("--exclude='./resources/icons'", $packaging);
         $this->assertStringContainsString("--exclude='./public/assets'", $packaging);
+        $this->assertStringContainsString("--exclude='./vendor'", $packaging);
+
+        $preparation = file_get_contents(base_path('scripts/prepare-production-release.sh'));
+        $this->assertStringContainsString('git archive "$release_sha"', $preparation);
+        $this->assertStringContainsString('DEPLOY_CACHE_ROOT', $preparation);
+        $this->assertStringContainsString('vendor-$vendor_sha.tgz', $preparation);
+        $this->assertStringContainsString('composer install --working-dir="$source_root"', $preparation);
+        $this->assertStringContainsString('scripts/package-production-vendor.sh', $preparation);
+        $this->assertStringContainsString('scripts/package-production-release.sh', $preparation);
 
         $upload = file_get_contents(base_path('scripts/upload-production-release.sh'));
         $this->assertStringContainsString('deploy-production-release.sh', $upload);
@@ -49,12 +63,15 @@ class DeploymentSafetyTest extends TestCase
         $this->assertStringContainsString('StrictHostKeyChecking=yes', $upload);
         $this->assertStringContainsString('IdentitiesOnly=yes', $upload);
         $this->assertStringContainsString('UserKnownHostsFile=', $upload);
+        $this->assertStringContainsString('managed-vendor', $upload);
+        $this->assertStringContainsString('VENDOR_CHECKSUM=', $upload);
         $this->assertStringContainsString('remote_bash', $upload);
         $this->assertStringContainsString('bash -lc', $upload);
 
         $localFallback = file_get_contents(base_path('scripts/deploy-production-from-local.sh'));
         $this->assertStringContainsString('Local fallback deploy requires a clean working tree.', $localFallback);
         $this->assertStringContainsString('Local main must exactly match origin/main.', $localFallback);
+        $this->assertStringContainsString('scripts/prepare-production-release.sh', $localFallback);
         $this->assertStringContainsString('scripts/upload-production-release.sh', $localFallback);
     }
 
@@ -69,6 +86,8 @@ class DeploymentSafetyTest extends TestCase
         $this->assertStringContainsString('ln -s "$PRODUCTION_PUBLIC_PATH/uploads" "$temporary_release/public/uploads"', $deployment);
         $this->assertStringContainsString('ln -s "$PRODUCTION_PUBLIC_PATH/storage" "$temporary_release/public/storage"', $deployment);
         $this->assertStringContainsString('ln -s "$managed_assets_path" "$temporary_release/public/assets"', $deployment);
+        $this->assertStringContainsString('ln -s "$managed_vendor_path" "$temporary_release/vendor"', $deployment);
+        $this->assertStringContainsString('Managed production vendor has an unexpected marker.', $deployment);
         $this->assertStringContainsString('ln -s "$shared_partners" "$extracted_assets/img/partners"', $deployment);
         $this->assertStringContainsString('down --retry=5 --no-interaction', $deployment);
         $this->assertStringContainsString('resume_after_partner_move', $deployment);

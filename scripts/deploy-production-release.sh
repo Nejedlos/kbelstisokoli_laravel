@@ -6,6 +6,9 @@ set -euo pipefail
 : "${RELEASE_SHA:?RELEASE_SHA is required}"
 : "${RELEASE_ARCHIVE:?RELEASE_ARCHIVE is required}"
 : "${RELEASE_CHECKSUM:?RELEASE_CHECKSUM is required}"
+: "${VENDOR_SHA:?VENDOR_SHA is required}"
+: "${VENDOR_ARCHIVE:?VENDOR_ARCHIVE is required}"
+: "${VENDOR_CHECKSUM:?VENDOR_CHECKSUM is required}"
 : "${ASSETS_SHA:?ASSETS_SHA is required}"
 : "${ASSETS_ARCHIVE:?ASSETS_ARCHIVE is required}"
 : "${ASSETS_CHECKSUM:?ASSETS_CHECKSUM is required}"
@@ -34,6 +37,9 @@ shared_partners="$shared_root/assets-partners"
 managed_assets_root="$deploy_root/managed-assets"
 managed_assets_path="$managed_assets_root/$ASSETS_SHA"
 managed_assets_prepare="$managed_assets_root/.prepare-$ASSETS_SHA-$$"
+managed_vendor_root="$deploy_root/managed-vendor"
+managed_vendor_path="$managed_vendor_root/$VENDOR_SHA"
+managed_vendor_prepare="$managed_vendor_root/.prepare-$VENDOR_SHA-$$"
 public_release_entries=(
     assets build js css fonts images
     android-chrome-192x192.png android-chrome-512x512.png apple-touch-icon.png
@@ -50,6 +56,10 @@ if [[ ! "$ASSETS_SHA" =~ ^[0-9a-f]{40}$ ]]; then
     echo "Invalid assets SHA." >&2
     exit 64
 fi
+if [[ ! "$VENDOR_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+    echo "Invalid vendor SHA." >&2
+    exit 64
+fi
 
 for required_path in "$PRODUCTION_PATH/.env" "$PRODUCTION_PATH/storage" "$PRODUCTION_PATH/resources/icons" "$PRODUCTION_PUBLIC_PATH/uploads" "$PRODUCTION_PUBLIC_PATH/storage" "$PRODUCTION_PUBLIC_PATH/assets"; do
     if [ ! -e "$required_path" ]; then
@@ -58,7 +68,7 @@ for required_path in "$PRODUCTION_PATH/.env" "$PRODUCTION_PATH/storage" "$PRODUC
     fi
 done
 
-mkdir -p "$releases_root" "$deploy_root/bootstrap-backups" "$managed_assets_root"
+mkdir -p "$releases_root" "$deploy_root/bootstrap-backups" "$managed_assets_root" "$managed_vendor_root"
 exec 9>"$deploy_root/deployment.lock"
 flock -w 300 9
 
@@ -127,6 +137,7 @@ cleanup() {
     fi
     rm -rf "$temporary_release"
     rm -rf "$managed_assets_prepare"
+    rm -rf "$managed_vendor_prepare"
     if [ -n "$headers_file" ]; then
         rm -f "$headers_file"
     fi
@@ -135,6 +146,23 @@ cleanup() {
 trap cleanup EXIT
 
 printf '%s  %s\n' "$RELEASE_CHECKSUM" "$RELEASE_ARCHIVE" | sha256sum -c -
+
+if [ ! -d "$managed_vendor_path" ]; then
+    printf '%s  %s\n' "$VENDOR_CHECKSUM" "$VENDOR_ARCHIVE" | sha256sum -c -
+    mkdir "$managed_vendor_prepare"
+    tar -xzf "$VENDOR_ARCHIVE" -C "$managed_vendor_prepare"
+    extracted_vendor="$managed_vendor_prepare/vendor"
+    if [ ! -f "$extracted_vendor/autoload.php" ] || [ -L "$extracted_vendor" ]; then
+        echo 'Vendor archive is incomplete or contains an unexpected symlink.' >&2
+        exit 1
+    fi
+    printf '%s\n' "$VENDOR_SHA" > "$extracted_vendor/.vendor-sha"
+    mv "$extracted_vendor" "$managed_vendor_path"
+fi
+if [ "$(cat "$managed_vendor_path/.vendor-sha" 2>/dev/null || true)" != "$VENDOR_SHA" ]; then
+    echo 'Managed production vendor has an unexpected marker.' >&2
+    exit 1
+fi
 
 if [ -L "$current_link" ]; then
     old_target=$(readlink "$current_link")
@@ -222,12 +250,13 @@ if [ ! -d "$release_path" ]; then
         exit 1
     fi
 
-    if [ -e "$temporary_release/.env" ] || [ ! -f "$temporary_release/vendor/autoload.php" ] || [ ! -f "$temporary_release/public/build/manifest.json" ]; then
+    if [ -e "$temporary_release/.env" ] || [ -e "$temporary_release/vendor" ] || [ ! -f "$temporary_release/public/build/manifest.json" ]; then
         echo "Release archive is incomplete or contains a forbidden environment file." >&2
         exit 1
     fi
 
     ln -s "$PRODUCTION_PATH/.env" "$temporary_release/.env"
+    ln -s "$managed_vendor_path" "$temporary_release/vendor"
     ln -s "$PRODUCTION_PATH/storage" "$temporary_release/storage"
     mkdir -p "$temporary_release/resources"
     ln -s "$PRODUCTION_PATH/resources/icons" "$temporary_release/resources/icons"
@@ -321,5 +350,6 @@ fi
 
 bootstrap_started=false
 rm -f "$RELEASE_ARCHIVE"
+rm -f "$VENDOR_ARCHIVE"
 rm -f "$ASSETS_ARCHIVE"
 echo "Production release $RELEASE_SHA is active."
