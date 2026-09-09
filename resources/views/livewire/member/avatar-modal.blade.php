@@ -220,9 +220,12 @@ class="fixed inset-0 z-50 overflow-y-auto"
                     <div x-show="activeTab === 'gallery'" class="space-y-4">
                         <div class="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3 max-h-none sm:max-h-[450px] overflow-y-visible sm:overflow-y-auto pr-0 sm:pr-2 custom-scrollbar">
                             @foreach($galleryAssets as $asset)
-                                <button type="button" wire:key="asset-{{ $asset->id }}" @click="selectFromGallery(@js($asset->getUrl()))"
-                                        class="group relative aspect-square rounded-xl overflow-hidden border-2 transition-all"
-                                        :class="previewUrl === @js($asset->getUrl()) ? 'border-primary ring-2 ring-primary/20' : 'border-slate-100 hover:border-primary/50'">
+                                <div wire:key="asset-{{ $asset->id }}" role="button" tabindex="0"
+                                     @click="selectFromGallery(@js($asset->getUrl()))"
+                                     @keydown.enter="selectFromGallery(@js($asset->getUrl()))"
+                                     @keydown.space.prevent="selectFromGallery(@js($asset->getUrl()))"
+                                     class="group relative aspect-square cursor-pointer rounded-xl overflow-hidden border-2 transition-all"
+                                     :class="previewUrl === @js($asset->getUrl()) ? 'border-primary ring-2 ring-primary/20' : 'border-slate-100 hover:border-primary/50'">
                                     <img src="{{ $asset->getUrl('thumb') }}"
                                          srcset="{{ $asset->getUrl('thumb') }} 200w, {{ $asset->getUrl() }} 1000w"
                                          sizes="(max-width: 640px) 33vw, 150px"
@@ -239,7 +242,7 @@ class="fixed inset-0 z-50 overflow-y-auto"
                                             <i class="fa-light fa-trash-can text-[10px]"></i>
                                         </button>
                                     @endif
-                                </button>
+                                </div>
                             @endforeach
                         </div>
 
