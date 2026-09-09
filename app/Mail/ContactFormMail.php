@@ -5,6 +5,7 @@ namespace App\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -29,7 +30,7 @@ class ContactFormMail extends Mailable implements ShouldQueue
     {
         return new Envelope(
             from: config('mail.from.address'),
-            replyTo: [$this->senderEmail => $this->senderName],
+            replyTo: [new Address($this->senderEmail, $this->senderName)],
             to: [$this->recipientEmail],
             subject: $this->subjectText,
         );
