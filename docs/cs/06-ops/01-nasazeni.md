@@ -18,6 +18,8 @@ Stabilní `www/index.php` načítá aplikaci přes `current`. Verzované veřejn
 
 Deployment drží serverový `flock`, ověří SHA-256 archivu, připraví migrace a cache mimo běžící verzi a potom atomicky přepne `current`. Nový release musí na `/up` vrátit hlavičku `X-App-Release` s přesným SHA. Při neúspěchu se pointer vrátí na předchozí verzi. Redis full-page cache používá SHA v klíči, takže přepnutí nevyžaduje globální mazání cache.
 
+Při přípravě nové verze se cache konfigurace, rout, pohledů, Filament komponent a Blade ikon vytvářejí právě jednou. Přenosové soubory pro každý release mají vlastní adresář podle SHA a samotné atomické povýšení se po výpadku SSH neopakuje; opakují se pouze bezpečné čtecí a stagingové kroky.
+
 Pouze první přechod krátce zapne Laravel maintenance režim, počká na skutečné ukončení všech již běžících PHP requestů a přesune původní fyzický adresář partnerských log do sdílené cesty. Pokud se request neuvolní do pěti minut, deployment přesun zruší a aplikaci znovu zapne. Původní i nový release pak používají stejná data i při rollbacku. Další deploymenty tento krok přeskakují.
 
 ### Běžné použití

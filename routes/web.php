@@ -11,6 +11,8 @@ use App\Http\Controllers\ScreenshotRenderController;
 use App\Http\Controllers\System\CronController;
 use App\Http\Middleware\EnsureValidTwoFactorChallenge;
 use App\Services\BrandingService;
+use App\Support\AuthRedirect;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 use Laravel\Fortify\Http\Controllers\TwoFactorAuthenticatedSessionController;
@@ -30,8 +32,15 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->middleware('web')
     ->name('logout');
 
-// Sjednocení přihlašovací stránky na admin/login (Filament)
-Route::get('/login', fn () => redirect()->to('/admin/login'))->name('login');
+// Členské přihlášení nepřesměrováváme přes náročnější Filament administraci.
+// Administrace zůstává dostupná samostatně na /admin/login.
+Route::get('/login', function (Request $request) {
+    if ($request->user()) {
+        return redirect()->to(AuthRedirect::getTargetUrl($request->user(), $request));
+    }
+
+    return view('auth.login');
+})->middleware('web')->name('login');
 
 // Změna jazyka (moderní přístup přes session)
 Route::get('/language/{lang}', LanguageController::class)

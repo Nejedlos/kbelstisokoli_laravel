@@ -66,8 +66,10 @@ class DeploymentSafetyTest extends TestCase
         $this->assertStringContainsString('managed-vendor', $upload);
         $this->assertStringContainsString('VENDOR_CHECKSUM=', $upload);
         $this->assertStringContainsString('remote_bash', $upload);
+        $this->assertStringContainsString('remote_bash_once', $upload);
+        $this->assertStringContainsString('incoming/$release_sha', $upload);
         $this->assertStringContainsString('bash -lc', $upload);
-        $this->assertStringContainsString('then exit 254', $upload);
+        $this->assertStringNotContainsString('then exit 254', $upload);
 
         $localFallback = file_get_contents(base_path('scripts/deploy-production-from-local.sh'));
         $this->assertStringContainsString('Local fallback deploy requires a clean working tree.', $localFallback);
@@ -105,6 +107,8 @@ class DeploymentSafetyTest extends TestCase
             strpos($deployment, 'mv "$temporary_release" "$release_path"'),
             strpos($deployment, '"$php_binary" "$release_path/artisan" optimize'),
         );
+        $this->assertStringContainsString('optimize --except=blade-icons --no-interaction', $deployment);
+        $this->assertStringNotContainsString('"$php_binary" "$release_path/artisan" filament:optimize', $deployment);
         $this->assertStringContainsString('for health_path in /up / /treninky /akce /zapasy /tymy', $deployment);
         $this->assertStringContainsString('&& [ "$current_switched" != true ]', $deployment);
         $this->assertStringNotContainsString('rm -rf "$PRODUCTION_PUBLIC_PATH', $deployment);

@@ -6,6 +6,21 @@ use Tests\TestCase;
 
 class MobileLoginTest extends TestCase
 {
+    public function test_member_login_renders_the_native_form_without_an_admin_redirect(): void
+    {
+        $this->get('/login')
+            ->assertOk()
+            ->assertSee('Vítejte zpět')
+            ->assertSee('type="password"', false);
+    }
+
+    public function test_authenticated_member_reopening_native_login_goes_to_member_dashboard(): void
+    {
+        $this->actingAs($this->createMember())
+            ->get('/login')
+            ->assertRedirect(route('member.dashboard'));
+    }
+
     public function test_authenticated_member_reopening_login_goes_to_member_dashboard(): void
     {
         $member = $this->createMember();

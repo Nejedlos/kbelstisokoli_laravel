@@ -277,8 +277,10 @@ if [ ! -d "$release_path" ]; then
     release_created=true
 
     "$php_binary" "$release_path/artisan" migrate --force --no-interaction
-    "$php_binary" "$release_path/artisan" filament:optimize
-    "$php_binary" "$release_path/artisan" optimize --no-interaction
+    # `optimize` already runs Filament's component cache. Excluding the
+    # standalone Blade Icons task leaves Filament to build the same manifest
+    # once, instead of scanning the icon tree a second time.
+    "$php_binary" "$release_path/artisan" optimize --except=blade-icons --no-interaction
 fi
 
 if [ "$(cat "$release_path/.release-sha" 2>/dev/null || true)" != "$RELEASE_SHA" ]; then

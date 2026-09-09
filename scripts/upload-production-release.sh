@@ -63,13 +63,13 @@ retry_transport() {
 }
 
 remote="$PRODUCTION_SSH_USER@$PRODUCTION_SSH_HOST"
-incoming="$PRODUCTION_PATH/deploy/incoming"
+incoming="$PRODUCTION_PATH/deploy/incoming/$release_sha"
 managed_assets="$PRODUCTION_PATH/deploy/managed-assets/$assets_sha"
 managed_vendor="$PRODUCTION_PATH/deploy/managed-vendor/$vendor_sha"
 release_archive="$incoming/release-$release_sha.tgz"
 vendor_archive="$incoming/vendor-$vendor_sha.tgz"
 assets_archive="$incoming/assets-$assets_sha.tar"
-remote_script="$incoming/deploy-production-release.sh"
+remote_script="$incoming/deploy-production-release-$release_sha.sh"
 script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 release_checksum=$(sha256_file "$release_source")
 vendor_checksum=$(sha256_file "$vendor_source")
@@ -99,6 +99,14 @@ remote_bash() {
     local remote_command=$1
 
     retry_transport ssh "${ssh_options[@]}" "$remote" "bash -lc $(printf '%q' "$remote_command")"
+}
+
+# Promotion can switch the live release. Never retry it after an SSH disconnect:
+# the server-side flock, checksum validation, and rollback handle one invocation.
+remote_bash_once() {
+    local remote_command=$1
+
+    ssh "${ssh_options[@]}" "$remote" "bash -lc $(printf '%q' "$remote_command")"
 }
 
 remote_bash "mkdir -p $(printf '%q' "$incoming")"
@@ -138,4 +146,4 @@ else
 fi
 
 deploy_command="PRODUCTION_PATH=$(printf '%q' "$PRODUCTION_PATH") PRODUCTION_PUBLIC_PATH=$(printf '%q' "$PRODUCTION_PUBLIC_PATH") RELEASE_SHA=$(printf '%q' "$release_sha") RELEASE_ARCHIVE=$(printf '%q' "$release_archive") RELEASE_CHECKSUM=$(printf '%q' "$release_checksum") VENDOR_SHA=$(printf '%q' "$vendor_sha") VENDOR_ARCHIVE=$(printf '%q' "$vendor_archive") VENDOR_CHECKSUM=$(printf '%q' "$vendor_checksum") ASSETS_SHA=$(printf '%q' "$assets_sha") ASSETS_ARCHIVE=$(printf '%q' "$assets_archive") ASSETS_CHECKSUM=$(printf '%q' "$assets_checksum") HEALTH_URL=$(printf '%q' "$health_url") PHP_BINARY=$(printf '%q' "$php_binary") bash $(printf '%q' "$remote_script")"
-remote_bash "$deploy_command; status=\$?; if [ \"\$status\" -eq 255 ]; then exit 254; fi; exit \"\$status\""
+remote_bash_once "$deploy_command"
