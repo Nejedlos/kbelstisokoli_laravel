@@ -276,7 +276,19 @@ if [ ! -d "$release_path" ]; then
     mv "$temporary_release" "$release_path"
     release_created=true
 
-    "$php_binary" "$release_path/artisan" migrate --force --no-interaction
+    # A successfully promoted release has already completed its migration
+    # check. When the migration tree is byte-for-byte unchanged, invoking
+    # Laravel's migration bootstrap only adds avoidable production latency.
+    # Any added, removed, or edited migration keeps the full forced check.
+    if [ -n "$old_target" ] \
+        && [ -d "$current_link/database/migrations" ] \
+        && [ -d "$release_path/database/migrations" ] \
+        && diff -qr "$current_link/database/migrations" "$release_path/database/migrations" >/dev/null; then
+        echo 'Migration files are unchanged; skipping migration check.'
+    else
+        "$php_binary" "$release_path/artisan" migrate --force --no-interaction
+    fi
+
     # `optimize` already runs Filament's component cache. Excluding the
     # standalone Blade Icons task leaves Filament to build the same manifest
     # once, instead of scanning the icon tree a second time.

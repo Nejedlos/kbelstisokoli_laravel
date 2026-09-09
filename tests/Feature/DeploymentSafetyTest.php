@@ -91,6 +91,9 @@ class DeploymentSafetyTest extends TestCase
         $this->assertStringContainsString('ln -s "$managed_assets_path" "$temporary_release/public/assets"', $deployment);
         $this->assertStringContainsString('cp -al "$managed_vendor_path/." "$temporary_release/vendor/"', $deployment);
         $this->assertStringContainsString('Managed production vendor has an unexpected marker.', $deployment);
+        $this->assertStringContainsString('diff -qr "$current_link/database/migrations" "$release_path/database/migrations"', $deployment);
+        $this->assertStringContainsString('Migration files are unchanged; skipping migration check.', $deployment);
+        $this->assertStringContainsString('migrate --force --no-interaction', $deployment);
         $this->assertStringContainsString('ln -s "$shared_partners" "$extracted_assets/img/partners"', $deployment);
         $this->assertStringContainsString('down --retry=5 --no-interaction', $deployment);
         $this->assertStringContainsString('resume_after_partner_move', $deployment);

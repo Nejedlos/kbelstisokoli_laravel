@@ -20,6 +20,8 @@ Deployment drží serverový `flock`, ověří SHA-256 archivu, připraví migra
 
 Při přípravě nové verze se cache konfigurace, rout, pohledů, Filament komponent a Blade ikon vytvářejí právě jednou. Přenosové soubory pro každý release mají vlastní adresář podle SHA a samotné atomické povýšení se po výpadku SSH neopakuje; opakují se pouze bezpečné čtecí a stagingové kroky.
 
+Migrace se při release s nezměněným stromem `database/migrations` bezpečně přeskočí: aktivní předchozí release už úspěšně dokončil povinnou migraci. Přidání, úprava nebo odstranění migračního souboru vždy vynutí standardní `migrate --force` před atomickým přepnutím.
+
 Pouze první přechod krátce zapne Laravel maintenance režim, počká na skutečné ukončení všech již běžících PHP requestů a přesune původní fyzický adresář partnerských log do sdílené cesty. Pokud se request neuvolní do pěti minut, deployment přesun zruší a aplikaci znovu zapne. Původní i nový release pak používají stejná data i při rollbacku. Další deploymenty tento krok přeskakují.
 
 ### Běžné použití
