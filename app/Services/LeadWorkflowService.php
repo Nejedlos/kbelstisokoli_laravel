@@ -45,7 +45,7 @@ class LeadWorkflowService
     {
         return User::query()
             ->where('is_active', true)
-            ->whereHas('roles', fn (Builder $query) => $query->whereIn('name', ['admin', 'super_admin']))
+            ->whereHas('roles', fn (Builder $query) => $query->whereIn('name', ['admin', 'super_admin', 'coach']))
             ->orderBy('name');
     }
 

@@ -15,6 +15,8 @@ U každé úlohy vidíte její poslední stav:
 - **Running (Modrá):** Úloha právě probíhá.
 - **Failed (Červená):** Došlo k chybě. V takovém případě doporučujeme nahlédnout do **Logů úloh**, kde je popsána příčina selhání (např. výpadek API ČBF).
 
+Pokud se úloha přeruší limitem času, systém ji označí jako Failed a zaznamená důvod. Nespouštějte ji opakovaně ručně; po odstranění příčiny ji nechte proběhnout v dalším termínu podle rozvrhu, případně ji spusťte ručně právě jednou.
+
 ### Manuální spuštění (Run Now)
 Někdy nechcete čekat na automatický interval (např. právě jste nahráli nový bankovní výpis nebo skončil zápas).
 1. V seznamu úloh najděte tu správnou.

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Mail\LeadNotificationMail;
 use App\Models\LeadRoutingSetting;
+use App\Models\User;
 use App\Services\LeadWorkflowService;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Mail;
@@ -11,6 +12,23 @@ use Tests\TestCase;
 
 class LeadWorkflowServiceTest extends TestCase
 {
+    public function test_it_offers_active_administrators_and_coaches_as_responsible_people(): void
+    {
+        $admin = $this->createAdmin(['name' => 'Admin']);
+        $coach = User::factory()->create(['name' => 'Coach', 'is_active' => true]);
+        $coach->assignRole('coach');
+        $inactiveCoach = User::factory()->create(['name' => 'Inactive coach', 'is_active' => false]);
+        $inactiveCoach->assignRole('coach');
+        $member = $this->createMember(['name' => 'Member']);
+
+        $eligibleIds = app(LeadWorkflowService::class)->eligibleUsers()->pluck('id')->all();
+
+        $this->assertContains($admin->id, $eligibleIds);
+        $this->assertContains($coach->id, $eligibleIds);
+        $this->assertNotContains($inactiveCoach->id, $eligibleIds);
+        $this->assertNotContains($member->id, $eligibleIds);
+    }
+
     public function test_it_assigns_a_new_lead_to_the_configured_responsible_person_and_sends_immediately(): void
     {
         Mail::fake();

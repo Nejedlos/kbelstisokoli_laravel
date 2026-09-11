@@ -10,7 +10,7 @@ Lead je potenciální člen. V systému se zobrazuje v sekci **Lidé a členové
 ### Workflow zpracování zájemce
 Doporučený postup pro náborového manažera:
 1. **Nový:** Lead se objeví v seznamu se stavem "Nový". Pokud je nastavená výchozí odpovědná osoba, přijde jí ihned e-mail s kontaktem; jinak jde upozornění technickému kontaktu.
-2. **Přiřazení a kontaktování:** V detailu zvolte odpovědnou osobu (při změně dostane upozornění) a stav **V řešení**. Manažer zavolá nebo napíše rodičům.
+2. **Přiřazení a kontaktování:** V detailu zvolte aktivního administrátora nebo trenéra jako odpovědnou osobu (při změně dostane upozornění) a stav **V řešení**. Manažer zavolá nebo napíše rodičům.
 3. **Zkušební trénink:** Pokud zájemce přijde na trénink, můžete si k leadu psát interní poznámky (např. "Šikovný, chce to zkusit").
 4. **Rozhodnutí:**
     - **Přijat:** Pokud se zájemce rozhodne pokračovat, označte lead jako **Přijat** a ručně vytvořte profil v sekci Uživatelé.

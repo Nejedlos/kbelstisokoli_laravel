@@ -4,7 +4,7 @@ Každý webový kontakt i zájem o hraní se ukládá jako lead a ihned se o ně
 
 ## Odpovědnost
 
-V **Leadech** nastavte v horní akci výchozí odpovědnou osobu. Musí jít o aktivního administrátora, protože lead obsahuje osobní kontaktní údaje. Nové leady se jí přiřadí a dorazí jí e-mail. U konkrétního leadu lze osobu změnit; novému odpovědnému se odešle samostatné upozornění.
+V **Leadech** nastavte v horní akci výchozí odpovědnou osobu. Vybírat lze aktivního administrátora nebo trenéra, protože lead obsahuje osobní kontaktní údaje. Nové leady se jí přiřadí a dorazí jí e-mail. U konkrétního leadu lze osobu změnit; novému odpovědnému se odešle samostatné upozornění.
 
 ## Stavy
 

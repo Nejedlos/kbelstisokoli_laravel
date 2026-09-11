@@ -67,3 +67,5 @@ Každý běh úlohy z administrace (Dynamické úlohy) je logován do tabulky `c
 - **Poslední běh**: Čas a výsledek (Success/Failed).
 - **Výstup (Output)**: Kompletní výstup z konzole pro diagnostiku.
 - **Doba trvání**: Jak dlouho úloha běžela.
+
+Pokud se dynamická úloha ukončí mimo vlastní příkaz (například timeoutem workeru), systém ji označí jako `Failed` a zapíše příčinu do stejného logu. Daná zpráva se opakuje nejvýše jednou; další pokus provede až následující běh podle cron výrazu. Tím se předejde souběžnému zpracování jedné úlohy a chybě „attempted too many times“.
