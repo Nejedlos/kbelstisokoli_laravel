@@ -135,7 +135,7 @@ jobs:
         env:
           FONTAWESOME_TOKEN: ${{ secrets.FONTAWESOME_TOKEN }}
         run: |
-          npm ci --no-audit --no-fund
+          scripts/prepare-production-node-modules.sh
           npm run build
 
       - name: Prepare production dependencies and release archive

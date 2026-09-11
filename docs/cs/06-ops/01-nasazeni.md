@@ -46,6 +46,12 @@ Přepínač `--ci-validated` použijte jen tehdy, když krok `Validate code` pro
 
 Výchozí SSH cíl odpovídá tomuto projektu. Lze jej dočasně přepsat proměnnými `PRODUCTION_SSH_HOST`, `PRODUCTION_SSH_PORT`, `PRODUCTION_SSH_USER`, `PRODUCTION_PATH` a `PRODUCTION_PUBLIC_PATH`. Přihlašovací údaje se do repozitáře neukládají; používá se místní SSH klíč a povinná kontrola `known_hosts`.
 
+### Rychlé opakované releasy
+
+Self-hosted runner i místní fallback ponechávají `node_modules` mezi releasy. Skript `scripts/prepare-production-node-modules.sh` je znovu vytvoří jen při změně `package.json`, `package-lock.json`, verze Nodeu nebo platformy; jinak znovu použije ověřený strom označený hashem těchto vstupů. Font Awesome token se pro místní fallback načítá nejdříve z proměnné prostředí, poté z macOS Keychain položky `kbelstisokoli.fontawesome-token` a až nakonec z lokálního `.env`; nikdy se neukládá do repozitáře ani release archivu.
+
+Při podezření na poškozené závislosti vynutíte úplnou obnovu příkazem `FORCE_NPM_CI=1 scripts/deploy-production-from-local.sh`. GitHub workflow provede stejnou úplnou obnovu při každé změně lockfile.
+
 ### Ruční návrat aplikace
 
 Symlink `secret/deploy/previous` ukazuje na verzi aktivní před posledním úspěšným přepnutím. Návrat se provádí pouze při vědomé produkční údržbě atomickou výměnou `current`; před návratem je nutné ověřit kompatibilitu již provedených databázových migrací.

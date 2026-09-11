@@ -20,6 +20,7 @@ class DeploymentSafetyTest extends TestCase
         $this->assertStringContainsString('process.versions.node', $workflow);
         $this->assertStringContainsString('pigz --version', $workflow);
         $this->assertSame(1, substr_count($workflow, 'npm run build'));
+        $this->assertStringContainsString('scripts/prepare-production-node-modules.sh', $workflow);
         $this->assertStringContainsString('PRODUCTION_PUBLIC_PATH: ${{ secrets.PRODUCTION_PUBLIC_PATH }}', $workflow);
         $this->assertStringContainsString('scripts/prepare-production-release.sh', $workflow);
         $this->assertStringContainsString('scripts/production-vendor-id.sh', $workflow);
@@ -76,6 +77,13 @@ class DeploymentSafetyTest extends TestCase
         $this->assertStringContainsString('Local main must exactly match origin/main.', $localFallback);
         $this->assertStringContainsString('scripts/prepare-production-release.sh', $localFallback);
         $this->assertStringContainsString('scripts/upload-production-release.sh', $localFallback);
+        $this->assertStringContainsString('scripts/prepare-production-node-modules.sh', $localFallback);
+
+        $nodeDependencies = file_get_contents(base_path('scripts/prepare-production-node-modules.sh'));
+        $this->assertStringContainsString('FONTAWESOME_TOKEN', $nodeDependencies);
+        $this->assertStringContainsString('security find-generic-password', $nodeDependencies);
+        $this->assertStringContainsString('FORCE_NPM_CI', $nodeDependencies);
+        $this->assertStringContainsString('package-lock.json', $nodeDependencies);
     }
 
     public function test_release_promotion_preserves_persistent_paths_and_has_rollback_guards(): void

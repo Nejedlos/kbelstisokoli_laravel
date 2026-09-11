@@ -47,23 +47,7 @@ if [ "$ci_validated" != true ]; then
     php artisan test --parallel --processes=4 --compact
 fi
 
-if [ -z "${FONTAWESOME_TOKEN:-}" ] && [ -f .env ]; then
-    FONTAWESOME_TOKEN=$(php -r '
-        foreach (file(".env", FILE_IGNORE_NEW_LINES) ?: [] as $line) {
-            if (str_starts_with(trim($line), "FONTAWESOME_TOKEN=")) {
-                echo trim(trim(substr($line, strpos($line, "=") + 1)), "\"\x27");
-                break;
-            }
-        }
-    ')
-    export FONTAWESOME_TOKEN
-fi
-if [ -z "${FONTAWESOME_TOKEN:-}" ]; then
-    echo "FONTAWESOME_TOKEN must be available in the environment or local .env." >&2
-    exit 1
-fi
-
-npm ci --no-audit --no-fund
+scripts/prepare-production-node-modules.sh
 npm run build
 
 if ! git diff --quiet || ! git diff --cached --quiet || [ -n "$(git status --short --untracked-files=normal)" ]; then
