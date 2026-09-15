@@ -17,6 +17,8 @@ U každé úlohy vidíte její poslední stav:
 
 Pokud se úloha přeruší limitem času, systém ji označí jako Failed a zaznamená důvod. Nespouštějte ji opakovaně ručně; po odstranění příčiny ji nechte proběhnout v dalším termínu podle rozvrhu, případně ji spusťte ručně právě jednou.
 
+Technické hlášení „attempted too many times“, které pouze uzavírá již zaznamenané selhání této plánované úlohy, nevytváří další duplicitní chybový e-mail. Skutečný timeout a ostatní chyby se nadále hlásí. Přístupový token scheduleru je v chybových reportech skrytý.
+
 ### Manuální spuštění (Run Now)
 Někdy nechcete čekat na automatický interval (např. právě jste nahráli nový bankovní výpis nebo skončil zápas).
 1. V seznamu úloh najděte tu správnou.

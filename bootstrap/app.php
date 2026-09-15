@@ -22,6 +22,8 @@ use App\Mail\ErrorMail;
 use App\Models\CronTask;
 use App\Support\AuthRedirect;
 use App\Support\ErrorMailThrottle;
+use App\Support\ErrorReportPolicy;
+use App\Support\ErrorReportSanitizer;
 use Filament\Http\Middleware\SetUpPanel;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Middleware\Authenticate;
@@ -243,10 +245,14 @@ $app = Application::configure(basePath: dirname(__DIR__))
 
         // Odeslání e-mailu s chybou na produkci (vynechá 4xx chyby)
         $exceptions->report(function (Throwable $e) {
+            $requestUrl = app()->bound('request')
+                ? ErrorReportSanitizer::sanitizeUrl(request()->fullUrl())
+                : 'CLI';
+
             if (app()->bound('log')) {
                 Log::error('App Exception: '.$e->getMessage(), [
                     'exception' => $e,
-                    'url' => app()->bound('request') ? request()->fullUrl() : 'CLI',
+                    'url' => $requestUrl,
                 ]);
             } else {
                 error_log('App Exception (Log facade not bound): '.$e->getMessage());
@@ -262,21 +268,11 @@ $app = Application::configure(basePath: dirname(__DIR__))
                     return; // nehlásíme 4xx
                 }
 
+                if (! ErrorReportPolicy::shouldSendEmail($e)) {
+                    return;
+                }
+
                 $request = app()->bound('request') ? request() : null;
-
-                // Sestavení hlášení s očištěním citlivých údajů
-                $sanitize = function (array $data) use (&$sanitize): array {
-                    $sensitive = ['password', 'password_confirmation', '_token', 'current_password', 'token'];
-                    foreach ($data as $k => $v) {
-                        if (in_array(strtolower((string) $k), $sensitive, true)) {
-                            $data[$k] = '[hidden]';
-                        } elseif (is_array($v)) {
-                            $data[$k] = $sanitize($v);
-                        }
-                    }
-
-                    return $data;
-                };
 
                 $headers = [];
                 if ($request) {
@@ -298,7 +294,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
                 } catch (Throwable $ignored) {
                 }
 
-                $report = [
+                $report = ErrorReportSanitizer::sanitize([
                     'timestamp' => now()->toIso8601String(),
                     'app' => [
                         'name' => config('app.name'),
@@ -317,8 +313,8 @@ $app = Application::configure(basePath: dirname(__DIR__))
                         'url' => $request->fullUrl(),
                         'method' => $request->method(),
                         'ip' => $request->ip(),
-                        'query' => $sanitize($request->query()),
-                        'input' => $sanitize($request->except(['password', 'password_confirmation', '_token', 'current_password', 'token'])),
+                        'query' => $request->query(),
+                        'input' => $request->all(),
                     ] : null,
                     'headers' => $headers,
                     'server' => [
@@ -327,14 +323,14 @@ $app = Application::configure(basePath: dirname(__DIR__))
                         'memory_usage' => memory_get_usage(true),
                     ],
                     'user' => $user,
-                ];
+                ]);
 
                 $to = config('mail.error_reporting.email');
                 $from = config('mail.error_reporting.sender', config('mail.from.address'));
 
                 if ($to) {
                     // Kontrola throttling / deduplikace chybových e-mailů
-                    if (ErrorMailThrottle::shouldThrottle($e, $request ? $request->fullUrl() : null)) {
+                    if (ErrorMailThrottle::shouldThrottle($e, $report['request']['url'] ?? null)) {
                         return;
                     }
 
@@ -385,26 +381,12 @@ $app = Application::configure(basePath: dirname(__DIR__))
                 return null;
             }
 
-            // Stejné čištění dat jako pro e-mail
-            $sanitize = function (array $data) use (&$sanitize): array {
-                $sensitive = ['password', 'password_confirmation', '_token', 'current_password', 'token'];
-                foreach ($data as $k => $v) {
-                    if (in_array(strtolower((string) $k), $sensitive, true)) {
-                        $data[$k] = '[hidden]';
-                    } elseif (is_array($v)) {
-                        $data[$k] = $sanitize($v);
-                    }
-                }
-
-                return $data;
-            };
-
             $headers = [];
             foreach ($request->headers->all() as $k => $v) {
                 $headers[$k] = is_array($v) ? implode(', ', $v) : (string) $v;
             }
 
-            $report = [
+            $report = ErrorReportSanitizer::sanitize([
                 'timestamp' => now()->toIso8601String(),
                 'app' => [
                     'name' => config('app.name'),
@@ -423,8 +405,8 @@ $app = Application::configure(basePath: dirname(__DIR__))
                     'url' => $request->fullUrl(),
                     'method' => $request->method(),
                     'ip' => $request->ip(),
-                    'query' => $sanitize($request->query()),
-                    'input' => $sanitize($request->except(['password', 'password_confirmation', '_token', 'current_password', 'token'])),
+                    'query' => $request->query(),
+                    'input' => $request->all(),
                 ],
                 'headers' => $headers,
                 'server' => [
@@ -432,7 +414,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
                     'sapi' => PHP_SAPI,
                     'memory_usage' => memory_get_usage(true),
                 ],
-            ];
+            ]);
 
             return response()->view('errors.500', ['report' => $report], 500);
         });

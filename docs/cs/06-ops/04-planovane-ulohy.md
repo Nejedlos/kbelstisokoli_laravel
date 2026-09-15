@@ -68,4 +68,6 @@ Každý běh úlohy z administrace (Dynamické úlohy) je logován do tabulky `c
 - **Výstup (Output)**: Kompletní výstup z konzole pro diagnostiku.
 - **Doba trvání**: Jak dlouho úloha běžela.
 
-Pokud se dynamická úloha ukončí mimo vlastní příkaz (například timeoutem workeru), systém ji označí jako `Failed` a zapíše příčinu do stejného logu. Daná zpráva se opakuje nejvýše jednou; další pokus provede až následující běh podle cron výrazu. Tím se předejde souběžnému zpracování jedné úlohy a chybě „attempted too many times“.
+Pokud se dynamická úloha ukončí mimo vlastní příkaz (například timeoutem workeru), systém ji označí jako `Failed` a zapíše příčinu do stejného logu. Daná zpráva se z fronty neopakuje; další pokus provede až následující běh podle cron výrazu. Terminální hlášení „attempted too many times“, které pouze uzavírá už zaznamenané selhání této úlohy, se neposílá podruhé e-mailem. Skutečný timeout i chyby jiných úloh zůstávají v e-mailových alertech.
+
+Chybové reporty maskují token HTTP scheduleru, hesla, cookies a autorizační hlavičky. Provozní URL s tokenem proto nekopírujte do volného textu logů ani do veřejných tiketů.

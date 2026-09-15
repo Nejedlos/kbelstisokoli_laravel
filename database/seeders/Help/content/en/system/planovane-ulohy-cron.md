@@ -15,6 +15,8 @@ For each task, you can see its latest status:
 - **Running (Blue):** The task is currently in progress.
 - **Failed (Red):** An error occurred. In this case, we recommend checking the **Task Logs**, where the cause of the failure is described (e.g., ČBF API outage).
 
+If a task exceeds its time limit, the system marks it as Failed and records the reason. The technical “attempted too many times” event that only closes an already recorded scheduled-task failure does not produce a duplicate error email. Actual timeouts and other errors are still reported. The scheduler access token is hidden in error reports.
+
 ### Manual Start (Run Now)
 Sometimes you don't want to wait for the automatic interval (e.g., you just uploaded a new bank statement or a match has finished).
 1. Find the correct task in the list.
