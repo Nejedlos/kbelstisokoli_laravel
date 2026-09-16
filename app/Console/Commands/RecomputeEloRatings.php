@@ -28,6 +28,8 @@ class RecomputeEloRatings extends Command
 
         $query = BasketballMatch::whereNotNull('score_home')
             ->whereNotNull('score_away')
+            ->whereNotNull('team_id')
+            ->whereNotNull('opponent_id')
             ->orderBy('scheduled_at', 'asc');
 
         if ($seasonId) {
@@ -60,6 +62,10 @@ class RecomputeEloRatings extends Command
         $eloRatings = []; // [season_id][team_key] => rating
 
         foreach ($matches as $match) {
+            if (! $match->hasPredictionContext()) {
+                continue;
+            }
+
             $seasonId = $match->season_id;
             $teamKey = TeamEloRating::getInternalTeamKey($match->team_id);
             $oppKey = TeamEloRating::getOpponentKey($match->opponent_id);

@@ -41,6 +41,9 @@ Pravděpodobnosti jsou převedeny na logity, smíchány podle vah a převedeny z
 ### Databázové tabulky
 - `team_elo_ratings`: Ukládá aktuální Elo hodnocení týmů v rámci sezóny.
 - `match_predictions`: Ukládá vypočítané predikce, faktory a slovní vysvětlení.
+- Predikce a Elo se počítají jen pro zápasy s jednoznačně vyplněným interním
+  `team_id` a `opponent_id`. Vícetýmové zápasy bez primárního týmu se bezpečně
+  přeskočí, protože jednu predikci nelze přiřadit více týmům současně.
 
 ### Proces výpočtu
 1. **Trigger:** `MatchPredictionObserver` zachytí změnu v modelu `BasketballMatch` (např. vytvoření zápasu, zadání výsledku) nebo `StatisticRow` (nahrání boxscore).

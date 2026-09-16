@@ -30,7 +30,7 @@ class PredictionService
 
     public function predict(BasketballMatch $match): ?MatchPrediction
     {
-        if (! $match->opponent_id) {
+        if (! $match->hasPredictionContext()) {
             return null;
         }
 

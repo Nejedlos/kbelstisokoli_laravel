@@ -101,6 +101,17 @@ class BasketballMatch extends Model
         return $this->hasOne(MatchPrediction::class, 'basketball_match_id');
     }
 
+    /**
+     * Predikce a Elo vyžadují právě jeden interní tým a jednoho soupeře.
+     *
+     * team_id je po zavedení vícetýmové vazby záměrně nullable. Zápasy bez
+     * jednoznačného primárního týmu proto nelze bezpečně zahrnout do výpočtu.
+     */
+    public function hasPredictionContext(): bool
+    {
+        return $this->team_id !== null && $this->opponent_id !== null;
+    }
+
     public function statisticRows(): HasMany
     {
         return $this->hasMany(StatisticRow::class, 'basketball_match_id')

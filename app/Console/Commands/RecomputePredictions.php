@@ -14,7 +14,9 @@ class RecomputePredictions extends Command
 
     public function handle(): int
     {
-        $query = BasketballMatch::query();
+        $query = BasketballMatch::query()
+            ->whereNotNull('team_id')
+            ->whereNotNull('opponent_id');
 
         if (! $this->option('all')) {
             $query->whereIn('status', ['planned', 'scheduled']);

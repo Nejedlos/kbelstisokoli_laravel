@@ -17,7 +17,7 @@ class MatchPredictionObserver
     {
         if ($model instanceof BasketballMatch) {
             // Jen pro budoucí nebo čerstvě odehrané zápasy
-            if (in_array($model->status, ['planned', 'scheduled'])) {
+            if ($model->hasPredictionContext() && in_array($model->status, ['planned', 'scheduled'])) {
                 ComputeMatchPredictionJob::dispatch($model->id);
             }
 
