@@ -72,6 +72,7 @@ Artisan::command('telescope:clear {--all : Smazat úplně všechno}', function (
 
 use App\Jobs\Stats\SyncTeamSeasonJob;
 use App\Models\ExternalTeamSeasonConfig;
+use App\Services\System\ScheduledQueueWorker;
 use Illuminate\Console\Events\CommandFinished;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schedule;
@@ -81,19 +82,13 @@ Schedule::call(fn () => Artisan::call('page-cache:prime'))->name('page-cache:pri
 
 // Jednorázový dávkový worker pro hosting bez trvalého queue procesu.
 // Limity chrání HTTP cron před timeoutem, withoutOverlapping brání souběžným workerům.
-Schedule::call(function (): void {
-    try {
-        Artisan::call('queue:work', [
-            '--stop-when-empty' => true,
-            '--max-jobs' => 25,
-            '--max-time' => 120,
-            '--tries' => 3,
-        ]);
-    } catch (Throwable $exception) {
-        // Už označený failed job nesmí shodit celý HTTP scheduler endpoint.
-        // Detail včetně názvu dynamické úlohy ukládá RunCronTaskJob::failed().
-        Log::error('Queue worker maintenance failed.', ['exception' => $exception]);
-    }
+Schedule::call(function (ScheduledQueueWorker $worker): void {
+    $worker->run('default', [
+        '--stop-when-empty' => true,
+        '--max-jobs' => 25,
+        '--max-time' => 120,
+        '--tries' => 3,
+    ]);
 })
     ->name('queue-worker-maintenance')
     ->everyMinute()
@@ -105,7 +100,7 @@ Schedule::call(fn () => Artisan::call('rsvp:reminders'))
     ->everyFifteenMinutes()
     ->withoutOverlapping(10)
     ->onOneServer();
-Schedule::call(fn () => Artisan::call('queue:work', [
+Schedule::call(fn (ScheduledQueueWorker $worker) => $worker->run('critical-mail', [
     '--queue' => 'critical-mail',
     '--stop-when-empty' => true,
     '--max-jobs' => 200,

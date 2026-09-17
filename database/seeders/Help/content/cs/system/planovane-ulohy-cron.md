@@ -19,6 +19,10 @@ Pokud se úloha přeruší limitem času, systém ji označí jako Failed a zazn
 
 Technické hlášení „attempted too many times“, které pouze uzavírá již zaznamenané selhání této plánované úlohy, nevytváří další duplicitní chybový e-mail. Skutečný timeout a ostatní chyby se nadále hlásí. Přístupový token scheduleru je v chybových reportech skrytý.
 
+Při krátkém výpadku databáze systém queue worker v dané minutě bezpečně přeskočí
+a automaticky jej zkusí znovu při dalším běhu. První upozornění na výpadek se
+odešle, opakované technické projevy stejného incidentu se dočasně sloučí.
+
 ### Manuální spuštění (Run Now)
 Někdy nechcete čekat na automatický interval (např. právě jste nahráli nový bankovní výpis nebo skončil zápas).
 1. V seznamu úloh najděte tu správnou.

@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use Illuminate\Database\LostConnectionDetector;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -63,6 +64,13 @@ class ErrorMailThrottle
      */
     private static function generateFingerprint(Throwable $e, ?string $url = null): string
     {
+        // Výpadek jedné databáze se v různých vrstvách projeví jako PDOException
+        // i QueryException a na různých URL. Jde ale o jediný provozní incident,
+        // proto po prvním alertu další projevy v rámci TTL sloučíme.
+        if ((new LostConnectionDetector)->causedByLostConnection($e)) {
+            return hash('sha256', 'database-connection-unavailable');
+        }
+
         $class = get_class($e);
         $message = $e->getMessage();
         $file = $e->getFile();

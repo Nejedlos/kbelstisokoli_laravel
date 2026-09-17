@@ -4,12 +4,16 @@ namespace Tests\Feature;
 
 use App\Jobs\RunCronTaskJob;
 use App\Mail\ErrorMail;
+use App\Support\ErrorMailThrottle;
 use App\Support\ErrorReportSanitizer;
 use Illuminate\Contracts\Queue\Job;
+use Illuminate\Database\QueryException;
 use Illuminate\Queue\MaxAttemptsExceededException;
 use Illuminate\Queue\TimeoutExceededException;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 use Mockery;
+use PDOException;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -77,6 +81,34 @@ class ErrorReportHotfixTest extends TestCase
         $this->assertStringNotContainsString('cookie-secret', $encoded);
         $this->assertStringNotContainsString('signature-secret', $encoded);
         $this->assertStringContainsString('json=1', $encoded);
+    }
+
+    public function test_it_deduplicates_database_outage_across_exception_types_and_urls(): void
+    {
+        Cache::flush();
+        config([
+            'app.env' => 'production',
+            'mail.error_reporting.dedup_enabled' => true,
+            'mail.error_reporting.dedup_environments' => ['production'],
+            'mail.error_reporting.dedup_ttl' => 900,
+        ]);
+
+        $pdoException = new PDOException('SQLSTATE[HY000] [2002] Connection refused', 2002);
+        $queryException = new QueryException(
+            'mysql',
+            'select * from `new_pages` where `slug` = ?',
+            ['legacy/path.php'],
+            new PDOException('SQLSTATE[HY000] [2002] Connection refused', 2002),
+        );
+
+        $this->assertFalse(ErrorMailThrottle::shouldThrottle(
+            $pdoException,
+            'https://example.test/system/schedule/[hidden]?json=1',
+        ));
+        $this->assertTrue(ErrorMailThrottle::shouldThrottle(
+            $queryException,
+            'https://example.test/legacy/path.php',
+        ));
     }
 
     /**

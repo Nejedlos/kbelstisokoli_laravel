@@ -218,5 +218,5 @@ Route::name('public.')->middleware(['public.maintenance', 'redirects'])->group(f
     // Generic pages (always at the end of the group)
     Route::get('/{slug}', [PageController::class, 'show'])
         ->name('pages.show')
-        ->where('slug', '^(?!admin|clenska-sekce|login|logout|logout-success|two-factor|auth|user|api|up|system|robots\.txt|sitemap\.xml|llms\.txt).*$');
+        ->where('slug', '^(?!admin|clenska-sekce|login|logout|logout-success|two-factor|auth|user|api|up|system)[A-Za-z0-9][A-Za-z0-9_-]*$');
 });

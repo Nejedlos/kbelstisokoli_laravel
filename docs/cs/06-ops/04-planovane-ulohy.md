@@ -70,4 +70,9 @@ Každý běh úlohy z administrace (Dynamické úlohy) je logován do tabulky `c
 
 Pokud se dynamická úloha ukončí mimo vlastní příkaz (například timeoutem workeru), systém ji označí jako `Failed` a zapíše příčinu do stejného logu. Daná zpráva se z fronty neopakuje; další pokus provede až následující běh podle cron výrazu. Terminální hlášení „attempted too many times“, které pouze uzavírá už zaznamenané selhání této úlohy, se neposílá podruhé e-mailem. Skutečný timeout i chyby jiných úloh zůstávají v e-mailových alertech.
 
+Před spuštěním databázových queue workerů se ověří dostupnost databáze. Při
+krátkém výpadku se worker v dané minutě bezpečně přeskočí a další plánovaný běh
+jej zkusí znovu. První chyba spojení zůstane nahlášena, ale další PDO a SQL
+projevy stejného výpadku se po dobu 15 minut sloučí do jednoho incidentu.
+
 Chybové reporty maskují token HTTP scheduleru, hesla, cookies a autorizační hlavičky. Provozní URL s tokenem proto nekopírujte do volného textu logů ani do veřejných tiketů.
