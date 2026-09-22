@@ -59,6 +59,7 @@ class AttendanceController extends Controller
 
         $matchesQuery = BasketballMatch::with([
             'team.activePlayers:player_profiles.id,user_id',
+            'teams.activePlayers:player_profiles.id,user_id',
             'opponent',
             'attendances' => fn ($q) => $q->where('user_id', $user->id),
             'prediction',
@@ -68,7 +69,10 @@ class AttendanceController extends Controller
                 'attendances as declined_count' => fn ($q) => $q->where('planned_status', 'declined'),
                 'attendances as maybe_count' => fn ($q) => $q->where('planned_status', 'maybe'),
             ])
-            ->when($activeTeamId, fn ($q) => $q->where('team_id', $activeTeamId));
+            // Zápasy mohou být přiřazené starým team_id i novou M:N vazbou.
+            ->when($activeTeamId, fn ($q) => $q->where(fn ($sq) => $sq
+                ->where('team_id', $activeTeamId)
+                ->orWhereHas('teams', fn ($ssq) => $ssq->where('teams.id', $activeTeamId))));
 
         $eventsQuery = ClubEvent::with([
             'teams.activePlayers:player_profiles.id,user_id',
@@ -224,9 +228,13 @@ class AttendanceController extends Controller
 
         // Seznam roků pro filtr (unikátní roky z dostupných dat) - Cachujeme na hodinu
         $years = Cache::remember('attendance_filter_years', 3600, function () {
-            $trainingYears = Training::selectRaw('YEAR(starts_at) as year')->distinct()->pluck('year');
-            $matchYears = BasketballMatch::selectRaw('YEAR(scheduled_at) as year')->distinct()->pluck('year');
-            $eventYears = ClubEvent::selectRaw('YEAR(starts_at) as year')->distinct()->pluck('year');
+            $yearSelect = fn (string $column) => DB::getDriverName() === 'sqlite'
+                ? "strftime('%Y', {$column}) as year"
+                : "YEAR({$column}) as year";
+
+            $trainingYears = Training::selectRaw($yearSelect('starts_at'))->distinct()->pluck('year');
+            $matchYears = BasketballMatch::selectRaw($yearSelect('scheduled_at'))->distinct()->pluck('year');
+            $eventYears = ClubEvent::selectRaw($yearSelect('starts_at'))->distinct()->pluck('year');
 
             return $trainingYears->concat($matchYears)->concat($eventYears)->unique()->sortDesc()->values();
         });
