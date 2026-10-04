@@ -9,6 +9,7 @@ use App\Models\Season;
 use App\Models\Team;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class MatchController extends Controller
 {
@@ -78,8 +79,12 @@ class MatchController extends Controller
         ));
     }
 
-    public function show(int $id): View
+    public function show(string $id): View
     {
+        if (! ctype_digit($id)) {
+            throw new NotFoundHttpException;
+        }
+
         $match = BasketballMatch::with(['teams', 'opponent', 'season', 'prediction', 'statisticRows.player'])
             ->findOrFail($id);
 

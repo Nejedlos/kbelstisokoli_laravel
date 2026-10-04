@@ -207,6 +207,7 @@ Všechny tyto části mají definované rozhraní (Interfaces) v `app/Services/S
 ### Veřejné zobrazení
 - `/zapasy`: Seznam všech zápasů s paginací.
 - `/zapasy/{id}`: Detail zápasu s výsledkem a veřejnou poznámkou.
+  Parametr `id` přijímá pouze číslice; neplatné hodnoty (např. `null`) a neexistující zápasy vracejí HTTP 404. Controller přijímá ID jako řetězec, aby ani příliš dlouhé číselné ID nevyvolalo chybu při převodu na PHP `int`.
 - `/treninky`: Přehled tréninkových informací rozdělený podle týmů.
 
 

@@ -131,7 +131,9 @@ Route::name('public.')->middleware(['public.maintenance', 'redirects'])->group(f
 
     // Zápasy
     Route::get('/zapasy', [MatchController::class, 'index'])->name('matches.index');
-    Route::get('/zapasy/{id}', [MatchController::class, 'show'])->name('matches.show');
+    Route::get('/zapasy/{id}', [MatchController::class, 'show'])
+        ->whereNumber('id')
+        ->name('matches.show');
 
     // Týmy (plural hlavní přehled)
     Route::get('/tymy', [TeamController::class, 'index'])->name('teams.index');

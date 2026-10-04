@@ -24,5 +24,6 @@ Tento proces probíhá ve dvou fázích (Pozvánka a Skutečnost):
 - **Odkazy**: U každého zápasu doporučujeme vložit odkaz na "Technický zápis ČBF", aby k němu měli hráči snadný přístup.
 
 ### Tipy a řešení problémů
+- **Neplatný odkaz na veřejný detail**: Adresa `/zapasy/{id}` vyžaduje číselné ID existujícího zápasu. Neplatný odkaz (např. `/zapasy/null`) nebo smazaný zápas vrací stránku „Nenalezeno“ (HTTP 404).
 - **Změna času**: Pokud se čas zápasu změní v ČBF, systém jej při příští synchronizaci sám aktualizuje.
 - **Mismatch v docházce**: Pokud hráč potvrdil účast, ale nepřišel, systém v tabulce zápasů zobrazí **červený badge s počtem rozporů** (Mismatches). To je signál pro trenéra, aby docházku prověřil.
