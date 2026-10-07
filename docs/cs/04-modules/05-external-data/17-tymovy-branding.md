@@ -19,7 +19,7 @@ Projekt využívá centralizovanou službu `App\Services\TeamBrandingResolver`, 
 ### Pravidla:
 1. **Interní týmy (C & E):** Pokud je týmu (podle slugu) rozpoznán jako náš interní tým (obsahuje `-c`, `-e`, nebo je to přímo `c` / `e`), zobrazuje se **týmové logo Kbelští sokoli**.
 2. **Ostatní týmy / Hlavní oddíl:** U ostatních týmů nebo v kontextu celého oddílu se zobrazuje logo **TJ Sokol Kbely Basketball**.
-3. **Zápasy:** Logo se u zápasu zobrazuje pouze u našeho týmu (domácí/hosté podle rozpisu).
+3. **Zápasy:** Logo se u zápasu zobrazuje pouze u našeho týmu (domácí/hosté podle rozpisu). Tým se rozpoznává z vazby `basketball_match_team`; starší zápasy bez této vazby používají `team_id`. Týmy C i E, včetně společných zápasů, používají týmové logo ze stejného nastavení jako hlavička webu. Pravidlo platí pro karty i detail zápasu a nevyžaduje doplňování `team_id`.
 
 ## 3. Technické detaily
 

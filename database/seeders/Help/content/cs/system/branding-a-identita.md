@@ -14,6 +14,9 @@ V této sekci nastavujete oficiální údaje:
 3. Nezapomeňte nahrát i **Favicon** (ikonku prohlížeče).
 4. Klikněte na tlačítko **Uložit změny**.
 
+#### Logo týmů v zápasech
+Týmy Muži C i Muži E používají v kartách a detailu zápasu stejné týmové logo Kbelštích sokolů jako hlavička webu. Zobrazuje se u našeho týmu podle toho, zda hraje doma nebo venku. Rozpoznání vychází z týmů přiřazených k zápasu; u starších záznamů systém podporuje také původní přiřazení jednoho týmu. Stejné logo se používá i při společném přiřazení C a E.
+
 ### Ekonomické údaje (Kritické)
 Údaje v této sekci mají přímý vliv na finance:
 - **Bankovní účet a název banky:** Tyto údaje se automaticky zobrazují členům v jejich profilu jako instrukce k platbě. Pokud je zde změníte, všechny nové instrukce budou obsahovat nové číslo účtu.

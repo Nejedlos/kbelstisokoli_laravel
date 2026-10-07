@@ -73,6 +73,12 @@ class TeamBrandingResolver
             return null;
         }
 
-        return $this->getTeamBranding($match->team);
+        // Nové zápasy mají týmy v pivotu a team_id může zůstat prázdné.
+        // C i E sdílejí stejnou identitu, také u společného zápasu.
+        $team = $match->teams->first(fn (Team $team) => $this->isInternalTeam($team))
+            ?? $match->teams->first()
+            ?? $match->team;
+
+        return $this->getTeamBranding($team);
     }
 }
