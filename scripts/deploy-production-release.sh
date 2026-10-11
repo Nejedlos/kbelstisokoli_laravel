@@ -345,16 +345,57 @@ fi
 
 headers_file="$deploy_root/.health-$RELEASE_SHA-$$"
 health_base=${HEALTH_URL%/}
-for health_path in /up / /treninky /akce /zapasy /tymy; do
-    if ! "$curl_binary" -fsS --max-time 30 -D "$headers_file" -o /dev/null "$health_base$health_path?release=$RELEASE_SHA"; then
-        echo "Production health request failed for $health_path; current will be restored." >&2
-        exit 1
-    fi
-    if ! tr -d '\r' < "$headers_file" | grep -Fxi "X-App-Release: $RELEASE_SHA" >/dev/null; then
-        echo "Production reported an unexpected release for $health_path; current will be restored." >&2
-        exit 1
-    fi
-done
+verify_release_health() {
+    # Hosting workers may retain the old current symlink for their 120-second
+    # realpath cache TTL. Allow convergence, but never accept a mixed sweep.
+    local deadline remaining request_timeout retry_delay attempt=0
+    local health_path http_status sweep_ready health_run
+    health_run="$(date +%s)-$$"
+    deadline=$(( $(date +%s) + 150 ))
+
+    while [ "$(date +%s)" -lt "$deadline" ]; do
+        attempt=$((attempt + 1))
+        sweep_ready=true
+        for health_path in /up / /treninky /akce /zapasy /tymy; do
+            remaining=$((deadline - $(date +%s)))
+            if [ "$remaining" -le 0 ]; then
+                sweep_ready=false
+                break
+            fi
+            request_timeout=$remaining
+            if [ "$request_timeout" -gt 30 ]; then request_timeout=30; fi
+            : > "$headers_file"
+            if ! http_status=$("$curl_binary" -fsS --max-time "$request_timeout" \
+                -H 'Cache-Control: no-cache' -D "$headers_file" -o /dev/null \
+                -w '%{http_code}' "$health_base$health_path?release=$RELEASE_SHA&health_attempt=$attempt&health_run=$health_run"); then
+                sweep_ready=false
+                break
+            fi
+            if [ "$http_status" != 200 ] || ! tr -d '\r' < "$headers_file" | awk -v expected="$RELEASE_SHA" '
+                tolower($1) == "x-app-release:" { count++; if (NF != 2 || $2 != expected) invalid = 1 }
+                END { exit !(count == 1 && !invalid) }
+            '; then
+                sweep_ready=false
+                break
+            fi
+        done
+        if [ "$sweep_ready" = true ] && [ "$(date +%s)" -lt "$deadline" ]; then
+            return 0
+        fi
+
+        remaining=$((deadline - $(date +%s)))
+        if [ "$remaining" -le 0 ]; then break; fi
+        echo "Production health sweep $attempt is not ready at $health_path; retrying within the release deadline." >&2
+        retry_delay=$remaining
+        if [ "$retry_delay" -gt 5 ]; then retry_delay=5; fi
+        sleep "$retry_delay"
+    done
+
+    echo 'Production health checks did not converge within 150 seconds; current will be restored.' >&2
+    return 1
+}
+
+verify_release_health
 rm -f "$headers_file"
 headers_file=''
 

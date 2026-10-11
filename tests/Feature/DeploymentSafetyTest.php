@@ -2,6 +2,9 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Filesystem\Filesystem;
+use PHPUnit\Framework\Attributes\DataProvider;
+use Symfony\Component\Process\Process;
 use Tests\TestCase;
 
 class DeploymentSafetyTest extends TestCase
@@ -113,7 +116,7 @@ class DeploymentSafetyTest extends TestCase
         $this->assertStringNotContainsString('assets build js css fonts vendor images', $deployment);
         $this->assertStringContainsString('mv -Tf "$deploy_root/.current-$RELEASE_SHA" "$current_link"', $deployment);
         $this->assertStringContainsString('rollback_bootstrap', $deployment);
-        $this->assertStringContainsString('X-App-Release: $RELEASE_SHA', $deployment);
+        $this->assertStringContainsString('awk -v expected="$RELEASE_SHA"', $deployment);
         $this->assertGreaterThan(
             strpos($deployment, 'mv "$temporary_release" "$release_path"'),
             strpos($deployment, '"$php_binary" "$release_path/artisan" optimize'),
@@ -145,6 +148,146 @@ class DeploymentSafetyTest extends TestCase
 
         $bootstrap = file_get_contents(base_path('bootstrap/app.php'));
         $this->assertStringContainsString("defined('LARAVEL_RELEASE_PUBLIC_PATH')", $bootstrap);
+    }
+
+    public static function healthScenarios(): array
+    {
+        return [
+            'ready' => ['ready', true, 6],
+            'old worker recovers' => ['transient', true, 7],
+            'last endpoint forces complete new sweep' => ['last_endpoint', true, 12],
+            '120 second cache expires' => ['cache_ttl', true, 30],
+            'persistent old release' => ['wrong_release', false, 30],
+            'redirect with correct header' => ['redirect', false, 30],
+            'duplicate release header' => ['duplicate', false, 30],
+            'extra text in release header' => ['malformed', false, 30],
+            'missing release header' => ['missing', false, 30],
+            'network timeouts exhaust remaining budget' => ['timeout', false, 5],
+        ];
+    }
+
+    #[DataProvider('healthScenarios')]
+    public function test_health_sweep_recovers_or_rolls_back_within_a_bounded_deadline(string $scenario, bool $success, int $expectedCalls): void
+    {
+        $deployment = file_get_contents(base_path('scripts/deploy-production-release.sh'));
+        preg_match('/^verify_release_health\(\) \{\n.*?^\}/ms', $deployment, $healthFunction);
+        preg_match('/^rollback_current\(\) \{\n.*?^\}/ms', $deployment, $rollbackFunction);
+        $this->assertNotEmpty($healthFunction);
+        $this->assertNotEmpty($rollbackFunction);
+
+        $directory = sys_get_temp_dir().'/sokoli-health-'.bin2hex(random_bytes(8));
+        mkdir($directory.'/releases/old', 0777, true);
+        mkdir($directory.'/releases/new');
+        symlink('releases/new', $directory.'/current');
+        file_put_contents($directory.'/clock', '0');
+        file_put_contents($directory.'/calls', '0');
+
+        // Execute the real shell health and rollback functions. Only time, HTTP
+        // and GNU mv's atomic rename are replaced by deterministic local doubles.
+        $harness = <<<'BASH'
+set -euo pipefail
+deploy_root=$TEST_DIRECTORY
+current_link="$deploy_root/current"
+old_target=releases/old
+current_switched=true
+headers_file="$deploy_root/headers"
+health_base=https://example.invalid
+curl_binary=mock_curl
+date() { cat "$deploy_root/clock"; }
+sleep() {
+    printf '%s\n' "$1" >> "$deploy_root/sleeps"
+    printf '%s' "$(( $(date +%s) + $1 ))" > "$deploy_root/clock"
+}
+mv() {
+    [ "$1" = '-Tf' ]
+    "$TEST_PHP_BINARY" -r 'exit(rename($argv[1], $argv[2]) ? 0 : 1);' "$2" "$3"
+}
+mock_curl() {
+    local headers='' maximum='' url='' cache_control='' writer=''
+    while [ "$#" -gt 0 ]; do
+        case "$1" in
+            -D) headers=$2; shift 2 ;;
+            --max-time) maximum=$2; shift 2 ;;
+            -H) cache_control=$2; shift 2 ;;
+            -w) writer=$2; shift 2 ;;
+            -o) shift 2 ;;
+            -fsS) shift ;;
+            *) url=$1; shift ;;
+        esac
+    done
+    [ "$cache_control" = 'Cache-Control: no-cache' ] || return 90
+    [ "$writer" = '%{http_code}' ] || return 91
+    local count now status=200 release=$RELEASE_SHA
+    count=$(( $(cat "$deploy_root/calls") + 1 ))
+    now=$(date +%s)
+    printf '%s' "$count" > "$deploy_root/calls"
+    printf '%s|%s|%s\n' "$now" "$maximum" "$url" >> "$deploy_root/requests"
+    case "$TEST_SCENARIO" in
+        transient) if [ "$count" -eq 1 ]; then release=old; fi ;;
+        last_endpoint) if [ "$count" -eq 6 ]; then release=old; fi ;;
+        cache_ttl) if [ "$now" -lt 120 ]; then release=old; fi ;;
+        wrong_release) release=old ;;
+        redirect) status=302 ;;
+        malformed) release="$RELEASE_SHA garbage" ;;
+        timeout)
+            printf '%s' "$((now + maximum))" > "$deploy_root/clock"
+            return 28
+            ;;
+    esac
+    printf 'HTTP/2 %s\r\n' "$status" > "$headers"
+    if [ "$TEST_SCENARIO" != missing ]; then
+        printf 'x-App-Release: %s\r\n' "$release" >> "$headers"
+    fi
+    if [ "$TEST_SCENARIO" = duplicate ]; then
+        printf 'X-App-Release: \r\n' >> "$headers"
+    fi
+    printf '%s' "$status"
+}
+BASH;
+        $harness .= "\n".$rollbackFunction[0]."\n".$healthFunction[0]."\n";
+        $harness .= <<<'BASH'
+trap 'status=$?; if [ "$status" -ne 0 ]; then rollback_current; fi; exit "$status"' EXIT
+verify_release_health
+BASH;
+
+        try {
+            $process = new Process(['bash', '-c', $harness], null, [
+                'TEST_DIRECTORY' => $directory,
+                'TEST_SCENARIO' => $scenario,
+                'TEST_PHP_BINARY' => PHP_BINARY,
+                'RELEASE_SHA' => str_repeat('a', 40),
+            ]);
+            $process->setTimeout(15)->run();
+            $this->assertSame($success ? 0 : 1, $process->getExitCode(), $process->getErrorOutput());
+            clearstatcache(true, $directory.'/current');
+            $this->assertSame($success ? 'releases/new' : 'releases/old', readlink($directory.'/current'));
+            $this->assertSame($expectedCalls, (int) file_get_contents($directory.'/calls'));
+            $elapsed = (int) file_get_contents($directory.'/clock');
+            $this->assertLessThanOrEqual(150, $elapsed);
+            if (! $success) {
+                $this->assertSame(150, $elapsed);
+                $this->assertStringContainsString('current will be restored', $process->getErrorOutput());
+            }
+            $requests = file($directory.'/requests', FILE_IGNORE_NEW_LINES);
+            foreach ($requests as $request) {
+                [$started, $timeout, $url] = explode('|', $request);
+                $this->assertGreaterThan(0, (int) $timeout);
+                $this->assertLessThanOrEqual(min(30, 150 - (int) $started), (int) $timeout);
+                $this->assertStringContainsString('?release='.str_repeat('a', 40).'&health_attempt=', $url);
+                $this->assertMatchesRegularExpression('/&health_run=0-[1-9][0-9]*$/', $url);
+            }
+            if ($expectedCalls > 6 || ! $success) {
+                $this->assertFileExists($directory.'/sleeps');
+                $this->assertGreaterThan(0, array_sum(file($directory.'/sleeps')));
+            }
+            if ($success) {
+                $finalUrls = array_map(fn (string $request): string => explode('|', $request)[2], array_slice($requests, -6));
+                $this->assertSame(['/up', '/', '/treninky', '/akce', '/zapasy', '/tymy'], array_map(fn (string $url): string => parse_url($url, PHP_URL_PATH), $finalUrls));
+                $this->assertCount(1, array_unique(array_map(fn (string $url): string => parse_url($url, PHP_URL_QUERY), $finalUrls)));
+            }
+        } finally {
+            (new Filesystem)->deleteDirectory($directory);
+        }
     }
 
     public function test_direct_deployment_does_not_import_or_delete_domain_data(): void

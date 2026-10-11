@@ -16,7 +16,7 @@ Doména stále obsluhuje skutečný adresář `/home/html/kbelstisokoli.cz/publi
 
 Stabilní `www/index.php` načítá aplikaci přes `current`. Verzované veřejné adresáře a kořenové soubory, například `assets`, `build`, `js`, `css`, `fonts`, `images`, favicony, manifest, `robots.txt` a sitemap, sledují stejný release. `assets` ukazuje na neměnný strom `secret/deploy/managed-assets/<hash>` a Composer závislosti na `secret/deploy/managed-vendor/<hash>`; zapisovaný podadresář partnerských log vede na `secret/deploy/shared/assets-partners`. `www/uploads`, `www/storage`, produkční `.env`, aplikační `storage`, dříve publikované soubory v `www/vendor` a vygenerovaná sada Blade ikon zůstávají na stabilních cestách. `.htaccess` se nemění.
 
-Deployment drží serverový `flock`, ověří SHA-256 archivu, připraví migrace a cache mimo běžící verzi a potom atomicky přepne `current`. Nový release musí na `/up` vrátit hlavičku `X-App-Release` s přesným SHA. Při neúspěchu se pointer vrátí na předchozí verzi. Redis full-page cache používá SHA v klíči, takže přepnutí nevyžaduje globální mazání cache.
+Deployment drží serverový `flock`, ověří SHA-256 archivu, připraví migrace a cache mimo běžící verzi a potom atomicky přepne `current`. Nový release musí v jednom úplném průchodu kontrol vrátit HTTP 200 a právě jednu hlavičku `X-App-Release` s přesným SHA na `/up`, `/`, `/treninky`, `/akce`, `/zapasy` a `/tymy`. Po přepnutí se celý průchod opakuje nejvýše 150 sekund, aby mohla doběhnout krátkodobá cache cest nebo hostingu; jednotlivý požadavek má limit nejvýše 30 sekund a zároveň zbývajícího času. Kontroly používají unikátní identifikátor spuštění (čas a PID), číslo pokusu a požadavek `Cache-Control: no-cache`. Při neúspěchu se pointer vrátí na předchozí verzi. Redis full-page cache používá SHA v klíči, takže přepnutí nevyžaduje globální mazání cache.
 
 Při přípravě nové verze se cache konfigurace, rout, pohledů, Filament komponent a Blade ikon vytvářejí právě jednou. Přenosové soubory pro každý release mají vlastní adresář podle SHA a samotné atomické povýšení se po výpadku SSH neopakuje; opakují se pouze bezpečné čtecí a stagingové kroky.
 
@@ -32,7 +32,7 @@ git push origin main
 
 Workflow `Validate and deploy` provede validaci i deployment. Není potřeba přihlašovat se na server ani spouštět `app:deploy`.
 
-Přenos přes SSH opakuje pouze chyby spojení. Před opakovaným přenosem porovná SHA-256 již nahraného archivu, takže po krátkém výpadku neposílá znovu kompletní soubor. Chybu migrace, validace nebo health checku neopakuje a serverový skript provede rollback.
+Přenos přes SSH opakuje pouze chyby spojení. Před opakovaným přenosem porovná SHA-256 již nahraného archivu, takže po krátkém výpadku neposílá znovu kompletní soubor. Migraci ani povýšení po chybě neopakuje. Health check má vlastní 150sekundové okno pro opakované čtení; po jeho vyčerpání serverový skript provede rollback.
 
 ### Nouzové nasazení přímo z pracovního počítače
 
