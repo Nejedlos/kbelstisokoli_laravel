@@ -32,3 +32,4 @@ Běžný člen si může dobrovolné 2FA v profilu vypnout po potřebném ověř
 - **Neplatný kód:** Zkontrolujte správný účet v ověřovací aplikaci a automatické nastavení času v telefonu.
 - **Obnova hesla:** Obnovení hesla neruší aktivní 2FA. Nadále potřebujete ověřovací aplikaci nebo záložní kód.
 - **Přerušení přihlášení:** Tlačítko odhlášení zruší i rozpracovanou 2FA výzvu.
+- **Dlouhé čekání po odeslání:** Poznamenejte si, zda čekáte po zadání hesla, po zadání kódu, nebo už při otevření přihlašovací stránky, a předejte to správci. Kvůli rychlosti není potřeba měnit heslo ani vypínat 2FA.

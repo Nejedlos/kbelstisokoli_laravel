@@ -28,6 +28,8 @@ Běžný člen si může dobrovolné 2FA v profilu vypnout po potřebném ověř
 
 ## Když se přihlášení nedaří
 
+Při přihlášení zadáváte stávající heslo. Indikátor síly a seznam požadavků se zobrazují pouze při zadávání nového hesla (vytvoření, obnovení nebo změna), nikoli při přihlášení či potvrzení stávajícího hesla.
+
 - **Ztráta telefonu:** Použijte záložní kód. Pokud nemáte ani ten, kontaktujte správce, který může 2FA resetovat. U účtů s přístupem do administrace následuje nové povinné nastavení.
 - **Neplatný kód:** Zkontrolujte správný účet v ověřovací aplikaci a automatické nastavení času v telefonu.
 - **Obnova hesla:** Obnovení hesla neruší aktivní 2FA. Nadále potřebujete ověřovací aplikaci nebo záložní kód.

@@ -31,3 +31,6 @@ Z nasbíraných dat systém automaticky generuje reporty:
 
 ### Hromadná změna týmů
 V seznamu označte tréninky a zvolte **Změnit týmy**. Po potvrzení se u označených tréninků nahradí dosavadní týmy novým výběrem. Neoznačené tréninky zůstanou beze změny.
+
+### Rychlý zápis v Reálné docházce
+V části **Reálná docházka** má každý hráč checkbox skutečné přítomnosti. Potvrzení účastníci jsou první a lze je označit hromadně tlačítkem **Označit potvrzené jako přítomné**. Seznam zobrazuje pouze potvrzené účastníky a již zapsané přítomné. Ostatní aktivní hráče svého i jiného týmu přidáte vyhledáním jména; přidaný hráč se zobrazí se zaškrtnutou přítomností. Změny checkboxů se ukládají ihned a zachovávají původní odpověď hráče. Platby se zpracují až samostatnou potvrzenou finalizací.

@@ -111,15 +111,20 @@ const isValid = (input) => {
 const isNewPasswordField = (input) => {
     if (isConfirmationField(input)) return false;
     const ident = (input.name || input.id || '').toLowerCase();
-    if (ident.includes('current')) return false;
+    const autocomplete = (input.autocomplete || '').toLowerCase();
+    if (ident.includes('current') || autocomplete === 'current-password') return false;
+    if (/(^|\/)(login|confirm-password)(\/|$)/.test(window.location.pathname)) return false;
+    if (autocomplete === 'new-password' || ident === 'new_password') return true;
 
     // Reset password page
     if (window.location.pathname.includes('reset')) {
         return ident === 'password';
     }
 
-    // Profile page or register
-    if (ident === 'new_password' || ident === 'password') return true;
+    // A generic password field is new only in a password creation form.
+    const form = input.closest('form');
+    if (ident === 'password' && (window.location.pathname.includes('register')
+        || form?.querySelector('input[name="password_confirmation"]'))) return true;
 
     return false;
 };

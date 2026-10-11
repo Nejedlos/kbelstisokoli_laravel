@@ -8,6 +8,8 @@ Sekce **Soupeři** slouží jako centrální databáze klubů, se kterými Kbel�
 3. Vyplňte **Název** klubu a **Město**, ve kterém sídlí.
 4. Můžete přidat odkaz na **Logo** (pro zobrazení na webu).
 
+Při vytváření nebo úpravě zápasu lze soupeře založit rychle přímo v poli **Soupeř**. Zadejte celý název a vyberte **Vytvořit tým „…“**. Záznam se okamžitě uloží pouze s názvem a vybere se v zápasu; město, halu nebo logo lze doplnit později zde v adresáři. Nabídka se nezobrazí, pokud už existuje název shodný bez ohledu na velikost písmen a nadbytečné mezery.
+
 ## Řešení duplicit
 Při automatických importech z cz.basketball může dojít k vytvoření duplicitních záznamů (např. "BC Slaný" a "ŠBK Slaný").
 

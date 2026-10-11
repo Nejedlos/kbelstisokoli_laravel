@@ -386,7 +386,7 @@
                        class="group flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[13px] font-bold transition-all {{ request()->routeIs($item['route']) ? 'bg-primary text-white shadow-xl shadow-primary/20 scale-[1.02]' : 'text-slate-500 hover:bg-slate-50 hover:text-secondary' }}">
                         <div class="w-8 h-8 flex items-center justify-center rounded-xl transition-colors {{ request()->routeIs($item['route']) ? 'bg-white/20' : 'bg-slate-100 group-hover:bg-white group-hover:shadow-sm group-hover:text-primary' }}">
                             @if($item['icon'] ?? null)
-                                <x-dynamic-component :component="$item['icon']" class="w-4 h-4" />
+                                <x-icon :name="$item['icon']" class="w-4 h-4" />
                             @endif
                         </div>
                         <span class="uppercase tracking-widest text-[11px]">{{ __($item['title']) }}</span>
@@ -407,7 +407,7 @@
                            class="group flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[13px] font-bold transition-all {{ request()->routeIs($item['route']) ? 'bg-secondary text-white shadow-xl shadow-secondary/20 scale-[1.02]' : 'text-slate-500 hover:bg-slate-50 hover:text-secondary' }}">
                             <div class="w-8 h-8 flex items-center justify-center rounded-xl transition-colors {{ request()->routeIs($item['route']) ? 'bg-white/10' : 'bg-slate-100 group-hover:bg-white group-hover:shadow-sm group-hover:text-primary' }}">
                                 @if($item['icon'] ?? null)
-                                    <x-dynamic-component :component="$item['icon']" class="w-4 h-4" />
+                                    <x-icon :name="$item['icon']" class="w-4 h-4" />
                                 @endif
                             </div>
                             <span class="uppercase tracking-widest text-[11px]">{{ __($item['title']) }}</span>
@@ -509,7 +509,7 @@
                        @click="sidebarOpen = false"
                        class="flex items-center gap-4 px-4 py-4 rounded-club text-base font-bold transition-all {{ request()->routeIs($item['route']) ? 'bg-primary text-white shadow-lg' : 'text-slate-600 hover:bg-slate-50' }}">
                         @if($item['icon'] ?? null)
-                            <x-dynamic-component :component="$item['icon']" class="w-6 h-6 {{ request()->routeIs($item['route']) ? 'text-white' : 'text-slate-400' }}" />
+                            <x-icon :name="$item['icon']" class="w-6 h-6 {{ request()->routeIs($item['route']) ? 'text-white' : 'text-slate-400' }}" />
                         @endif
                         {{ __($item['title']) }}
                     </a>
@@ -522,7 +522,7 @@
                            @click="sidebarOpen = false"
                            class="flex items-center gap-4 px-4 py-4 rounded-club text-base font-bold transition-all {{ request()->routeIs($item['route']) ? 'bg-secondary text-white shadow-lg' : 'text-slate-600 hover:bg-slate-50' }}">
                             @if($item['icon'] ?? null)
-                                <x-dynamic-component :component="$item['icon']" class="w-6 h-6 {{ request()->routeIs($item['route']) ? 'text-white' : 'text-slate-400' }}" />
+                                <x-icon :name="$item['icon']" class="w-6 h-6 {{ request()->routeIs($item['route']) ? 'text-white' : 'text-slate-400' }}" />
                             @endif
                             {{ __($item['title']) }}
                         </a>

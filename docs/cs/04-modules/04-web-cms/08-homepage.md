@@ -71,6 +71,14 @@ Změny byly zavedeny pomocí:
 2. Aktualizace metody `getHomeBlocks()` a `seedPages()` v `database/seeders/CmsContentSeeder.php`.
 3. Spuštění seederu: `php artisan db:seed --class=CmsContentSeeder`.
 
+### Aktuální výsledky a program
+
+- Nad obsahem CMS se zobrazuje nejvýše čtveřice nejnovějších odehraných zápasů se skóre z aktivní sezóny.
+- Do výpisu vstupují stavy `finished`, `played` a `completed`; zápas musí mít vyplněné obě části skóre.
+- Pokud má aktivní sezóna povolená externí mapování týmů, výpis je omezen na tyto týmy a respektuje starší vazbu `matches.team_id` i vícetýmovou vazbu `basketball_match_team`.
+- CMS blok `matches_listing` zobrazuje skutečná data. Podle nastavení ukazuje nejbližší program nebo poslední výsledky a odkazuje na úplný přehled zápasů.
+- Bez aktivní nebo kalendářně aktuální sezóny se archivní výsledky na homepage automaticky nevydávají za aktuální.
+
 Obsah je plně editovatelný z administrace Filamentu přes Builder v sekci "Stránky".
 
 ## 7. Doporučené commity

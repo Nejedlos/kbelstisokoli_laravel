@@ -38,23 +38,13 @@
                     $competitionName = __('general.competition') ?? 'Soutěž';
                 }
 
-                $activeTeam = $teamId ? \App\Models\Team::find($teamId) : null;
-                $activeTeamNameSuffix = $activeTeam ? (preg_match('/\b([a-gA-G])\b/', mb_strtolower($activeTeam->name), $m) ? strtoupper($m[1]) : null) : null;
+                $ourTeamNames = ($configuredTeamNames ?? collect())->get($url, collect());
 
                 // Najdeme index našeho týmu v kolekci $rows
                 $ourTeamIndex = null;
                 foreach($rows as $idx => $row) {
-                    $rowTeamLower = mb_strtolower($row->team_name);
-                    $match = false;
-                    if (str_contains($rowTeamLower, 'kbely')) {
-                        if (!$activeTeamNameSuffix) {
-                            $match = true;
-                        } else {
-                            $match = str_ends_with($rowTeamLower, ' ' . mb_strtolower($activeTeamNameSuffix))
-                                   || str_contains($rowTeamLower, 'kbely ' . mb_strtolower($activeTeamNameSuffix));
-                        }
-                    }
-                    if ($match) {
+                    $rowTeamName = mb_strtolower(trim(preg_replace('/\s+/u', ' ', $row->team_name)));
+                    if ($ourTeamNames->contains($rowTeamName)) {
                         $ourTeamIndex = $idx;
                         break;
                     }

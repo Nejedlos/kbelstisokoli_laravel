@@ -39,3 +39,11 @@ Tento dokument shrnuje provedené optimalizace výkonu pro projekt Kbelští sok
 ## 6. Doporučení pro vývojáře
 - Pokud se změny v kódu neprojevují, je to pravděpodobně kvůli `opcache.validate_timestamps=0`.
 - **Řešení:** V administraci v SystemConsole nebo přes SSH spusťte `php artisan optimize:clear` (toto by mělo vyčistit i OPcache pokud je správně nakonfigurován fcgi protokol, jinak je nutné vyčkat na automatický timeout nebo restart PHP procesu v administraci hostingu).
+
+## 7. Start aplikace a přihlašování (2026-10-11)
+
+Při diagnostice lokálního přihlašování oddělujte `X-Perf-Bootstrap-MS` od `X-Perf-Logic-MS` a času databázových dotazů. Zaznamenané dlouhé požadavky na heslo i 2FA strávily většinu času ještě před samotným ověřováním.
+
+Příčinou bylo opakované sestavování registru Blade ikon po odstranění manifestu: lokální knihovna obsahovala 77 243 SVG souborů. Konfigurace `blade-icons.components.disabled=true` ruší hromadnou registraci aliasů, zatímco obecná komponenta `x-icon` a Filament načítají konkrétní SVG podle potřeby. Oprava funguje i bez `bootstrap/cache/blade-icons.php`; nevyžaduje vypnutí 2FA, změnu hesla ani úpravu rolí.
+
+Izolované lokální měření HTTP bootstrapu před úpravou trvalo 6 011 ms, po úpravě 322 ms. Jde o diagnostiku startu aplikace, nikoli garanci celkové odezvy nebo měření produkce. Funkčnost obecné komponenty, Filament ikon, navigace a historie plateb ověřuje `IconErrorTest`; zachování přihlašovacího procesu ověřuje `TwoFactorPipelineTest`.

@@ -2,7 +2,10 @@
 
 namespace App\Filament\Resources\BasketballMatches\Schemas;
 
+use App\Filament\Resources\BasketballMatches\BasketballMatchResource;
+use App\Models\BasketballMatch;
 use App\Models\Season;
+use App\Services\OpponentQuickCreateService;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -10,7 +13,9 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Illuminate\Validation\ValidationException;
 
 class BasketballMatchForm
 {
@@ -47,8 +52,36 @@ class BasketballMatchForm
                                 Select::make('opponent_id')
                                     ->label('Soupeř')
                                     ->relationship('opponent', 'name')
+                                    ->getSearchResultsUsing(fn (string $search): array => app(OpponentQuickCreateService::class)->searchOptions($search))
                                     ->searchable()
                                     ->preload()
+                                    ->live()
+                                    ->afterStateUpdated(function (Select $component, Set $set, mixed $state, ?BasketballMatch $record): void {
+                                        $service = app(OpponentQuickCreateService::class);
+
+                                        if (! $service->isCreateOption($state)) {
+                                            return;
+                                        }
+
+                                        $record
+                                            ? BasketballMatchResource::authorizeEdit($record)
+                                            : BasketballMatchResource::authorizeCreate();
+
+                                        try {
+                                            $opponent = $service->createFromOption($state);
+                                        } catch (ValidationException $exception) {
+                                            $set('opponent_id', null);
+
+                                            throw ValidationException::withMessages([
+                                                $component->getStatePath() => collect($exception->errors())->flatten()->first()
+                                                    ?? __('admin.resources.basketball_match.validation.invalid_opponent_option'),
+                                            ]);
+                                        }
+
+                                        $set('opponent_id', (string) $opponent->getKey());
+                                        $component->refreshSelectedOptionLabel();
+                                    })
+                                    ->exists('opponents', 'id')
                                     ->required(),
                                 DateTimePicker::make('scheduled_at')
                                     ->label('Datum a čas zápasu')

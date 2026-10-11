@@ -7,6 +7,8 @@
         'planned' => 'bg-accent text-white',
         'scheduled' => 'bg-accent text-white',
         'finished' => 'bg-success text-white',
+        'played' => 'bg-success text-white',
+        'completed' => 'bg-success text-white',
         'cancelled' => 'bg-danger text-white',
         'postponed' => 'bg-warning text-black',
     ];
@@ -14,6 +16,8 @@
         'planned' => __('matches.planned') ?? 'Plánováno',
         'scheduled' => __('matches.planned') ?? 'Plánováno',
         'finished' => __('matches.finished') ?? 'Odehráno',
+        'played' => __('matches.finished') ?? 'Odehráno',
+        'completed' => __('matches.finished') ?? 'Odehráno',
         'cancelled' => __('matches.cancelled') ?? 'Zrušeno',
         'postponed' => __('matches.postponed') ?? 'Odloženo',
     ];
@@ -36,7 +40,7 @@
         'pratelske' => 'fa-handshake',
     ];
 
-    $isPlayed = $match->status === 'finished';
+    $isPlayed = in_array($match->status, ['finished', 'played', 'completed'], true);
     $homeScore = $match->score_home ?? 0;
     $awayScore = $match->score_away ?? 0;
     $hasScore = isset($match->score_home) || isset($match->score_away);

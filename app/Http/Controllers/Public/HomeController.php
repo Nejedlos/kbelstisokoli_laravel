@@ -5,11 +5,12 @@ namespace App\Http\Controllers\Public;
 use App\Http\Controllers\Controller;
 use App\Models\Page;
 use App\Services\BrandingService;
+use App\Services\PublicMatchListingService;
 use Illuminate\View\View;
 
 class HomeController extends Controller
 {
-    public function __invoke(BrandingService $brandingService): View
+    public function __invoke(BrandingService $brandingService, PublicMatchListingService $matchListingService): View
     {
         $branding = $brandingService->getSettings();
         $isAdmin = auth()->check() && auth()->user()->canAccessAdmin();
@@ -48,6 +49,8 @@ class HomeController extends Controller
             'homePage' => $homePage,
             'branding' => $branding,
             'branding_css' => $brandingService->getCssVariables(),
+            'latestMatches' => $matchListingService->forCurrentSeason('latest', 4),
+            'currentSeason' => $matchListingService->currentSeason(),
         ]);
     }
 }

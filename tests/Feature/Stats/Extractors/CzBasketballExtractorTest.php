@@ -5,10 +5,17 @@ namespace Tests\Feature\Stats\Extractors;
 use App\Services\Stats\Extractors\CzBasketball\MatchDetailBoxscoreExtractor;
 use App\Services\Stats\Extractors\CzBasketball\MatchesListExtractor;
 use App\Services\Stats\Extractors\CzBasketball\TeamRosterExtractor;
+use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
 class CzBasketballExtractorTest extends TestCase
 {
+    protected function tearDown(): void
+    {
+        Carbon::setTestNow();
+        parent::tearDown();
+    }
+
     public function test_team_roster_extractor()
     {
         $html = file_get_contents(base_path('tests/Fixtures/Stats/CzBasketball/team_page.html'));
@@ -48,6 +55,30 @@ class CzBasketballExtractorTest extends TestCase
         $this->assertGreaterThan(0, count($dto->rows));
         $this->assertNotNull($dto->rows[0]->values['scheduled_at']);
         $this->assertNotNull($dto->rows[0]->metadata['external_match_id']);
+    }
+
+    public function test_matches_list_extractor_reads_scored_pbasket_schedule_rows(): void
+    {
+        Carbon::setTestNow('2026-10-11 12:00:00');
+        $html = <<<'HTML'
+        <table class="table table-bordered table-striped">
+            <thead><tr><th>kolo</th><th>datum a čas</th><th>domácí / hosté</th><th>skore</th><th>čtvrtiny</th><th>fáze sezony</th><td></td></tr></thead>
+            <tbody><tr>
+                <td>1. kolo</td><td>7. 10. 2026<br>20:15</td>
+                <td><div class="text-nowrap">Sokol Kbely C</div><div class="text-nowrap">Sokol Kbely B</div></td>
+                <td><a href="/zapas/549785"><div>47</div><div>54</div></a></td>
+                <td></td><td>Základní fáze</td><td><a href="/zapas/549785">Review</a></td>
+            </tr></tbody>
+        </table>
+        HTML;
+
+        $rows = (new MatchesListExtractor)->extract($html)['data']->rows;
+
+        $this->assertCount(1, $rows);
+        $this->assertSame('549785', $rows[0]->values['external_match_id']);
+        $this->assertSame('47:54', $rows[0]->values['score']);
+        $this->assertSame('finished', $rows[0]->values['status']);
+        $this->assertSame('2026-10-07 20:15:00', $rows[0]->values['scheduled_at']);
     }
 
     public function test_match_detail_boxscore_extractor()

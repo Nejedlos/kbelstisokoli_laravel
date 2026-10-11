@@ -29,6 +29,32 @@
         <x-public.blocks.hero :data="$heroData" />
     @endif
 
+    {{-- 2. Poslední výsledky aktuální sezóny --}}
+    @if(($latestMatches ?? collect())->isNotEmpty())
+        <section class="section-padding bg-slate-50 relative overflow-hidden border-b border-slate-100">
+            <div class="container relative z-10">
+                <x-section-heading
+                    :title="__('general.home_results_title')"
+                    :subtitle="__('general.home_results_subtitle', ['season' => $currentSeason?->name ?? ''])"
+                    align="center"
+                />
+
+                <div class="flex flex-col gap-6 max-w-5xl mx-auto">
+                    @foreach($latestMatches as $match)
+                        <x-match-card :match="$match" />
+                    @endforeach
+                </div>
+
+                <div class="mt-10 text-center">
+                    <a href="{{ route('public.matches.index', ['type' => 'latest', 'season_id' => $currentSeason?->id]) }}" class="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-primary text-white font-black uppercase tracking-widest text-xs hover:shadow-xl hover:shadow-primary/20 transition-all active:scale-95">
+                        {{ __('general.home_results_cta') }}
+                        <i class="fa-light fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+    @endif
+
     {{-- 3. Tabulky soutěží (Vždy viditelné, hodně nahoře) --}}
     <div class="section-padding bg-white relative overflow-hidden border-b border-slate-100">
         <div class="container">
@@ -38,7 +64,7 @@
                 align="center"
             />
             <div class="max-w-4xl mx-auto">
-                @livewire('public-standings-table', ['showFilters' => false, 'limit' => 5])
+                @livewire('public-standings-table', ['showFilters' => false, 'limit' => 5, 'configuredOnly' => true])
 
                 <div class="mt-12 text-center">
                     <a href="{{ route('public.teams.index') }}" class="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-secondary text-white font-black uppercase tracking-widest text-xs hover:bg-primary hover:shadow-xl hover:shadow-primary/20 transition-all active:scale-95">

@@ -7,6 +7,7 @@ use App\Models\ClubEvent;
 use App\Models\Season;
 use App\Models\Training;
 use App\Models\UserSeasonConfig;
+use App\Services\Attendance\RealAttendanceService;
 use App\Support\IconHelper;
 use Filament\Pages\Page;
 use Illuminate\Contracts\Support\Htmlable;
@@ -208,6 +209,9 @@ class RealAttendance extends Page
         if (! $this->selectedEventId || ! $this->selectedEventType) {
             return null;
         }
+
+        abort_unless(static::canAccess(), 403);
+        abort_unless(is_string($this->selectedEventType) && RealAttendanceService::supportsType($this->selectedEventType), 404);
 
         $query = $this->selectedEventType::query();
 

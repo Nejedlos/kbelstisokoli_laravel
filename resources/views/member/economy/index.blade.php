@@ -87,7 +87,7 @@
                             <div class="bg-white rounded-club p-4 border border-slate-100 shadow-sm flex items-center justify-between">
                                 <div class="flex items-center gap-4">
                                     <div class="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center text-success">
-                                        <x-heroicon-o-arrow-down-left class="w-5 h-5" />
+                                        <x-icon name="heroicon-o-arrow-down-left" class="w-5 h-5" />
                                     </div>
                                     <div class="text-sm font-bold text-secondary">{{ number_format($payment->amount, 0, ',', ' ') }} {{ __('member.currency_czk') }}</div>
                                 </div>
@@ -112,7 +112,7 @@
                             <div class="bg-white rounded-club p-4 border border-slate-100 shadow-sm flex items-center justify-between">
                                 <div class="flex items-center gap-4">
                                     <div class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
-                                        <x-heroicon-o-check class="w-5 h-5" />
+                                        <x-icon name="heroicon-o-check" class="w-5 h-5" />
                                     </div>
                                     <div>
                                         <div class="text-sm font-bold text-slate-600">{{ $charge->title }}</div>

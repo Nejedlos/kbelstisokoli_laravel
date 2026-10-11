@@ -36,8 +36,12 @@ class MatchController extends Controller
         }
 
         if ($teamId) {
-            $query->whereHas('teams', function ($q) use ($teamId) {
-                $q->where('teams.id', $teamId);
+            $query->where(function ($teamQuery) use ($teamId) {
+                $teamQuery
+                    ->where('team_id', $teamId)
+                    ->orWhereHas('teams', function ($pivotQuery) use ($teamId) {
+                        $pivotQuery->where('teams.id', $teamId);
+                    });
             });
         }
 
@@ -46,10 +50,12 @@ class MatchController extends Controller
         }
 
         if ($type === 'latest') {
-            $query->whereIn('status', ['finished'])
+            $query->whereIn('status', ['finished', 'played', 'completed'])
+                ->whereNotNull('score_home')
+                ->whereNotNull('score_away')
                 ->orderBy('scheduled_at', 'desc');
         } else {
-            $query->whereNotIn('status', ['finished'])
+            $query->whereNotIn('status', ['finished', 'played', 'completed'])
                 ->where('scheduled_at', '>=', now()->subHours(3)) // Zobrazit i probíhající
                 ->orderBy('scheduled_at', 'asc');
         }

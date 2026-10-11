@@ -6,6 +6,46 @@
         </div>
     @endif
 
+    <div class="space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+                <h3 class="text-lg font-bold">{{ __('admin.real_attendance.tracker.checklist_title') }} ({{ $this->participants->count() }})</h3>
+                <p class="text-sm text-gray-500">{{ __('admin.real_attendance.tracker.checklist_hint') }}</p>
+            </div>
+            @if($this->participants->where('planned_status', 'confirmed')->isNotEmpty())
+                <x-filament::button wire:click="markConfirmedPresent" wire:loading.attr="disabled" color="success">
+                    {{ __('admin.real_attendance.tracker.mark_confirmed') }}
+                </x-filament::button>
+            @endif
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            @forelse($this->participants as $row)
+                @php
+                    $user = $row['user'];
+                    $present = $row['actual_status'] === 'attended';
+                    $planned = in_array($row['planned_status'], ['confirmed', 'declined', 'maybe']) ? $row['planned_status'] : 'pending';
+                @endphp
+                <label wire:key="participant-{{ $user->id }}" class="flex items-center gap-3 rounded-xl border p-4 cursor-pointer {{ $present ? 'border-success-400 bg-success-50 dark:bg-success-900/20' : 'border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900' }}">
+                    <input type="checkbox"
+                        wire:key="presence-{{ $user->id }}-{{ $present ? 'yes' : 'no' }}"
+                        wire:change="setPresent({{ $user->id }}, $event.target.checked)"
+                        wire:loading.attr="disabled"
+                        @checked($present)
+                        aria-label="{{ __('admin.real_attendance.tracker.present_label', ['name' => $user->name]) }}"
+                        class="h-5 w-5 shrink-0 rounded border-gray-300 text-success-600 focus:ring-success-500"
+                    >
+                    <div class="min-w-0">
+                        <div class="font-bold text-gray-900 dark:text-gray-100">{{ $user->name }}</div>
+                        <div class="text-xs {{ $planned === 'confirmed' ? 'text-success-600 dark:text-success-400' : 'text-gray-500' }}">{{ __('admin.real_attendance.tracker.planned_'.$planned) }}</div>
+                        <div class="text-xs font-semibold">{{ __('admin.real_attendance.tracker.'.($present ? 'present' : (in_array($row['actual_status'], ['absent', 'excused']) ? $row['actual_status'] : 'unrecorded'))) }}</div>
+                    </div>
+                </label>
+            @empty
+                <p class="col-span-full py-8 text-center text-gray-500">{{ __('admin.real_attendance.tracker.no_players') }}</p>
+            @endforelse
+        </div>
+    </div>
+
     <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 shadow-sm">
         <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
             <i class="fa-light fa-user-plus text-primary-500"></i>
@@ -29,10 +69,12 @@
                 <div class="absolute z-30 mt-1 w-full bg-white dark:bg-gray-800 shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm border border-gray-200 dark:border-gray-700">
                     @foreach($this->users as $user)
                         <button
+                            type="button"
+                            wire:loading.attr="disabled"
                             wire:click="selectUser({{ $user->id }})"
                             class="w-full text-left px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-3 transition-colors"
                         >
-                            <img src="{{ $user->getFilamentAvatarUrl() }}" class="w-8 h-8 rounded-full border border-gray-200 dark:border-gray-700">
+                            <img alt="" src="{{ $user->getFilamentAvatarUrl() }}" class="w-8 h-8 rounded-full border border-gray-200 dark:border-gray-700">
                             <div>
                                 <div class="font-medium text-gray-900 dark:text-gray-100">{{ $user->name }}</div>
                                 <div class="text-xs text-gray-500">{{ $user->email }}</div>
@@ -40,7 +82,7 @@
                         </button>
                     @endforeach
                 </div>
-            @elseif(!empty($search) && strlen($search) >= 2)
+            @elseif(!empty($search) && mb_strlen(trim($search)) >= 2)
                 <div class="absolute z-30 mt-1 w-full bg-white dark:bg-gray-800 shadow-lg rounded-md py-4 text-center text-sm text-gray-500 border border-gray-200 dark:border-gray-700">
                     {{ __('admin.real_attendance.tracker.no_member_found') }}
                 </div>
@@ -118,33 +160,5 @@
         </div>
     @endif
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        @forelse($this->attendances as $attendance)
-            <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-3 shadow-sm flex items-center justify-between group animate-in fade-in zoom-in duration-300">
-                <div class="flex items-center gap-3">
-                    <img src="{{ $attendance->user->getFilamentAvatarUrl() }}" class="w-10 h-10 rounded-full border-2 border-primary-100 dark:border-primary-900">
-                    <div>
-                        <div class="font-bold text-gray-900 dark:text-gray-100 line-clamp-1">{{ $attendance->user->name }}</div>
-                        <div class="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">{{ __('admin.real_attendance.tracker.present') }}</div>
-                    </div>
-                </div>
-                <button
-                    wire:click="removeAttendance({{ $attendance->id }})"
-                    class="p-2 text-gray-400 hover:text-danger-500 hover:bg-danger-50 dark:hover:bg-danger-900/20 rounded-lg transition-all"
-                    title="{{ __('admin.real_attendance.tracker.remove_from_attendance') }}"
-                >
-                    <i class="fa-light fa-trash-can"></i>
-                </button>
-            </div>
-        @empty
-            <div class="col-span-full py-12 text-center bg-gray-50 dark:bg-gray-800/50 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-800">
-                <div class="text-gray-400 mb-2 text-4xl">
-                    <i class="fa-light fa-users-slash"></i>
-                </div>
-                <div class="text-gray-500 font-medium">{{ __('admin.real_attendance.tracker.no_attendance_yet') }}</div>
-                <div class="text-sm text-gray-400 mt-1">{{ __('admin.real_attendance.tracker.use_search_to_add') }}</div>
-            </div>
-        @endforelse
-    </div>
 
 </div>

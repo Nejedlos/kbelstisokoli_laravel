@@ -14,6 +14,7 @@
 
 ### Vztahy
 - `BasketballMatch` patří pod `Team`, `Season` a `Opponent`.
+- Formulář zápasu vyhledává soupeře podle celého zadaného názvu. Pokud normalizovaný název (bez nadbytečných mezer a bez rozlišení velikosti písmen) přesně neexistuje, nabídne syntetickou volbu pro okamžité vytvoření záznamu `Opponent` pouze s názvem. Po výběru ji server převede na číselné `opponent_id`; syntetická hodnota se do zápasu neukládá. Stejný tok používá vytvoření i editace zápasu a při každém zápisu znovu ověřuje oprávnění `manage_matches`.
 - `Training` patří pod `Team`.
 - `Team` má mnoho `BasketballMatch` a `Training`.
 - `Team` rozlišuje mezi všemi hráči v týmu a hráči na **oficiální soupisce** (`is_on_roster` v pivotu).
@@ -66,3 +67,13 @@ Při změně týmu nebo čísla dresu se doporučuje použít akci **Transfer** 
 - `/zapasy`: Seznam všech zápasů s paginací.
 - `/zapasy/{id}`: Detail zápasu s výsledkem a veřejnou poznámkou.
 - `/treninky`: Přehled tréninkových informací rozdělený podle týmů.
+
+## Reálná docházka – hromadný zápis skutečné účasti
+
+V administraci **Reálná docházka** zobrazuje seznam s checkboxy pouze uživatele, kteří potvrdili účast (`planned_status = confirmed`), a již zapsané přítomné (`actual_status = attended`), včetně ručně přidaných hráčů. Potvrzení jsou první a každý hráč se zobrazí jen jednou. Ostatní členové týmu ani odpovědi „nepřijdu“, „možná“ a „bez odpovědi“ se automaticky nezobrazují; hráče lze vyhledat a přidat. Odškrtnutý ručně přidaný hráč bez příslibu ze seznamu zmizí a zůstane dostupný ve vyhledávání. Potvrzený hráč zůstává v seznamu i po odškrtnutí.
+
+Checkboxy ukládají ihned pouze `actual_status`: zaškrtnutí `attended`, odškrtnutí `null`. Původní odpověď, omluva, poznámky a `responded_at` zůstávají zachované. Tlačítko **Označit potvrzené jako přítomné** hromadně zapíše pouze skutečnou přítomnost aktuálně potvrzených hráčů; ostatní záznamy nemění. Vyhledávání od dvou znaků umožňuje přidat uživatele s aktivním hráčským profilem i z jiného týmu. Přidání rovnou zapíše skutečnou přítomnost.
+
+Zápis checkboxy negeneruje platby. Samostatná potvrzovaná finalizace používá dosavadní finanční službu a doplní absence podle jejích pravidel. Zrušení přítomnosti není automatická omluva ani zpětné zrušení již vystavených plateb.
+
+`RealAttendanceService` sestavuje seznam a provádí změny skutečné účasti. Livewire tracker kontroluje `manage_attendance` nebo roli `super_admin` při každém požadavku, zamyká identitu události a dovoluje pouze `Training`, `BasketballMatch`, `ClubEvent`. Odebrání docházky je omezené na právě otevřenou událost.

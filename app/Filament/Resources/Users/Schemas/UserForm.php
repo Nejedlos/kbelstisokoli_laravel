@@ -566,6 +566,7 @@ class UserForm
                                 TextInput::make('password')
                                     ->label(__('user.fields.password'))
                                     ->password()
+                                    ->autocomplete('new-password')
                                     ->dehydrated(fn ($state) => filled($state))
                                     ->required(fn ($livewire) => $livewire instanceof CreateRecord)
                                     ->maxLength(255),

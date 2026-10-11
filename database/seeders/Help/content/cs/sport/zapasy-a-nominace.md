@@ -8,7 +8,7 @@ Tato funkce je pro klub Kbelští sokoli zásadní a šetří hodiny administrat
 
 ### Plánování a správa zápasu
 U přátelských utkání nebo turnajů, které nejsou v ČBF, musíte zápas vytvořit ručně.
-1. **Základní údaje**: Výběr domácího týmu, soupeře (pokud chybí, založte jej v sekci Soupeři), data, času a místa.
+1. **Základní údaje**: Výběr domácího týmu, soupeře, data, času a místa. Do pole **Soupeř** napište celý název. Existující tým vyberte z výsledků; pokud přesně stejný název ještě není v adresáři, zvolte **Vytvořit tým „…“**. Soupeř se ihned založí pouze s názvem a rovnou se vybere, bez dalšího formuláře nebo přechodu na jinou stránku.
 2. **Místo konání (Hala)**: U každého zápasu lze specifikovat konkrétní halu. Pokud je to hala Kbely, automaticky se nabízí s mapou.
 3. **Status zápasu**: Plánováno (vytvořeno), Naplánováno (potvrzen termín), Odehráno (zapsán výsledek), Odloženo/Zrušeno.
 

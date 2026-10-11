@@ -51,6 +51,12 @@ Blade Icons vyžadují názvy s pomlčkami a prefixem setu:
 
 **Nikdy nepoužívejte podtržítka** (např. `fal_user`) přímo ve Filamentu. Náš helper `FilamentIcon` je automaticky opraví, ale je lepší psát kód správně.
 
+### Načítání ikon při vykreslení
+
+`config/blade-icons.php` vypíná hromadnou registraci samostatných komponent pro každou SVG ikonu. Knihovna Font Awesome Pro obsahuje desítky tisíc souborů; bez manifestu jejich procházení zpomalovalo start každého požadavku, včetně přihlášení heslem a 2FA. Ikony se nyní načítají jednotlivě podle potřeby i po vyčištění optimalizačních cache.
+
+V Blade používejte `<x-icon name="heroicon-o-check" />` nebo `<x-icon :name="$icon" />`. Nepoužívejte `<x-heroicon-o-check />` ani `<x-dynamic-component :component="$icon" />` pro názvy ikon. Obecná komponenta `x-icon`, direktiva `@svg`, helper `svg()` a `x-filament::icon` zůstávají dostupné. Samotné SVG, CSS třídy a pravidla přihlašování se nemění.
+
 ## 5. Vlastní SVG ikony
 Pokud potřebujete přidat vlastní SVG ikonu:
 1. Vložte SVG do `resources/svg/icon-name.svg`.
@@ -99,8 +105,8 @@ Tento příkaz automaticky:
 **Řešení:** 
 ```bash
 php artisan icons:clear
-php artisan icons:cache
 php artisan optimize:clear
+php artisan icons:cache
 ```
 
 ## 9. Budoucí upgrade na Font Awesome Pro

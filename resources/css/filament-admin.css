@@ -1,6 +1,46 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* One-click opponent creation is a primary action within the search results. */
+.fi-select-input-option[data-value^="__create_opponent__:"] {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 3.25rem;
+    margin-block: 0.5rem;
+    padding: 0.875rem 1rem;
+    border: 1px solid #991b1b;
+    border-radius: 0.625rem;
+    background-color: #b91c1c !important;
+    color: #fff !important;
+    font-size: 0.9375rem;
+    font-weight: 800;
+    line-height: 1.4;
+    box-shadow: 0 3px 8px rgb(185 28 28 / 20%);
+    white-space: normal;
+}
+
+.fi-select-input-option[data-value^="__create_opponent__:"]::before {
+    content: "";
+    width: 1.75rem;
+    height: 1.75rem;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 18%) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M12 5v14M5 12h14'/%3E%3C/svg%3E") center / 1.125rem no-repeat;
+}
+
+.fi-select-input-option[data-value^="__create_opponent__:"] > span {
+    color: inherit !important;
+    font-weight: inherit;
+    overflow-wrap: anywhere;
+}
+
+.fi-select-input-option[data-value^="__create_opponent__:"]:is(:hover, :focus-visible, .fi-selected) {
+    background-color: #991b1b !important;
+    outline: 2px solid #b91c1c;
+    outline-offset: 2px;
+}
+
 :root {
     color-scheme: light !important;
 }

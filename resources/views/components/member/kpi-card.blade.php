@@ -23,7 +23,7 @@
     <div class="relative p-6 sm:p-7 flex items-center gap-4 sm:gap-6">
         <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-{{ $twColor }}-50 text-{{ $twColor }}-600 flex items-center justify-center flex-shrink-0 transition-all group-hover:scale-110 group-hover:rotate-3">
             @if(str_contains($icon, 'heroicon'))
-                <x-dynamic-component :component="$icon" class="w-7 h-7 sm:w-8 sm:h-8" />
+                <x-icon :name="$icon" class="w-7 h-7 sm:w-8 sm:h-8" />
             @else
                 <i class="fa-light fa-{{ $icon }} text-xl sm:text-2xl"></i>
             @endif

@@ -31,6 +31,8 @@ Od verze únor 2026 je řešení postaveno na vlastním layoutu panelu, což zaj
 
 ## Troubleshooting a časté chyby
 
+Indikátor síly hesla a pravidla pro nové heslo patří pouze do formulářů pro vytvoření, obnovení nebo změnu hesla. Přihlášení a potvrzení stávajícího hesla je nezobrazují ani podle těchto pravidel neomezují. Pole nového hesla v administraci mají explicitní `autocomplete="new-password"`.
+
 ### 1. Změny se neprojevují v HTML
 **Příčina:** Špatně zaregistrovaný render hook nebo chybějící `@import "tailwindcss"` v entrypointu.
 **Řešení:**

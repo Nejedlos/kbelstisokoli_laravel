@@ -14,6 +14,8 @@ V této sekci definujete, odkud systém data stahuje.
 - **API Key:** Přístupové heslo pro bezpečné stahování dat.
 - **Synchronizační intervaly:** Určuje, jak často se mají data aktualizovat (např. každou hodinu v sezóně, jednou denně v létě).
 
+Pražské soutěže na `pbasket.cz.basketball` jsou součástí stejné platformy CZ.BASKETBALL. U týmové sezóny ponechte zdroj `czbasketball` a vyplňte konkrétní týmovou URL, URL seznamu zápasů a URL soutěže z PBasket. Homepage pak používá pouze povolená mapování aktivní sezóny pro výsledky a tabulky.
+
 ### Řešení mismatchů (Neshody)
 Někdy synchronizace narazí na problém:
 - **Jméno nesouhlasí:** Hráč je u nás veden jinak než v ČBF (např. diakritika). Systém nahlásí "Mismatch" a vy musíte ručně potvrdit, že jde o stejnou osobu.
