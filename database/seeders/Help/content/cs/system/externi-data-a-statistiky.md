@@ -24,6 +24,8 @@ U PBasket použijte jako **URL seznamu zápasů** úplnou týmovou stránku pro 
 
 U staršího ručně založeného zápasu může systém při přesném termínu a shodném směru utkání rozpoznat i běžnou variantu názvu soupeře (například „TJ ČSA Praha“ a „TJ ČSA“). Zachová původní zápas i soupeře. Rozdílné písmeno týmu, věkovou kategorii nebo zamítnutý návrh sloučení tímto způsobem nepřekoná.
 
+Souhrnná bilance týmu vychází z aktuální tabulky zvolené soutěže. Pole **Název týmu ve zdroji** proto musí přesně odpovídat názvu v této tabulce. Pokud jednoznačný řádek chybí, samostatný režim zápasů či tabulek vypočítá bilanci z uložených výsledků. Soutěžní bilance může nezahrnovat pohárové zápasy, které vidíte v celkovém přehledu utkání. Aktualizace tabulky automaticky obnoví i souhrnné statistiky.
+
 ### Řešení mismatchů (Neshody)
 Někdy synchronizace narazí na problém:
 - **Jméno nesouhlasí:** Hráč je u nás veden jinak než v ČBF (např. diakritika). Systém nahlásí "Mismatch" a vy musíte ručně potvrdit, že jde o stejnou osobu.

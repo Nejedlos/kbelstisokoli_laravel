@@ -3,6 +3,7 @@
 namespace App\Services\Stats;
 
 use App\Models\BasketballMatch;
+use App\Models\CompetitionStanding;
 use App\Models\ExternalTeamSeasonConfig;
 use App\Models\StatisticRow;
 use App\Models\User;
@@ -27,9 +28,14 @@ class TeamStatsService
     public function getSeasonSummary(int $teamId, int $seasonId): ?array
     {
         return Cache::remember("team_stats_{$teamId}_{$seasonId}_season_summary", 86400, function () use ($teamId, $seasonId) {
-            // Preferujeme oficiální souhrn ze stránky soutěže, pokud je k dispozici
-            if ($official = $this->getOfficialTeamSummary($teamId, $seasonId)) {
+            $config = ExternalTeamSeasonConfig::where('team_id', $teamId)->where('season_id', $seasonId)->first();
+            // Prefer the exact current competition row over legacy header metadata.
+            if ($official = $this->getOfficialTeamSummary($config)) {
                 return $official;
+            }
+
+            if ($config && ! $config->is_enabled && ($config->isMatchesOnly() || data_get($config->metadata, 'standings_enabled') === true)) {
+                return $this->calculateSummaryFromMatches($teamId, $seasonId);
             }
 
             $row = StatisticRow::where('team_id', $teamId)
@@ -385,17 +391,26 @@ class TeamStatsService
     }
 
     /**
-     * Zkusí vrátit souhrn z oficiální tabulky soutěže, pokud je uložen v konfiguraci.
+     * Resolve a unique standing for the configured season, URL and exact team name.
      */
-    protected function getOfficialTeamSummary(int $teamId, int $seasonId): ?array
+    protected function getOfficialTeamSummary(?ExternalTeamSeasonConfig $config): ?array
     {
         try {
-            /** @var ExternalTeamSeasonConfig|null $config */
-            $config = ExternalTeamSeasonConfig::where('team_id', $teamId)
-                ->where('season_id', $seasonId)
-                ->first();
-
-            $official = $config?->metadata['official_standing'] ?? null;
+            $official = null;
+            $teamName = trim($config?->team_name_in_source ?? '');
+            if ($config?->competition_url && $teamName !== '') {
+                $matches = CompetitionStanding::where('season_id', $config->season_id)
+                    ->where('competition_url', $config->competition_url)
+                    ->get()
+                    ->filter(fn (CompetitionStanding $standing) => $standing->competition_url === $config->competition_url && trim($standing->team_name) === $teamName);
+                if ($matches->count() === 1) {
+                    $official = $matches->first()->only(['gp', 'w', 'l', 'score']);
+                }
+            }
+            // Independent modes never inherit an unversioned historical header summary.
+            if (! $official && $config?->is_enabled) {
+                $official = $config->metadata['official_standing'] ?? null;
+            }
             if ($official && isset($official['gp'], $official['w'], $official['l'], $official['score'])) {
                 $gp = (int) $official['gp'];
                 $wins = (int) $official['w'];

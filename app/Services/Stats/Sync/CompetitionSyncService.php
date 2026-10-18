@@ -11,6 +11,7 @@ use App\Services\Stats\Contracts\StatFetcherInterface;
 use App\Services\Stats\Extractors\CzBasketball\CompetitionScheduleExtractor;
 use App\Services\Stats\Extractors\CzBasketball\CompetitionStandingExtractor;
 use App\Services\Stats\StandingsConfigService;
+use App\Services\Stats\TeamStatsService;
 use App\Services\Support\ConsoleService;
 use Illuminate\Support\Facades\Log;
 
@@ -270,5 +271,13 @@ class CompetitionSyncService
                 ]
             );
         }
+
+        // Standings-only refreshes must also refresh the member/public headline.
+        ExternalTeamSeasonConfig::where('season_id', $season->id)
+            ->where('competition_url', $url)
+            ->get()
+            ->filter(fn (ExternalTeamSeasonConfig $candidate) => $candidate->competition_url === $url
+                && ($candidate->isMatchSyncEnabled() || $this->standingsConfigService->isEligible($candidate)))
+            ->each(fn (ExternalTeamSeasonConfig $candidate) => app(TeamStatsService::class)->invalidateCache($candidate->team_id, $season->id));
     }
 }

@@ -45,6 +45,14 @@ Při chybě import nejprve uloží stav `failed` s původní příčinou. Ulože
 diagnostického HTML je následné a volitelné; jeho selhání nesmí původní chybu
 zakrýt ani ponechat běh ve stavu `running`.
 
+Souhrnná bilance týmu upřednostňuje právě jeden řádek `CompetitionStanding`
+se shodnou sezónou, přesnou URL soutěže a přesným `team_name_in_source`
+(bez okrajových mezer). Samostatné režimy zápasů/tabulek nepřebírají historické
+`metadata.official_standing`: bez jednoznačného aktuálního řádku bilanci spočítají
+z místních zápasů. Plný import zachovává kompatibilní fallback na starší metadata.
+Každé uložení tabulky zneplatní cache statistik povolených konfigurací pouze pro
+danou URL a sezónu, včetně samostatné hodinové synchronizace tabulek.
+
 1.  **Fáze 1: Sezónní přehled (`SyncTeamSeasonJob`)**
     - Stáhne soupisku týmu.
     - Stáhne seznam zápasů (termíny, soupeři, výsledky).
