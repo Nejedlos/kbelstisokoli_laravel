@@ -6,8 +6,10 @@ use App\Jobs\Stats\SyncMatchDetailJob;
 use App\Jobs\Stats\SyncTeamSeasonJob;
 use App\Models\BasketballMatch;
 use App\Models\ExternalEntityMapping;
+use App\Models\ExternalImportRun;
 use App\Models\ExternalTeamSeasonConfig;
 use App\Models\Opponent;
+use App\Models\OpponentMergeSuggestion;
 use App\Models\Season;
 use App\Models\StatisticRow;
 use App\Models\StatisticSet;
@@ -260,5 +262,88 @@ class MatchesOnlySyncTest extends TestCase
         $this->mock(StatFetcherInterface::class)->shouldNotReceive('fetch');
         app(ExternalStatsSyncService::class)->syncTeamSeason($this->team->id, $this->season->id);
         $this->assertNull($this->config->fresh()->last_synced_at);
+    }
+
+    public function test_exact_legacy_opponent_alias_preserves_match_and_opponent_and_is_idempotent(): void
+    {
+        foreach ([['TJ ČSA Praha', 'TJ ČSA'], ['Slavia Tygři Praha C', 'Slavia Tygři Praha C'], ['TJ Slovan Bohnice A', 'Slovan Bohnice A']] as $index => [$storedName, $sourceName]) {
+            $opponent = Opponent::create(['name' => $storedName]);
+            $date = now()->setDate(2026, 10, 21)->setTime(20, 15)->addDays($index);
+            $match = $this->match(true);
+            $match->update(['opponent_id' => $opponent->id, 'scheduled_at' => $date, 'metadata' => [], 'match_type' => 'poharove']);
+            $row = ['external_match_id' => (string) (549796 + $index), 'scheduled_at' => $date->toDateTimeString(), 'home_team' => 'Sokol Kbely C', 'away_team' => $sourceName];
+            for ($attempt = 0; $attempt < 2; $attempt++) {
+                $result = app(MatchSyncService::class)->sync($this->team, $this->season, $row, null, ['conservative_matching' => true]);
+                $this->assertSame($match->id, $result->id);
+                $this->assertSame($opponent->id, $result->opponent_id);
+                $this->assertNull($result->team_id);
+                $this->assertSame('poharove', $result->match_type);
+                $this->assertNotNull($opponent->fresh());
+            }
+        }
+        $this->assertDatabaseCount('matches', 3);
+    }
+
+    public function test_legacy_alias_rejects_different_identity_time_direction_empty_alias_and_rejected_pair(): void
+    {
+        $cases = [
+            ['TJ ČSA Praha', 'TJ ČSA', '2026-10-01 21:00:00', true, false],
+            ['TJ ČSA Praha', 'TJ ČSA', '2026-10-01 20:00:00', false, false],
+            ['TJ ČSA Praha C', 'TJ ČSA E', '2026-10-01 20:00:00', true, false],
+            ['TJ Slavia Praha', 'Sparta Praha', '2026-10-01 20:00:00', true, false],
+            ['TJ ČSA U19', 'ČSA U23', '2026-10-01 20:00:00', true, false],
+            ['TJ Praha', 'BK Praha', '2026-10-01 20:00:00', true, false],
+            ['TJ ČSA Praha', 'TJ ČSA', '2026-10-01 20:00:00', true, true],
+        ];
+        foreach ($cases as [$storedName, $sourceName, $sourceDate, $home, $rejected]) {
+            $stored = Opponent::firstOrCreate(['name' => $storedName]);
+            $source = Opponent::firstOrCreate(['name' => $sourceName]);
+            $match = $this->match(true);
+            $match->update(['opponent_id' => $stored->id, 'metadata' => []]);
+            if ($rejected) {
+                OpponentMergeSuggestion::create(['source_opponent_id' => $stored->id, 'target_opponent_id' => $source->id, 'similarity' => 1, 'status' => 'rejected']);
+            }
+            try {
+                app(MatchSyncService::class)->sync($this->team, $this->season, ['external_match_id' => '549796', 'scheduled_at' => $sourceDate, 'home_team' => $home ? 'Sokol Kbely C' : $sourceName, 'away_team' => $home ? $sourceName : 'Sokol Kbely C'], null, ['conservative_matching' => true]);
+                $this->fail('Expected conflicting legacy fixture rejection');
+            } catch (\RuntimeException $error) {
+                $this->assertStringContainsString('Conflicting match', $error->getMessage());
+            }
+            $this->assertSame([], $match->fresh()->metadata);
+            $this->assertSame($stored->id, $match->fresh()->opponent_id);
+            $match->teams()->detach();
+            $match->delete();
+        }
+    }
+
+    public function test_alias_on_a_different_day_does_not_reuse_the_legacy_match(): void
+    {
+        $opponent = Opponent::create(['name' => 'TJ ČSA Praha']);
+        $old = $this->match(true);
+        $old->update(['opponent_id' => $opponent->id, 'metadata' => []]);
+        $new = app(MatchSyncService::class)->sync($this->team, $this->season, ['external_match_id' => '549796', 'scheduled_at' => '2026-10-02 20:00:00', 'home_team' => 'Sokol Kbely C', 'away_team' => 'TJ ČSA'], null, ['conservative_matching' => true]);
+        $this->assertNotSame($old->id, $new->id);
+        $this->assertSame([], $old->fresh()->metadata);
+        $this->assertDatabaseCount('matches', 2);
+    }
+
+    public function test_diagnostic_failure_cannot_mask_the_original_failed_import(): void
+    {
+        $this->match();
+        $this->match();
+        $this->mock(StatFetcherInterface::class)->shouldReceive('fetch')->once()->andReturn('<html></html>');
+        $row = new NormalizedRowDTO(['external_match_id' => '550451', 'scheduled_at' => '2026-10-01 20:00:00', 'home_team' => 'Sokol Kbely C', 'away_team' => 'Opponent']);
+        $this->mock(MatchesListExtractor::class)->shouldReceive('extract')->once()->andReturn(['data' => new NormalizedTableDTO('Matches', [], [$row]), 'fragment_html' => 'matches']);
+        $this->mock(StatNormalizerInterface::class)->shouldReceive('sanitizeHtml')->once()->andThrow(new \Error('Snapshot unavailable'));
+        try {
+            app(ExternalStatsSyncService::class)->syncTeamSeason($this->team->id, $this->season->id);
+            $this->fail('Expected import failure');
+        } catch (\Exception $error) {
+            $this->assertStringContainsString('Ambiguous external match ID', $error->getMessage());
+            $this->assertStringNotContainsString('Snapshot unavailable', $error->getMessage());
+        }
+        $run = ExternalImportRun::where('run_type', 'matches_list')->firstOrFail();
+        $this->assertSame('failed', $run->status);
+        $this->assertStringContainsString('Ambiguous external match ID', $run->error_summary);
     }
 }

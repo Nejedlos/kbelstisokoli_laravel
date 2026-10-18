@@ -24,6 +24,11 @@ jako URL seznamu zápasů; samostatná stránka `/zapasy` může mít omezený f
   konfliktní zápasy stejného dne zastaví import k prověření; režim neslučuje zápasy.
 - Páruje existující zápasy přes `team_id` i `basketball_match_team`, zachovává jejich
   ID, vlastnictví a druh zápasu. Detail dostává ověřený kontext `sync_team_id`.
+  U staršího zápasu bez externího ID lze přijmout jednoznačný alias soupeře pouze
+  při přesném termínu a směru utkání. Porovnání odstraňuje diakritiku, běžný
+  prefix TJ/SK/BK/BC a slovo Praha; zachovává identitu klubu, věkovou kategorii
+  a písmeno týmu. Prázdný název nebo dříve zamítnutý návrh sloučení shodu
+  vyloučí. Původní soupeř zůstává zachován, žádné soupeře neslučujeme.
 - Detaily plánuje pouze pro zápasy s termínem v minulosti. Čas načtení seznamu
   neblokuje detail: ten má samostatné `metadata.detail_synced_at`.
 - Omezení se znovu vyhodnocují při zpracování detailu, včetně ručního volání.
@@ -35,6 +40,10 @@ statistiky ani nepřidá úspěšný `boxscore_synced_at`. Náhrada je jedna tra
 omezená na daný tým a zápas; zámek sezóny chrání stávající přepočet sezónních
 souhrnů před souběhem. Po importu se ruší pouze známé cache statistik dotčeného
 týmu a sezóny. `--force` tato omezení neobchází.
+
+Při chybě import nejprve uloží stav `failed` s původní příčinou. Uložení
+diagnostického HTML je následné a volitelné; jeho selhání nesmí původní chybu
+zakrýt ani ponechat běh ve stavu `running`.
 
 1.  **Fáze 1: Sezónní přehled (`SyncTeamSeasonJob`)**
     - Stáhne soupisku týmu.

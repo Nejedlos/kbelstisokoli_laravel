@@ -22,6 +22,8 @@ Pro rozpis, výsledky a statistiky bez zásahů do členství ponechte **Aktivn�
 
 U PBasket použijte jako **URL seznamu zápasů** úplnou týmovou stránku pro správnou sezónu, například `https://pbasket.cz.basketball/tym/7761?y=2026`. Samostatný přehled `/zapasy` může zobrazovat jen omezený výběr. Neurčený termín se do rozpisu zatím neimportuje. Podrobné statistiky se stahují až po termínu zápasu; pokud zdroj boxscore ještě nezveřejnil, dřívější statistiky zůstanou zachované. Případné nejednoznačné párování uvidíte v logu importu a režim zápasy automaticky neslučuje.
 
+U staršího ručně založeného zápasu může systém při přesném termínu a shodném směru utkání rozpoznat i běžnou variantu názvu soupeře (například „TJ ČSA Praha“ a „TJ ČSA“). Zachová původní zápas i soupeře. Rozdílné písmeno týmu, věkovou kategorii nebo zamítnutý návrh sloučení tímto způsobem nepřekoná.
+
 ### Řešení mismatchů (Neshody)
 Někdy synchronizace narazí na problém:
 - **Jméno nesouhlasí:** Hráč je u nás veden jinak než v ČBF (např. diakritika). Systém nahlásí "Mismatch" a vy musíte ručně potvrdit, že jde o stejnou osobu.

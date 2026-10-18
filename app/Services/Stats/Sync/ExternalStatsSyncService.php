@@ -331,12 +331,17 @@ class ExternalStatsSyncService
                 'imported_count' => count($data->rows),
             ]);
         } catch (\Exception $e) {
-            if (isset($html)) {
-                $sanitized = $this->normalizer->sanitizeHtml($html);
-                Storage::disk('local')->put("debug_html/run_{$run->id}.html", $sanitized);
-                $run->updateMetadata(['debug_html_file' => "debug_html/run_{$run->id}.html"]);
-            }
+            // Persist the original failure before optional diagnostics can fail.
             $run->fail($e);
+            if (isset($html)) {
+                try {
+                    $sanitized = $this->normalizer->sanitizeHtml($html);
+                    Storage::disk('local')->put("debug_html/run_{$run->id}.html", $sanitized);
+                    $run->updateMetadata(['debug_html_file' => "debug_html/run_{$run->id}.html"]);
+                } catch (\Throwable $debugError) {
+                    Log::warning('Unable to save import failure snapshot.', ['run_id' => $run->id, 'error' => $debugError->getMessage()]);
+                }
+            }
             throw $e;
         }
     }
@@ -513,12 +518,17 @@ class ExternalStatsSyncService
             }
 
         } catch (\Exception $e) {
-            if (isset($html)) {
-                $sanitized = $this->normalizer->sanitizeHtml($html);
-                Storage::disk('local')->put("debug_html/run_{$run->id}.html", $sanitized);
-                $run->updateMetadata(['debug_html_file' => "debug_html/run_{$run->id}.html"]);
-            }
+            // Persist the original failure before optional diagnostics can fail.
             $run->fail($e);
+            if (isset($html)) {
+                try {
+                    $sanitized = $this->normalizer->sanitizeHtml($html);
+                    Storage::disk('local')->put("debug_html/run_{$run->id}.html", $sanitized);
+                    $run->updateMetadata(['debug_html_file' => "debug_html/run_{$run->id}.html"]);
+                } catch (\Throwable $debugError) {
+                    Log::warning('Unable to save import failure snapshot.', ['run_id' => $run->id, 'error' => $debugError->getMessage()]);
+                }
+            }
             throw $e;
         }
     }
@@ -939,12 +949,17 @@ class ExternalStatsSyncService
             ]);
 
         } catch (\Exception $e) {
-            if (isset($html)) {
-                $sanitized = $this->normalizer->sanitizeHtml($html);
-                Storage::disk('local')->put("debug_html/run_{$run->id}.html", $sanitized);
-                $run->updateMetadata(['debug_html_file' => "debug_html/run_{$run->id}.html"]);
-            }
+            // Persist the original failure before optional diagnostics can fail.
             $run->fail($e);
+            if (isset($html)) {
+                try {
+                    $sanitized = $this->normalizer->sanitizeHtml($html);
+                    Storage::disk('local')->put("debug_html/run_{$run->id}.html", $sanitized);
+                    $run->updateMetadata(['debug_html_file' => "debug_html/run_{$run->id}.html"]);
+                } catch (\Throwable $debugError) {
+                    Log::warning('Unable to save import failure snapshot.', ['run_id' => $run->id, 'error' => $debugError->getMessage()]);
+                }
+            }
             throw $e;
         }
     }

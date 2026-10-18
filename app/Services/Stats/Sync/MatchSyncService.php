@@ -11,6 +11,7 @@ use App\Models\Team;
 use App\Support\MatchIdentityKey;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class MatchSyncService
 {
@@ -43,6 +44,20 @@ class MatchSyncService
         $name = preg_replace('/[^a-z0-9]/', '', $name);
 
         return $name;
+    }
+
+    /**
+     * Exact alias comparison for dated legacy fixtures. Keep club identity, age
+     * groups and team letters; the broader fuzzy normalizer is unsuitable here.
+     */
+    private function normalizeLegacyOpponentAlias(string $name): string
+    {
+        $name = mb_strtolower(Str::ascii(trim($name)));
+        $name = preg_replace('/[^a-z0-9]+/', ' ', $name);
+        $name = preg_replace('/^(tj|sk|bk|bc)\s+/', '', trim($name));
+        $name = preg_replace('/\bpraha\b/', '', $name);
+
+        return trim(preg_replace('/\s+/', ' ', $name));
     }
 
     /**
@@ -141,6 +156,7 @@ class MatchSyncService
             }
             $candidates = BasketballMatch::where('season_id', $season->id)
                 ->where(fn ($query) => $query->where('team_id', $team->id)->orWhereHas('teams', fn ($teams) => $teams->where('teams.id', $team->id)))
+                ->with('opponent')
                 ->get();
             $exact = $candidates->filter(fn ($candidate) => (string) ($candidate->metadata['external_id'] ?? $candidate->metadata['season_external_match_id'] ?? '') === (string) $externalMatchId);
             if ($exact->count() > 1) {
@@ -149,9 +165,26 @@ class MatchSyncService
             $match = $exact->first();
             if (! $match) {
                 $sameDay = $candidates->filter(fn ($candidate) => $candidate->scheduled_at?->isSameDay($scheduledAt));
-                $legacy = $sameDay->filter(fn ($candidate) => empty($candidate->metadata['external_id']) && empty($candidate->metadata['season_external_match_id'])
-                    && (int) $candidate->opponent_id === (int) $opponent->id
-                    && $candidate->is_home === $isHome);
+                $legacy = $sameDay->filter(function ($candidate) use ($opponent, $opponentName, $isHome, $scheduledAt) {
+                    if (! empty($candidate->metadata['external_id']) || ! empty($candidate->metadata['season_external_match_id'])
+                        || ! $candidate->scheduled_at->equalTo($scheduledAt) || $candidate->is_home !== $isHome) {
+                        return false;
+                    }
+                    if ((int) $candidate->opponent_id === (int) $opponent->id) {
+                        return true;
+                    }
+                    $existingName = $this->normalizeLegacyOpponentAlias($candidate->opponent?->name ?? '');
+                    $sourceName = $this->normalizeLegacyOpponentAlias($opponentName);
+                    if ($sourceName === '' || $existingName !== $sourceName) {
+                        return false;
+                    }
+
+                    return ! OpponentMergeSuggestion::where('status', 'rejected')
+                        ->where(function ($query) use ($opponent, $candidate) {
+                            $query->where(fn ($pair) => $pair->where('source_opponent_id', $opponent->id)->where('target_opponent_id', $candidate->opponent_id))
+                                ->orWhere(fn ($pair) => $pair->where('source_opponent_id', $candidate->opponent_id)->where('target_opponent_id', $opponent->id));
+                        })->exists();
+                });
                 if ($legacy->count() === 1 && $sameDay->count() === 1) {
                     $match = $legacy->first();
                 } elseif ($sameDay->isNotEmpty()) {
@@ -380,7 +413,7 @@ class MatchSyncService
             'match_type' => $match && ($options['conservative_matching'] ?? false) ? $match->match_type : 'mistrovske',
             'team_id' => $match && ($options['conservative_matching'] ?? false) ? $match->team_id : $team->id,
             'season_id' => $season->id,
-            'opponent_id' => $opponent->id,
+            'opponent_id' => $match && ($options['conservative_matching'] ?? false) ? $match->opponent_id : $opponent->id,
             'scheduled_at' => $scheduledAt,
             'is_home' => $isHome,
             'status' => $status,
