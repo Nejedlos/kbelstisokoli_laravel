@@ -9,6 +9,7 @@ use App\Models\ExternalImportRun;
 use App\Models\ExternalTeamSeasonConfig;
 use App\Models\Season;
 use App\Models\Team;
+use App\Services\Matches\MatchWriteService;
 use App\Services\Stats\Clippers\CzBasketball\CzBasketballMatchDetailClipper;
 use App\Services\Stats\Clippers\CzBasketball\CzBasketballMatchesListClipper;
 use App\Services\Stats\Clippers\CzBasketball\CzBasketballTeamPageClipper;
@@ -488,10 +489,8 @@ class ExternalStatsSyncService
 
                         continue;
                     }
-                    DB::transaction(function () use ($config, $team, $season, $rowValues, $run, $options) {
-                        ExternalTeamSeasonConfig::whereKey($config->id)->lockForUpdate()->first();
-                        $this->matchSyncService->sync($team, $season, $rowValues, $run, $options);
-                    });
+                    // MatchSyncService owns the shared team lock and atomic write used by manual entry too.
+                    $this->matchSyncService->sync($team, $season, $rowValues, $run, $options);
                     $importedCount++;
                 }
 
@@ -805,136 +804,138 @@ class ExternalStatsSyncService
                 $run->update(['status' => 'partial_failed', 'error_summary' => 'DOM extractor failed or AI-only used, used AI.']);
             }
 
-            // An absent/opponent-only boxscore must never erase our existing rows.
-            $hasReplacement = collect($tables)->contains(fn ($table) => $this->statisticSyncService->isOwnTeamBoxscore($match, $table, $teamId)
-                && collect($table->rows)->contains(fn ($row) => ! ($row->metadata['is_total'] ?? false) && $row->rowLabel !== null && is_numeric($row->values['pts'] ?? null)));
+            $writer = app(MatchWriteService::class);
+            $writer->withImportTeamLocks($teamId, function () use ($writer, &$match, $teamId, $run, $tables, $mainData, $options) {
+                // Validate a detail's reschedule before replacing any related statistics.
+                Season::whereKey($match->season_id)->lockForUpdate()->first();
+                $detailDate = $mainData->metadata['header']['scheduled_at'] ?? null;
+                $match = $writer->lockExistingForUpdate($match, $teamId, $detailDate ? Carbon::parse($detailDate) : null);
+                // An absent/opponent-only boxscore must never erase our existing rows.
+                $hasReplacement = collect($tables)->contains(fn ($table) => $this->statisticSyncService->isOwnTeamBoxscore($match, $table, $teamId)
+                    && collect($table->rows)->contains(fn ($row) => ! ($row->metadata['is_total'] ?? false) && $row->rowLabel !== null && is_numeric($row->values['pts'] ?? null)));
 
-            // Předběžná příprava metadat z hlavičky pro detekci týmů v tabulkách
-            $header = $mainData->metadata['header'] ?? [];
-            Log::info('DEBUG SYNC: Header found', ['header_keys' => array_keys($header)]);
-            $matchMetadata = $match->metadata ?? [];
-            $matchMetadata['last_synced_at'] = now()->toDateTimeString();
+                // Předběžná příprava metadat z hlavičky pro detekci týmů v tabulkách
+                $header = $mainData->metadata['header'] ?? [];
+                Log::info('DEBUG SYNC: Header found', ['header_keys' => array_keys($header)]);
+                $matchMetadata = $match->metadata ?? [];
+                $matchMetadata['last_synced_at'] = now()->toDateTimeString();
 
-            if ($hasReplacement) {
-                DB::transaction(function () use ($match, $run, $teamId, $tables, $options) {
-                    // Season summaries are rebuilt by the existing statistics service. Serialize
-                    // replacements within the season so concurrent details cannot interleave them.
-                    Season::whereKey($match->season_id)->lockForUpdate()->first();
-                    DB::table('matches')->where('id', $match->id)->lockForUpdate()->first();
+                if ($hasReplacement) {
                     $this->statisticSyncService->clearMatchBoxscore($match, $run, $teamId);
                     foreach ($tables as $tableData) {
                         $this->statisticSyncService->syncMatchBoxscore($match, $tableData, $run, $options);
                     }
-                });
-            }
-
-            foreach ($hasReplacement ? $tables : [] as $tableData) {
-
-                // OSVĚŽENÍ: syncMatchBoxscore mění metadata přímo v DB (opponent_boxscore),
-                // musíme je znovu načíst z DB, abychom je nepřepsali na konci metody zastaralými lokálními daty.
-                $freshMatch = DB::table('matches')->where('id', $match->id)->first();
-                if ($freshMatch && $freshMatch->metadata) {
-                    $matchMetadata = json_decode($freshMatch->metadata, true) ?: $matchMetadata;
                 }
 
-                // Pokud tabulka obsahuje sumární řádek, uložíme ho do metadat zápasu pro rychlý přístup
-                $totalRow = collect($tableData->rows)->first(fn ($r) => ! empty($r->metadata['is_total']));
-                if ($totalRow) {
-                    $tableName = mb_strtolower($tableData->name);
-                    $homeName = mb_strtolower($header['home_team'] ?? '');
-                    $awayName = mb_strtolower($header['away_team'] ?? '');
+                foreach ($hasReplacement ? $tables : [] as $tableData) {
 
-                    if ($homeName && str_contains($tableName, $homeName)) {
-                        $matchMetadata['stats_home'] = $totalRow->values;
-                    } elseif ($awayName && str_contains($tableName, $awayName)) {
-                        $matchMetadata['stats_away'] = $totalRow->values;
-                    } else {
-                        // Fallback podle pořadí (první je obvykle domácí)
-                        $index = array_search($tableData, $tables);
-                        if ($index === 0 && ! isset($matchMetadata['stats_home'])) {
+                    // OSVĚŽENÍ: syncMatchBoxscore mění metadata přímo v DB (opponent_boxscore),
+                    // musíme je znovu načíst z DB, abychom je nepřepsali na konci metody zastaralými lokálními daty.
+                    $freshMatch = DB::table('matches')->where('id', $match->id)->first();
+                    if ($freshMatch && $freshMatch->metadata) {
+                        $matchMetadata = json_decode($freshMatch->metadata, true) ?: $matchMetadata;
+                    }
+
+                    // Pokud tabulka obsahuje sumární řádek, uložíme ho do metadat zápasu pro rychlý přístup
+                    $totalRow = collect($tableData->rows)->first(fn ($r) => ! empty($r->metadata['is_total']));
+                    if ($totalRow) {
+                        $tableName = mb_strtolower($tableData->name);
+                        $homeName = mb_strtolower($header['home_team'] ?? '');
+                        $awayName = mb_strtolower($header['away_team'] ?? '');
+
+                        if ($homeName && str_contains($tableName, $homeName)) {
                             $matchMetadata['stats_home'] = $totalRow->values;
-                        } elseif ($index === 1 && ! isset($matchMetadata['stats_away'])) {
+                        } elseif ($awayName && str_contains($tableName, $awayName)) {
                             $matchMetadata['stats_away'] = $totalRow->values;
+                        } else {
+                            // Fallback podle pořadí (první je obvykle domácí)
+                            $index = array_search($tableData, $tables);
+                            if ($index === 0 && ! isset($matchMetadata['stats_home'])) {
+                                $matchMetadata['stats_home'] = $totalRow->values;
+                            } elseif ($index === 1 && ! isset($matchMetadata['stats_away'])) {
+                                $matchMetadata['stats_away'] = $totalRow->values;
+                            }
                         }
                     }
                 }
-            }
 
-            // Aktualizace metadat a skóre zápasu z extrahované hlavičky
-            if (! empty($header['periods_text'])) {
-                $matchMetadata['periods'] = $header['periods_text'];
-            }
-            if (! empty($header['periods'])) {
-                $matchMetadata['periods_detailed'] = $header['periods'];
-            }
-            if (! empty($header['venue'])) {
-                $matchMetadata['venue'] = $header['venue'];
-                if (empty($match->location)) {
-                    $match->location = $header['venue'];
+                // Aktualizace metadat a skóre zápasu z extrahované hlavičky
+                if (! empty($header['periods_text'])) {
+                    $matchMetadata['periods'] = $header['periods_text'];
                 }
-            }
-            if (! empty($header['referees'])) {
-                $matchMetadata['referees'] = $header['referees'];
-            }
-            if (! empty($header['attendance'])) {
-                $matchMetadata['attendance'] = $header['attendance'];
-            }
-            if (! empty($header['commissioner'])) {
-                $matchMetadata['commissioner'] = $header['commissioner'];
-            }
-            if (! empty($header['scheduled_at'])) {
-                // Aktualizujeme čas zápasu, pokud je v detailu nalezen (bývá přesnější než v seznamu)
-                $match->scheduled_at = $header['scheduled_at'];
-            }
+                if (! empty($header['periods'])) {
+                    $matchMetadata['periods_detailed'] = $header['periods'];
+                }
+                if (! empty($header['venue'])) {
+                    $matchMetadata['venue'] = $header['venue'];
+                    if (empty($match->location)) {
+                        $match->location = $header['venue'];
+                    }
+                }
+                if (! empty($header['referees'])) {
+                    $matchMetadata['referees'] = $header['referees'];
+                }
+                if (! empty($header['attendance'])) {
+                    $matchMetadata['attendance'] = $header['attendance'];
+                }
+                if (! empty($header['commissioner'])) {
+                    $matchMetadata['commissioner'] = $header['commissioner'];
+                }
+                if (! empty($header['scheduled_at'])) {
+                    // Aktualizujeme čas zápasu, pokud je v detailu nalezen (bývá přesnější než v seznamu)
+                    $match->scheduled_at = $header['scheduled_at'];
+                }
 
-            // Uložení nejlepších hráčů
+                // Uložení nejlepších hráčů
+                $bestPlayers = $mainData->metadata['best_players'] ?? [];
+                if (! empty($bestPlayers)) {
+                    $matchMetadata['best_players'] = $bestPlayers;
+                }
+
+                // Uložení srovnání týmů a posledních zápasů
+                if (! empty($mainData->metadata['team_comparison'])) {
+                    $matchMetadata['team_comparison'] = $mainData->metadata['team_comparison'];
+                }
+                if (! empty($mainData->metadata['last_matches'])) {
+                    $matchMetadata['last_matches'] = $mainData->metadata['last_matches'];
+                }
+                if (! empty($mainData->metadata['mutual_matches'])) {
+                    $matchMetadata['mutual_matches'] = $mainData->metadata['mutual_matches'];
+                }
+
+                // Označíme, že synchronizace detailu proběhla v pořádku (včetně boxscore pokud byly nalezeny tabulky)
+                if ($hasReplacement) {
+                    $matchMetadata['boxscore_synced_at'] = now()->toDateTimeString();
+                }
+
+                $updateData = ['metadata' => $matchMetadata];
+                Log::info('DEBUG SYNC: Match metadata before update', ['metadata_keys' => array_keys($matchMetadata)]);
+
+                if (! empty($header['score']) && preg_match('/(\d+)\s*:\s*(\d+)/', $header['score'], $scoreMatches)) {
+                    $scoreHome = (int) $scoreMatches[1];
+                    $scoreAway = (int) $scoreMatches[2];
+
+                    // Aktualizujeme skóre jen pokud je validní a buď chybí, nebo jsme v force/fresh módu
+                    if (($options['force'] ?? false) || ($options['fresh'] ?? false) || ($match->score_home === null && $match->score_away === null)) {
+                        $updateData['score_home'] = $scoreHome;
+                        $updateData['score_away'] = $scoreAway;
+                        $updateData['status'] = 'finished'; // Sjednoceno na 'finished' dle předchozích úkolů
+                    }
+                } elseif ($match->scheduled_at && $match->scheduled_at->isFuture()) {
+                    // Pro budoucí zápasy bez skóre v hlavičce zajistíme, aby skóre bylo null
+                    $updateData['score_home'] = null;
+                    $updateData['score_away'] = null;
+                    $updateData['status'] = 'scheduled';
+                }
+
+                $updateData['metadata']['detail_synced_at'] = now()->toDateTimeString();
+                $match->update($updateData);
+            });
+            // Photo downloads are outside the fixture lock and happen only after a successful write.
             $bestPlayers = $mainData->metadata['best_players'] ?? [];
-            if (! empty($bestPlayers)) {
-                $matchMetadata['best_players'] = $bestPlayers;
-                // Zpracování fotografií nejlepších hráčů (pokud jsou naši)
-                if (! ($options['skip_photos'] ?? false)) {
-                    $this->processBestPlayerPhotos($bestPlayers, $run, $match);
-                }
+            if ($bestPlayers !== [] && ! ($options['skip_photos'] ?? false)) {
+                $this->processBestPlayerPhotos($bestPlayers, $run, $match);
             }
-
-            // Uložení srovnání týmů a posledních zápasů
-            if (! empty($mainData->metadata['team_comparison'])) {
-                $matchMetadata['team_comparison'] = $mainData->metadata['team_comparison'];
-            }
-            if (! empty($mainData->metadata['last_matches'])) {
-                $matchMetadata['last_matches'] = $mainData->metadata['last_matches'];
-            }
-            if (! empty($mainData->metadata['mutual_matches'])) {
-                $matchMetadata['mutual_matches'] = $mainData->metadata['mutual_matches'];
-            }
-
-            // Označíme, že synchronizace detailu proběhla v pořádku (včetně boxscore pokud byly nalezeny tabulky)
-            if ($hasReplacement) {
-                $matchMetadata['boxscore_synced_at'] = now()->toDateTimeString();
-            }
-
-            $updateData = ['metadata' => $matchMetadata];
-            Log::info('DEBUG SYNC: Match metadata before update', ['metadata_keys' => array_keys($matchMetadata)]);
-
-            if (! empty($header['score']) && preg_match('/(\d+)\s*:\s*(\d+)/', $header['score'], $scoreMatches)) {
-                $scoreHome = (int) $scoreMatches[1];
-                $scoreAway = (int) $scoreMatches[2];
-
-                // Aktualizujeme skóre jen pokud je validní a buď chybí, nebo jsme v force/fresh módu
-                if (($options['force'] ?? false) || ($options['fresh'] ?? false) || ($match->score_home === null && $match->score_away === null)) {
-                    $updateData['score_home'] = $scoreHome;
-                    $updateData['score_away'] = $scoreAway;
-                    $updateData['status'] = 'finished'; // Sjednoceno na 'finished' dle předchozích úkolů
-                }
-            } elseif ($match->scheduled_at && $match->scheduled_at->isFuture()) {
-                // Pro budoucí zápasy bez skóre v hlavičce zajistíme, aby skóre bylo null
-                $updateData['score_home'] = null;
-                $updateData['score_away'] = null;
-                $updateData['status'] = 'scheduled';
-            }
-
-            $updateData['metadata']['detail_synced_at'] = now()->toDateTimeString();
-            $match->update($updateData);
             app(TeamStatsService::class)->invalidateCache($teamId, $match->season_id);
 
             // Po úspěšné synchronizaci detailu (i pro budoucí zápasy) vyvoláme přepočet predikce

@@ -2,7 +2,7 @@ Sekce **Zápasy** pokrývá kompletní životní cyklus utkání – od automati
 
 ### Automatizace: Synchronizace s cz.basketball (ČBF)
 Tato funkce je pro klub Kbelští sokoli zásadní a šetří hodiny administrativní práce.
-- **Jak to funguje**: Pokud tým hraje soutěž zastřešenou ČBF, systém se automaticky napojuje na jejich API a pravidelně stahuje rozpis i výsledky zápasů.
+- **Jak to funguje**: U týmu s povolenou synchronizací systém pravidelně stahuje rozpis a výsledky z webu ČBF/PBasket. Nová utkání založí, existující aktualizuje podle externího ID.
 - **Externí indikátor**: V tabulce zápasů poznáte synchronizovaný zápas podle modré <i class="fa-light fa-cloud-arrow-down text-info"></i> **Ikony cloudu** u datumu zápasu.
 - **Hromadná AI synchronizace**: Pokud u historických zápasů chybí detaily (body, fauly hráčů), lze v hromadných akcích vybrat zápasy a spustit "AI Synchronizaci detailů". Ta se pokusí automaticky "vyčíst" a přiřadit statistiky k hráčům v databázi.
 
@@ -11,6 +11,20 @@ U přátelských utkání nebo turnajů, které nejsou v ČBF, musíte zápas vy
 1. **Základní údaje**: Výběr domácího týmu, soupeře, data, času a místa. Do pole **Soupeř** napište celý název. Existující tým vyberte z výsledků; pokud přesně stejný název ještě není v adresáři, zvolte **Vytvořit tým „…“**. Soupeř se ihned založí pouze s názvem a rovnou se vybere, bez dalšího formuláře nebo přechodu na jinou stránku.
 2. **Místo konání (Hala)**: U každého zápasu lze specifikovat konkrétní halu. Pokud je to hala Kbely, automaticky se nabízí s mapou.
 3. **Status zápasu**: Plánováno (vytvořeno), Naplánováno (potvrzen termín), Odehráno (zapsán výsledek), Odloženo/Zrušeno.
+
+### Ochrana před duplicitou
+
+Při vytváření i úpravě se kontroluje, zda některý vybraný tým už nemá stejný
+zápas v dané sezóně proti témuž soupeři, ve stejném termínu a se stejným
+směrem domácí/venku. Pokud ano, uložení se zastaví a oznámení nabídne
+**Otevřít existující zápas**. Použijte tento záznam pro nominaci, docházku i výsledky.
+Při jiném čase téhož dne formulář nabídne odkazy na podobná utkání. Zkontrolujte,
+zda nejde jen o překlep v čase; samostatné utkání lze uložit.
+
+Stejnou kontrolu používá automatický import, včetně souběhu s ručním ukládáním.
+Změna termínu na zdroji aktualizuje známé utkání. Existující docházka, statistiky
+a pokyny zůstávají navázané na původní zápas; import duplicity automaticky neslučuje
+ani nemaže. Různá utkání stejného dne, například turnaj, lze nadále zadat samostatně.
 
 ### Nominace a docházka hráčů
 Tento proces probíhá ve dvou fázích (Pozvánka a Skutečnost):

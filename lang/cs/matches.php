@@ -1,6 +1,17 @@
 <?php
 
 return [
+    'validation' => [
+        'duplicate' => 'Tento zápas už existuje (č. :id). Otevřete existující zápas místo vytváření dalšího.',
+        'import_conflict' => 'Konflikt identity zápasu. Zkontrolujte existující zápas č. :id. Záznamy zůstaly zachované.',
+        'invalid_teams' => 'Vyberte platné týmy zápasu.',
+        'stale_edit' => 'Zápas mezitím změnil jiný uživatel nebo import. Obnovte stránku a zkontrolujte aktuální údaje.',
+    ],
+    'duplicates' => [
+        'title' => 'Zápas už existuje',
+        'open_existing' => 'Otevřít existující zápas',
+        'similar' => 'Pro tento tým a soupeře už je ve stejný den zadaný zápas s jiným časem. Zkontrolujte, zda jde o jiné utkání:',
+    ],
     'title' => 'Zápasy',
     'subtitle' => 'Sledujte výsledky a rozpis utkání našich týmů.',
     'breadcrumbs' => 'Zápasy',

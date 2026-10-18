@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Stats\Sync;
 
+use App\Exceptions\DuplicateMatchException;
 use App\Jobs\Stats\SyncMatchDetailJob;
 use App\Jobs\Stats\SyncTeamSeasonJob;
 use App\Models\BasketballMatch;
@@ -185,7 +186,8 @@ class MatchesOnlySyncTest extends TestCase
             app(MatchSyncService::class)->sync($this->team, $this->season, ['external_match_id' => '550451', 'scheduled_at' => '2026-10-01 20:00:00', 'home_team' => 'Sokol Kbely C', 'away_team' => 'Opponent'], null, ['conservative_matching' => true]);
             $this->fail('Expected ambiguity rejection');
         } catch (\RuntimeException $error) {
-            $this->assertStringContainsString('Ambiguous external match ID', $error->getMessage());
+            $this->assertInstanceOf(DuplicateMatchException::class, $error);
+            $this->assertSame(__('matches.validation.import_conflict', ['id' => $error->matchId]), $error->getMessage());
         }
         $this->assertDatabaseCount('matches', 2);
     }
@@ -232,6 +234,32 @@ class MatchesOnlySyncTest extends TestCase
         $this->assertSame(['pts' => 7], $other->fresh()->values);
         $this->assertDatabaseMissing('statistic_rows', ['basketball_match_id' => $match->id, 'row_label' => 'Replacement']);
         $this->assertArrayNotHasKey('boxscore_synced_at', $match->fresh()->metadata);
+    }
+
+    public function test_detail_reschedule_conflict_preserves_boxscore_and_both_fixtures(): void
+    {
+        $opponent = Opponent::create(['name' => 'Opponent']);
+        $match = $this->match(true);
+        $match->update(['opponent_id' => $opponent->id]);
+        $conflict = $this->match(true);
+        $conflict->update(['opponent_id' => $opponent->id, 'scheduled_at' => '2026-10-02 20:00:00', 'metadata' => []]);
+        app(StatisticSetService::class)->ensureBaseSets();
+        $set = StatisticSet::where('slug', StatisticSetService::MATCH_BOXSCORE_SET)->firstOrFail();
+        $old = StatisticRow::create(['statistic_set_id' => $set->id, 'season_id' => $this->season->id, 'team_id' => $this->team->id, 'basketball_match_id' => $match->id, 'row_label' => 'Original', 'values' => ['pts' => 12]]);
+        $table = new NormalizedTableDTO('Sokol Kbely C', [], [new NormalizedRowDTO(['pts' => 9], rowLabel: 'Replacement')]);
+        $this->detail([$table]);
+        $table->metadata['header']['scheduled_at'] = '2026-10-02 20:00:00';
+        try {
+            app(ExternalStatsSyncService::class)->syncMatchDetail($match->id, ['force' => true]);
+            $this->fail('Expected detail collision');
+        } catch (DuplicateMatchException $exception) {
+            $this->assertSame($conflict->id, $exception->matchId);
+        }
+        $this->assertSame(['pts' => 12], $old->fresh()->values);
+        $this->assertSame('2026-10-01 20:00:00', $match->fresh()->scheduled_at->toDateTimeString());
+        $this->assertArrayNotHasKey('detail_synced_at', $match->fresh()->metadata);
+        $this->assertDatabaseCount('matches', 2);
+        $this->assertDatabaseMissing('statistic_rows', ['row_label' => 'Replacement']);
     }
 
     public function test_batch_import_includes_matches_only_configuration(): void
@@ -284,7 +312,7 @@ class MatchesOnlySyncTest extends TestCase
         $this->assertDatabaseCount('matches', 3);
     }
 
-    public function test_legacy_alias_rejects_different_identity_time_direction_empty_alias_and_rejected_pair(): void
+    public function test_legacy_alias_does_not_merge_different_identity_time_direction_empty_alias_or_rejected_pair(): void
     {
         $cases = [
             ['TJ ČSA Praha', 'TJ ČSA', '2026-10-01 21:00:00', true, false],
@@ -303,12 +331,10 @@ class MatchesOnlySyncTest extends TestCase
             if ($rejected) {
                 OpponentMergeSuggestion::create(['source_opponent_id' => $stored->id, 'target_opponent_id' => $source->id, 'similarity' => 1, 'status' => 'rejected']);
             }
-            try {
-                app(MatchSyncService::class)->sync($this->team, $this->season, ['external_match_id' => '549796', 'scheduled_at' => $sourceDate, 'home_team' => $home ? 'Sokol Kbely C' : $sourceName, 'away_team' => $home ? $sourceName : 'Sokol Kbely C'], null, ['conservative_matching' => true]);
-                $this->fail('Expected conflicting legacy fixture rejection');
-            } catch (\RuntimeException $error) {
-                $this->assertStringContainsString('Conflicting match', $error->getMessage());
-            }
+            $created = app(MatchSyncService::class)->sync($this->team, $this->season, ['external_match_id' => '549796', 'scheduled_at' => $sourceDate, 'home_team' => $home ? 'Sokol Kbely C' : $sourceName, 'away_team' => $home ? $sourceName : 'Sokol Kbely C'], null, ['conservative_matching' => true]);
+            $this->assertNotSame($match->id, $created->id);
+            $created->teams()->detach();
+            $created->delete();
             $this->assertSame([], $match->fresh()->metadata);
             $this->assertSame($stored->id, $match->fresh()->opponent_id);
             $match->teams()->detach();
@@ -329,7 +355,7 @@ class MatchesOnlySyncTest extends TestCase
 
     public function test_diagnostic_failure_cannot_mask_the_original_failed_import(): void
     {
-        $this->match();
+        $original = $this->match();
         $this->match();
         $this->mock(StatFetcherInterface::class)->shouldReceive('fetch')->once()->andReturn('<html></html>');
         $row = new NormalizedRowDTO(['external_match_id' => '550451', 'scheduled_at' => '2026-10-01 20:00:00', 'home_team' => 'Sokol Kbely C', 'away_team' => 'Opponent']);
@@ -339,11 +365,11 @@ class MatchesOnlySyncTest extends TestCase
             app(ExternalStatsSyncService::class)->syncTeamSeason($this->team->id, $this->season->id);
             $this->fail('Expected import failure');
         } catch (\Exception $error) {
-            $this->assertStringContainsString('Ambiguous external match ID', $error->getMessage());
+            $this->assertStringContainsString(__('matches.validation.import_conflict', ['id' => $original->id]), $error->getMessage());
             $this->assertStringNotContainsString('Snapshot unavailable', $error->getMessage());
         }
         $run = ExternalImportRun::where('run_type', 'matches_list')->firstOrFail();
         $this->assertSame('failed', $run->status);
-        $this->assertStringContainsString('Ambiguous external match ID', $run->error_summary);
+        $this->assertStringContainsString(__('matches.validation.import_conflict', ['id' => $original->id]), $run->error_summary);
     }
 }

@@ -1,38 +1,52 @@
-# Řešení duplicit zápasů
+# Prevence duplicit zápasů
 
-Tento dokument popisuje mechanismy prevence a opravy duplicitních zápasů, které mohou vzniknout při importu dat z externích zdrojů (např. cz.basketball).
+Ruční vytvoření, ruční editace a import používají společnou službu
+`App\Services\Matches\MatchWriteService`. Zápas se zapisuje společně s vazbami
+na týmy v jedné transakci. Kontrola zahrnuje legacy `team_id` i vazbu
+`basketball_match_team`.
 
-## 1. Příčina duplicit
-Duplicity obvykle vznikají, když stejný zápas v importu změní některý z klíčových identifikátorů:
-- **Název soupeře:** Např. "CTS Praha" vs "CTS Basket". Pokud nejsou tito soupeři v systému sloučeni, vygeneruje se pro ně jiný `MatchIdentityKey`.
-- **Datum/Čas:** Pokud se čas zápasu posune o více než 120 minut a zápas nemá v metadatech `external_id`.
-- **Chybějící metadata:** Pokud zápas v DB nemá `match_identity_key` ani `external_id` (např. ručně vytvořený zápas).
+## Ruční zadávání
 
-## 2. Prevence
-Do systému byly implementovány následující ochranné prvky:
-- **Normalizace identity klíče:** `MatchSyncService` nyní při generování `MatchIdentityKey` používá normalizovaný název ze synchronizovaného modelu `Opponent` místo surového názvu z importu. Pokud jsou dva názvy soupeře sloučeny pod jeden model, identifikační klíč zápasu bude stejný.
-- **Detekce podle času:** Pokud nebyl zápas nalezen podle klíčů, systém hledá jakýkoliv zápas stejného týmu v okně +/- 120 minut ve stejný den.
+Při přesné shodě sezóny, některého vybraného týmu, termínu, soupeře a směru
+domácí/venku se uložení odmítne. Administrace zobrazí odkaz na existující zápas.
+Editace vylučuje vlastní ID; změna týmů nesmí vytvořit kolizi s jiným záznamem.
+Typ zápasu není způsob, jak ochranu obejít. Odlišný čas, soupeř nebo tým může
+představovat samostatné utkání, například turnajový dvojzápas.
+Pro stejného soupeře a den s jiným časem formulář zobrazí upozornění s odkazy
+na podobná utkání; samo upozornění uložení neblokuje.
 
-## 3. Automatický úklid
-Byl vytvořen Artisan příkaz pro hromadné čištění duplicit, který běží automaticky každý den ve 4:00.
+Názvy soupeřů se porovnávají konzervativně: diakritika, mezery, běžný úvodní
+prefix TJ/SK/BK/BC a slovo Praha nemění shodu. Identita klubu, písmeno týmu
+a věková kategorie zůstávají zachované; dříve zamítnuté sloučení se respektuje.
+
+## Automatický import
+
+Stabilní externí ID se hledá pro danou sezónu a tým. Změna termínu aktualizuje
+stávající záznam a zachová jeho ID a URL. Ručně založený zápas bez externího ID
+lze převzít pouze při jednoznačné přesné shodě. Nejednoznačnost nebo konflikt
+externích ID zastaví zápis k prověření. Běžný import zápasy neslučuje ani nemaže.
+
+Párování nepoužívá toleranci ±120 minut ani obecné pravidlo „jeden zápas denně“.
+`MatchIdentityKey` s datem bez času není unikátní databázovou identitou.
+
+## Souběh a zachování dat
+
+Před kontrolou se zamykají existující řádky dotčených týmů ve stabilním pořadí.
+Editace zahrne původní i nově vybrané týmy. Kandidáti se znovu načtou až po
+získání zámků, takže import a ruční uložení používají stejnou ochranu i při
+souběhu. Uložení týmových vazeb mimo tuto službu nesmí ochranu obejít.
+
+Odmítnutí duplicity nepřesouvá docházku, statistiky ani poznámky. Aktualizace
+známého importovaného zápasu zachová původní záznam a jeho navázaná data.
+Existující podezřelé duplicity se automaticky neopravují slučováním.
+
+## Pravidelný audit
+
+Plánovač ve 04:00 spouští pouze kontrolu bez zápisu:
 
 ```bash
-php artisan stats:cleanup-duplicates
+php artisan stats:cleanup-duplicates --dry-run
 ```
 
-Příkaz vyhledá zápasy stejného týmu ve stejný den a čas (tolerance 120 min), sloučí jejich docházku, statistiky a metadata a nadbytečné záznamy odstraní.
-
-## 4. Ruční oprava (Specifické IDs)
-Pokud automatický úklid selže nebo je potřeba zasáhnout okamžitě u konkrétních ID, lze použít skript `fix_match_duplicity.php`.
-
-**Příklad použití (pro IDs 1299 a 1847):**
-1. Nahrajte skript na server (již je součástí projektu).
-2. Spusťte přes SSH:
-```bash
-php fix_match_duplicity.php
-```
-
-Skript provede:
-1. Přesun docházky (attendances) ze zdrojového ID (1299) do cílového (1847).
-2. Sloučení metadat (zachování `legacy_z_id`).
-3. Smazání nadbytečného zápasu (1299).
+Starší příkazy pro skutečné slučování jsou samostatná údržba; běžná synchronizace
+ani pravidelný audit je nevolají. Hlášený kandidát sám o sobě nepotvrzuje duplicitu.

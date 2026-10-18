@@ -138,8 +138,10 @@ Schedule::call(fn () => Artisan::call('stats:sync-players', ['--excesive' => tru
 // Zpracování DMARC reportů (každou hodinu)
 Schedule::call(fn () => Artisan::call('dmarc:ingest'))->hourly()->name('dmarc-ingest');
 
-// Čištění duplicit (každý den ve 4:00)
-Schedule::call(fn () => Artisan::call('stats:cleanup-duplicates'))->dailyAt('04:00');
+// Audit duplicit bez slučování nebo mazání navázaných dat (každý den ve 4:00).
+Schedule::call(fn () => Artisan::call('stats:cleanup-duplicates', ['--dry-run' => true]))
+    ->dailyAt('04:00')
+    ->name('match-duplicates-audit');
 
 // Generování týdenní AI aktuality (každé pondělí v 8:00)
 Schedule::call(fn () => Artisan::call('app:news:generate-weekly'))->weeklyOn(1, '08:00');

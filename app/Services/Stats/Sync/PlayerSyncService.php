@@ -14,6 +14,7 @@ use App\Models\Season;
 use App\Models\Team;
 use App\Models\User;
 use App\Models\Venue;
+use App\Services\Matches\MatchWriteService;
 use App\Services\Stats\Contracts\StatFetcherInterface;
 use App\Services\Stats\Extractors\CzBasketball\MatchDetailBoxscoreExtractor;
 use App\Services\Stats\Extractors\CzBasketball\PlayerDetailExtractor;
@@ -903,98 +904,86 @@ class PlayerSyncService
             return null;
         }
 
-        // 2. Najdeme nebo vytvoříme oponenta
-        $opponent = Opponent::firstOrCreate(['name' => $opponentName]);
-
-        // 3. Najdeme nebo určíme správnou sezónu
-        $matchDate = $extMatch->scheduled_at ?: ($extMatch->match_date ? $extMatch->match_date->startOfDay() : now());
-        $season = Season::forDate($matchDate);
-
-        if (! $season) {
-            $year = (int) $matchDate->format('Y');
-            $month = (int) $matchDate->format('m');
-            $seasonName = ($month >= 8) ? "$year/".($year + 1) : ($year - 1)."/$year";
-            $season = Season::create(['name' => $seasonName]);
+        if (! $extMatch->scheduled_at) {
+            // A missing time cannot safely identify a fixture; wait for a dated source record.
+            return null;
         }
+        $writer = app(MatchWriteService::class);
 
-        // 3.5 Najdeme nebo vytvoříme halu (Venue)
-        $venueName = $header['venue'] ?? $extMatch->venue;
-        $venue = $this->ensureVenue($venueName);
+        return $writer->withImportTeamLocks($ourTeam->id, function () use ($writer, $extMatch, $header, $ourTeam, $opponentName, $isHome) {
+            // 2. Najdeme nebo vytvoříme oponenta
+            $opponent = Opponent::firstOrCreate(['name' => $opponentName]);
 
-        // 4. Najdeme nebo vytvoříme BasketballMatch
-        // Vyhledávání zápasu podle externího ID v JSON metadatech
-        $match = null;
-        $extMatchId = (string) $extMatch->external_match_id;
+            // 3. Najdeme nebo určíme správnou sezónu
+            $matchDate = $extMatch->scheduled_at ?: ($extMatch->match_date ? $extMatch->match_date->startOfDay() : now());
+            $season = Season::forDate($matchDate);
 
-        if ($extMatchId) {
-            // Pro kompatibilitu s DB bez JSON funkcí načteme zápasy v sezóně a profiltrujeme v PHP
-            $match = BasketballMatch::where('season_id', $season->id)
-                ->get()
-                ->first(function ($m) use ($extMatchId) {
-                    $meta = $m->metadata;
+            if (! $season) {
+                $year = (int) $matchDate->format('Y');
+                $month = (int) $matchDate->format('m');
+                $seasonName = ($month >= 8) ? "$year/".($year + 1) : ($year - 1)."/$year";
+                $season = Season::create(['name' => $seasonName]);
+            }
 
-                    return ($meta['external_id'] ?? null) == $extMatchId
-                        || ($meta['external_match_id'] ?? null) == $extMatchId;
-                });
-        }
+            // 3.5 Najdeme nebo vytvoříme halu (Venue)
+            $venueName = $header['venue'] ?? $extMatch->venue;
+            $venue = $this->ensureVenue($venueName);
 
-        if (! $match) {
-            $match = BasketballMatch::where('team_id', $ourTeam->id)
-                ->where('season_id', $season->id)
-                ->where('scheduled_at', $extMatch->scheduled_at)
-                ->first();
-        }
+            // The same team-scoped identity gate is used by manual entry and team imports.
+            $match = $writer->resolveImported($ourTeam->id, $season->id, (string) $extMatch->external_match_id, $extMatch->scheduled_at, $isHome, $opponent->id);
 
-        if (! $match) {
-            $match = new BasketballMatch;
-            $match->team_id = $ourTeam->id;
-            $match->opponent_id = $opponent->id;
-            $match->season_id = $season->id;
-            $match->match_type = 'league';
-            $match->status = 'scheduled';
-        }
+            if (! $match) {
+                $match = new BasketballMatch;
+                $match->team_id = $ourTeam->id;
+                $match->opponent_id = $opponent->id;
+                $match->season_id = $season->id;
+                $match->match_type = 'league';
+                $match->status = 'scheduled';
+            }
 
-        // 5. Aktualizace dat
-        $match->scheduled_at = $extMatch->scheduled_at ?: $match->scheduled_at;
-        $match->location = $extMatch->venue ?: $match->location;
-        $match->venue_id = $venue?->id ?: $match->venue_id;
-        $match->is_home = $isHome;
+            // 5. Aktualizace dat
+            $match->scheduled_at = $extMatch->scheduled_at ?: $match->scheduled_at;
+            $match->location = $match->location ?: $extMatch->venue;
+            $match->venue_id = $match->venue_id ?: $venue?->id;
+            $match->is_home = $isHome;
 
-        // Pokud máme halu a tým ji nemá, nastavíme ji jako primární pro domácí zápasy
-        if ($venue) {
-            if ($isHome) {
-                if (! $ourTeam->primary_venue_id) {
-                    $ourTeam->primary_venue_id = $venue->id;
-                    $ourTeam->save();
-                }
-            } else {
-                if ($opponent && ! $opponent->primary_venue_id) {
-                    $opponent->primary_venue_id = $venue->id;
-                    $opponent->save();
+            // Pokud máme halu a tým ji nemá, nastavíme ji jako primární pro domácí zápasy
+            if ($venue) {
+                if ($isHome) {
+                    if (! $ourTeam->primary_venue_id) {
+                        $ourTeam->primary_venue_id = $venue->id;
+                        $ourTeam->save();
+                    }
+                } else {
+                    if ($opponent && ! $opponent->primary_venue_id) {
+                        $opponent->primary_venue_id = $venue->id;
+                        $opponent->save();
+                    }
                 }
             }
-        }
 
-        if (! empty($header['score']) && preg_match('/(\d+)\s*:\s*(\d+)/', $header['score'], $m)) {
-            $match->score_home = (int) $m[1];
-            $match->score_away = (int) $m[2];
-            $match->status = 'completed';
-        }
+            if (! empty($header['score']) && preg_match('/(\d+)\s*:\s*(\d+)/', $header['score'], $m)) {
+                $match->score_home = (int) $m[1];
+                $match->score_away = (int) $m[2];
+                $match->status = 'completed';
+            }
 
-        $metadata = $match->metadata ?? [];
-        $metadata['external_id'] = $extMatch->external_match_id;
-        $metadata['source'] = 'czbasketball';
-        $metadata['match_header'] = $header;
-        $match->metadata = $metadata;
+            $metadata = $match->metadata ?? [];
+            $metadata['external_id'] = $extMatch->external_match_id;
+            $metadata['source'] = 'czbasketball';
+            $metadata['match_header'] = $header;
+            $match->metadata = $metadata;
 
-        $match->save();
+            $match->save();
+            $match->teams()->syncWithoutDetaching([$ourTeam->id]);
 
-        // 6. Propojíme s ExternalPlayerMatch
-        if ($extMatch->basketball_match_id !== $match->id) {
-            $extMatch->basketball_match_id = $match->id;
-            $extMatch->save();
-        }
+            // 6. Propojíme s ExternalPlayerMatch
+            if ($extMatch->basketball_match_id !== $match->id) {
+                $extMatch->basketball_match_id = $match->id;
+                $extMatch->save();
+            }
 
-        return $match;
+            return $match;
+        });
     }
 }

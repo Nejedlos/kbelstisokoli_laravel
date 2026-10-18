@@ -2,6 +2,11 @@
 
 Tento dokument popisuje, jak probíhá automatizovaná synchronizace sportovních dat z webu `cz.basketball`.
 
+Zápis ručně i z importu sdílí `MatchWriteService`: kontroluje identitu po získání
+seřazených zámků dotčených týmů a uloží zápas s pivoty atomicky. Podrobnosti,
+zachování docházky/statistik a nedestruktivní pravidelný audit popisuje
+[prevence duplicit zápasů](../../06-ops/02-reseni-duplicit-zapasu.md).
+
 ## 1. Architektura
 
 Synchronizace je rozdělena do dvou hlavních fází, aby byla šetrná k externímu serveru a efektivní:
@@ -21,7 +26,7 @@ jako URL seznamu zápasů; samostatná stránka `/zapasy` může mít omezený f
   a externím ID bez nového účtu. Součtový řádek se neukládá jako hráč.
 - Přijímá pouze zápasy s externím ID, datem v dané sezóně a právě jedním výskytem
   konfigurovaného týmu. Neurčené termíny přeskočí. Nejednoznačná existující ID nebo
-  konfliktní zápasy stejného dne zastaví import k prověření; režim neslučuje zápasy.
+  přesná kolize utkání zastaví import k prověření; režim neslučuje zápasy.
 - Páruje existující zápasy přes `team_id` i `basketball_match_team`, zachovává jejich
   ID, vlastnictví a druh zápasu. Detail dostává ověřený kontext `sync_team_id`.
   U staršího zápasu bez externího ID lze přijmout jednoznačný alias soupeře pouze

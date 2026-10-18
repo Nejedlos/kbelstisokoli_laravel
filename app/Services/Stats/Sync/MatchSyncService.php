@@ -5,60 +5,19 @@ namespace App\Services\Stats\Sync;
 use App\Models\BasketballMatch;
 use App\Models\ExternalImportRun;
 use App\Models\ExternalTeamSeasonConfig;
-use App\Models\OpponentMergeSuggestion;
 use App\Models\Season;
 use App\Models\Team;
+use App\Services\Matches\MatchWriteService;
 use App\Support\MatchIdentityKey;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class MatchSyncService
 {
     public function __construct(
-        protected OpponentSyncService $opponentSyncService
+        protected OpponentSyncService $opponentSyncService,
+        protected MatchWriteService $matchWriteService
     ) {}
-
-    /**
-     * Normalizuje název soupeře pro fuzzy párování.
-     */
-    protected function normalizeOpponentName(string $name): string
-    {
-        // 1. Převedeme na malé písmena a odstraníme diakritiku
-        $name = mb_strtolower(trim($name));
-        $name = iconv('UTF-8', 'ASCII//TRANSLIT', $name);
-
-        // 2. Odstraníme stop slova (běžné součásti názvů klubů, které nejsou unikátní)
-        $stopWords = [
-            'sokol', 'basket', 'praha', 'tj', 'sk', 'slavoj', 'sportovni',
-            'klub', 'basketbal', 'basketball', 'bkc', 'bc', 'bk', 'bs',
-            'slavia', 'sparta', 'u23', 'u19', 'u17', 'akademie', 'academy',
-            'praha', 'mesto', 'ostrava', 'brno', 'plzen', 'liberec', 'olomouc',
-        ];
-
-        foreach ($stopWords as $word) {
-            $name = preg_replace('/\b'.preg_quote($word, '/').'\b/i', '', $name);
-        }
-
-        // 3. Odstraníme vše kromě písmen a čísel (včetně mezer)
-        $name = preg_replace('/[^a-z0-9]/', '', $name);
-
-        return $name;
-    }
-
-    /**
-     * Exact alias comparison for dated legacy fixtures. Keep club identity, age
-     * groups and team letters; the broader fuzzy normalizer is unsuitable here.
-     */
-    private function normalizeLegacyOpponentAlias(string $name): string
-    {
-        $name = mb_strtolower(Str::ascii(trim($name)));
-        $name = preg_replace('/[^a-z0-9]+/', ' ', $name);
-        $name = preg_replace('/^(tj|sk|bk|bc)\s+/', '', trim($name));
-        $name = preg_replace('/\bpraha\b/', '', $name);
-
-        return trim(preg_replace('/\s+/', ' ', $name));
-    }
 
     /**
      * Synchronizuje zápas.
@@ -66,6 +25,13 @@ class MatchSyncService
      * @param  array  $matchData  [scheduled_at, home_team, away_team, score, status, external_match_id]
      */
     public function sync(Team $team, Season $season, array $matchData, ?ExternalImportRun $run = null, array $options = []): BasketballMatch
+    {
+        return $this->matchWriteService->withImportTeamLocks($team->id, function () use ($team, $season, $matchData, $run, $options) {
+            return $this->syncLocked($team, $season, $matchData, $run, $options);
+        });
+    }
+
+    private function syncLocked(Team $team, Season $season, array $matchData, ?ExternalImportRun $run, array $options): BasketballMatch
     {
         if ($options['conservative_matching'] ?? false) {
             if (empty($matchData['external_match_id']) || empty($matchData['scheduled_at']) || ! $season->containsDate(Carbon::parse($matchData['scheduled_at']))) {
@@ -148,221 +114,10 @@ class MatchSyncService
             $opponent->name
         );
 
-        $match = null;
-
-        if ($options['conservative_matching'] ?? false) {
-            if (! $externalMatchId || ! $scheduledAt || ! $season->containsDate($scheduledAt)) {
-                throw new \RuntimeException('Conservative match sync requires an external ID and a date in the configured season.');
-            }
-            $candidates = BasketballMatch::where('season_id', $season->id)
-                ->where(fn ($query) => $query->where('team_id', $team->id)->orWhereHas('teams', fn ($teams) => $teams->where('teams.id', $team->id)))
-                ->with('opponent')
-                ->get();
-            $exact = $candidates->filter(fn ($candidate) => (string) ($candidate->metadata['external_id'] ?? $candidate->metadata['season_external_match_id'] ?? '') === (string) $externalMatchId);
-            if ($exact->count() > 1) {
-                throw new \RuntimeException('Ambiguous external match ID; automatic merging is disabled for matches-only sync.');
-            }
-            $match = $exact->first();
-            if (! $match) {
-                $sameDay = $candidates->filter(fn ($candidate) => $candidate->scheduled_at?->isSameDay($scheduledAt));
-                $legacy = $sameDay->filter(function ($candidate) use ($opponent, $opponentName, $isHome, $scheduledAt) {
-                    if (! empty($candidate->metadata['external_id']) || ! empty($candidate->metadata['season_external_match_id'])
-                        || ! $candidate->scheduled_at->equalTo($scheduledAt) || $candidate->is_home !== $isHome) {
-                        return false;
-                    }
-                    if ((int) $candidate->opponent_id === (int) $opponent->id) {
-                        return true;
-                    }
-                    $existingName = $this->normalizeLegacyOpponentAlias($candidate->opponent?->name ?? '');
-                    $sourceName = $this->normalizeLegacyOpponentAlias($opponentName);
-                    if ($sourceName === '' || $existingName !== $sourceName) {
-                        return false;
-                    }
-
-                    return ! OpponentMergeSuggestion::where('status', 'rejected')
-                        ->where(function ($query) use ($opponent, $candidate) {
-                            $query->where(fn ($pair) => $pair->where('source_opponent_id', $opponent->id)->where('target_opponent_id', $candidate->opponent_id))
-                                ->orWhere(fn ($pair) => $pair->where('source_opponent_id', $candidate->opponent_id)->where('target_opponent_id', $opponent->id));
-                        })->exists();
-                });
-                if ($legacy->count() === 1 && $sameDay->count() === 1) {
-                    $match = $legacy->first();
-                } elseif ($sameDay->isNotEmpty()) {
-                    throw new \RuntimeException('Conflicting match on the same day; review required before importing a new match.');
-                }
-            }
-        } else {
-            // 1. Přednost má external_id (hledáme v rámci sezóny a týmu; zároveň deduplikujeme pokud je více záznamů)
-            if ($externalMatchId) {
-                // Pro kompatibilitu s DB bez JSON funkcí načteme zápasy týmu v sezóně a profiltrujeme v PHP
-                $matchesInSeason = BasketballMatch::where('season_id', $season->id)
-                    ->where('team_id', $team->id)
-                    ->get();
-
-                $matchesByExt = $matchesInSeason->filter(function ($m) use ($externalMatchId) {
-                    return ($m->metadata['external_id'] ?? null) == (string) $externalMatchId;
-                })->sortBy('id');
-
-                if ($matchesByExt->count() > 1) {
-                    $match = $this->mergeDuplicatesByExternalId($team, $season, (string) $externalMatchId, $run);
-                } elseif ($matchesByExt->count() === 1) {
-                    $match = $matchesByExt->first();
-                }
-
-                // Pokud jsme stále nenašli, zkusíme najít zápas s tímto external_id KDEKOLIV v této sezóně (i pro jiný tým)
-                if (! $match) {
-                    // Pozor: Zde by globální dotaz mohl být pomalý, ale v dané sezóně bývá jen pár set zápasů celkem.
-                    $globalMatch = BasketballMatch::where('season_id', $season->id)
-                        ->get()
-                        ->first(function ($m) use ($externalMatchId) {
-                            return ($m->metadata['external_id'] ?? null) == (string) $externalMatchId;
-                        });
-
-                    if ($globalMatch) {
-                        \Log::info("MatchSync: Found match {$externalMatchId} under different team (ID {$globalMatch->team_id}), existing match ID: {$globalMatch->id}");
-
-                        if ((int) $globalMatch->team_id === (int) $team->id) {
-                            $match = $globalMatch;
-                        }
-                    }
-                }
-            }
-
-            // 2. Fallback na identity key (v rámci sezóny a týmu)
-            if (! $match) {
-                // Zápasy pro tým v sezóně už máme načtené z kroku 1, pokud bylo externalMatchId
-                if (! isset($matchesInSeason)) {
-                    $matchesInSeason = BasketballMatch::where('season_id', $season->id)
-                        ->where('team_id', $team->id)
-                        ->get();
-                }
-
-                $match = $matchesInSeason->first(function ($m) use ($matchIdentityKey) {
-                    return ($m->metadata['match_identity_key'] ?? null) == (string) $matchIdentityKey;
-                });
-            }
-
-            // 3. Poslední záchrana: vyhledání podle data, soupeře a směru zápasu (is_home)
-            // Toto pomáhá identifikovat zápasy, které byly importovány z jiného zdroje (legacy)
-            // a nemají v metadatech identity key ani external_id.
-            // POZNÁMKA: Normalizujeme název soupeře pro lepší párování, pokud legacy název nesedí úplně přesně.
-            if (! $match && $scheduledAt && $opponent) {
-                $match = BasketballMatch::where('season_id', $season->id)
-                    ->where('team_id', $team->id)
-                    ->where(function ($q) use ($opponent, $opponentName) {
-                        $q->where('opponent_id', $opponent->id)
-                            ->orWhereHas('opponent', function ($sq) use ($opponentName) {
-                                $sq->where('name', 'LIKE', '%'.$opponentName.'%');
-                            });
-                    })
-                    ->where('is_home', $isHome)
-                    ->whereDate('scheduled_at', $scheduledAt->format('Y-m-d'))
-                    ->first();
-
-                if ($match) {
-                    \Log::info("Match found by date/opponent/is_home fallback: {$match->id} for {$team->slug} vs {$opponentName} on {$scheduledAt->format('Y-m-d')}");
-                }
-            }
-
-            // 4. NOVÉ KRITICKÉ PRAVIDLO: Tým nemůže hrát ve stejný den a čas dva zápasy.
-            // Pokud existuje jakýkoliv zápas našeho týmu v tento čas (tolerance 120 min), je to on, bez ohledu na jméno soupeře.
-            // DŮLEŽITÉ: Omezujeme na sezónu, abychom neaktualizovali staré zápasy z jiných sezón, které mají náhodou podobný čas.
-            if (! $match && $scheduledAt) {
-                $match = BasketballMatch::where('team_id', $team->id)
-                    ->where('season_id', $season->id)
-                    ->where('scheduled_at', '>=', $scheduledAt->copy()->subMinutes(120)->toDateTimeString())
-                    ->where('scheduled_at', '<=', $scheduledAt->copy()->addMinutes(120)->toDateTimeString())
-                    ->first();
-
-                if ($match) {
-                    \Log::info("Match matched by team and close time (New rule): ID {$match->id}, diff: ".abs($match->scheduled_at->diffInMinutes($scheduledAt)).' min, old opponent: '.($match->opponent->name ?? 'None').", new opponent: {$opponentName}");
-                }
-            }
-
-            // 5. Detekce duplicit pro ručně vytvořené zápasy s podobným názvem soupeře (pokud nebyl nalezen přesný)
-            if (! $match && $scheduledAt) {
-                $potentialMatches = BasketballMatch::where('season_id', $season->id)
-                    ->where('team_id', $team->id)
-                    ->where('is_home', $isHome)
-                    ->whereDate('scheduled_at', $scheduledAt->format('Y-m-d'))
-                    ->with('opponent')
-                    ->get();
-
-                foreach ($potentialMatches as $potential) {
-                    // Pokud už má external_id jinde, tak to pravděpodobně není on
-                    if (! empty($potential->metadata['external_id']) && ($potential->metadata['external_id'] != $externalMatchId)) {
-                        continue;
-                    }
-
-                    $potentialOpponentName = $potential->opponent?->name;
-                    if ($potentialOpponentName) {
-                        $nameA = mb_strtolower(trim($opponentName));
-                        $nameB = mb_strtolower(trim($potentialOpponentName));
-
-                        // 1. Přesná shoda po ořezání
-                        if ($nameA === $nameB) {
-                            $sim = 100;
-                        } else {
-                            // 2. Normalizovaná shoda (propojení "CTS Praha" vs "CTS Basket")
-                            $normA = $this->normalizeOpponentName($opponentName);
-                            $normB = $this->normalizeOpponentName($potentialOpponentName);
-                            if ($normA !== '' && $normA === $normB) {
-                                $sim = 95; // Velmi vysoká podobnost pokud sedí normalizované jméno
-                            } else {
-                                // 3. Levenshtein
-                                $lev = levenshtein($nameA, $nameB);
-                                $maxLen = max(strlen($nameA), strlen($nameB));
-                                $sim = $maxLen > 0 ? (1 - ($lev / $maxLen)) * 100 : 0;
-                            }
-                        }
-
-                        $isMatch = ($sim > 70);
-
-                        // 3. Robustnější kontrola pro podřetězce (např. "TJ ČSA" vs "TJ ČSA Praha")
-                        if (! $isMatch && (strlen($nameA) > 3 && strlen($nameB) > 3)) {
-                            if (str_contains($nameA, $nameB) || str_contains($nameB, $nameA)) {
-                                // Pokud jeden obsahuje druhý, je to pravděpodobně shoda, pokud se neliší v suffixu týmu (A/B/C)
-                                $isMatch = true;
-
-                                // Ale pozor na suffixy (pokud má jeden B a druhý C, tak to není stejný tým)
-                                preg_match('/\b([a-g])\b$/', $nameA, $suffixA);
-                                preg_match('/\b([a-g])\b$/', $nameB, $suffixB);
-                                if (isset($suffixA[1]) && isset($suffixB[1]) && $suffixA[1] !== $suffixB[1]) {
-                                    $isMatch = false;
-                                }
-                            }
-                        }
-
-                        if ($isMatch) {
-                            // Kontrola zamítnutých merge návrhů mezi soupeři
-                            if ($opponent->id != $potential->opponent_id) {
-                                $isRejected = OpponentMergeSuggestion::where('status', 'rejected')
-                                    ->where(function ($query) use ($opponent, $potential) {
-                                        $query->where(function ($q) use ($opponent, $potential) {
-                                            $q->where('source_opponent_id', $opponent->id)
-                                                ->where('target_opponent_id', $potential->opponent_id);
-                                        })->orWhere(function ($q) use ($opponent, $potential) {
-                                            $q->where('source_opponent_id', $potential->opponent_id)
-                                                ->where('target_opponent_id', $opponent->id);
-                                        });
-                                    })->exists();
-
-                                if ($isRejected) {
-                                    \Log::info("Match fuzzy-match skipped: Opponent merge was previously rejected by user between {$opponent->id} and {$potential->opponent_id}");
-
-                                    continue;
-                                }
-                            }
-
-                            $match = $potential;
-                            \Log::info("Match detected as potential duplicate by similar opponent name: {$match->id} (Sim: {$sim}%, {$potentialOpponentName} vs {$opponentName})");
-                            break;
-                        }
-                    }
-                }
-            }
-
+        if (! $scheduledAt) {
+            throw new \RuntimeException('Match sync requires an explicit valid date; undated fixtures cannot be safely identified.');
         }
+        $match = $this->matchWriteService->resolveImported($team->id, $season->id, $externalMatchId === null ? null : (string) $externalMatchId, $scheduledAt, $isHome, $opponent->id);
 
         // Zpracování statusu
         $status = $matchData['status'] ?? 'planned';
@@ -410,10 +165,10 @@ class MatchSyncService
         }
 
         $data = [
-            'match_type' => $match && ($options['conservative_matching'] ?? false) ? $match->match_type : 'mistrovske',
-            'team_id' => $match && ($options['conservative_matching'] ?? false) ? $match->team_id : $team->id,
+            'match_type' => $match ? $match->match_type : 'mistrovske',
+            'team_id' => $match ? $match->team_id : $team->id,
             'season_id' => $season->id,
-            'opponent_id' => $match && ($options['conservative_matching'] ?? false) ? $match->opponent_id : $opponent->id,
+            'opponent_id' => $match ? $match->opponent_id : $opponent->id,
             'scheduled_at' => $scheduledAt,
             'is_home' => $isHome,
             'status' => $status,
@@ -456,11 +211,6 @@ class MatchSyncService
             if ($run) {
                 $run->addLog('created', $match, null, $match->only(['status', 'score_home', 'score_away', 'scheduled_at', 'opponent_id']));
             }
-        }
-
-        // Finální deduplikační průchod pro jistotu (sloučí záznamy podle data/soupeře)
-        if (! ($options['conservative_matching'] ?? false)) {
-            $match = $this->mergeDuplicatesForMatch($match, $run);
         }
 
         return $match;

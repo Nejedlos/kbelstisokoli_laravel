@@ -1,6 +1,17 @@
 <?php
 
 return [
+    'validation' => [
+        'duplicate' => 'This match already exists (no. :id). Open the existing match instead of creating another one.',
+        'import_conflict' => 'Conflicting match identity. Review existing match no. :id. All records have been preserved.',
+        'invalid_teams' => 'Select valid match teams.',
+        'stale_edit' => 'Another user or import changed this match. Reload the page and review its current details.',
+    ],
+    'duplicates' => [
+        'title' => 'Match already exists',
+        'open_existing' => 'Open existing match',
+        'similar' => 'This team already has a match against the same opponent on this date at another time. Check whether this is a separate fixture:',
+    ],
     'title' => 'Matches',
     'subtitle' => 'Follow the results and schedule of our teams\' games.',
     'breadcrumbs' => 'Matches',
