@@ -27,6 +27,7 @@ class ExternalTeamSeasonConfigFormTest extends TestCase
             'is_enabled' => false,
             'metadata' => [
                 'standings_enabled' => false,
+                'matches_enabled' => false,
                 'existing_key' => 'preserved',
             ],
         ]);
@@ -35,10 +36,12 @@ class ExternalTeamSeasonConfigFormTest extends TestCase
         Livewire::test(EditExternalTeamSeasonConfig::class, ['record' => $config->getRouteKey()])
             ->assertFormSet([
                 'metadata.standings_enabled' => false,
+                'metadata.matches_enabled' => false,
             ])
             ->fillForm([
                 'competition_url' => $competitionUrl,
                 'metadata.standings_enabled' => true,
+                'metadata.matches_enabled' => true,
             ])
             ->call('save')
             ->assertHasNoFormErrors();
@@ -48,6 +51,7 @@ class ExternalTeamSeasonConfigFormTest extends TestCase
         $this->assertFalse($config->is_enabled);
         $this->assertSame($competitionUrl, $config->competition_url);
         $this->assertTrue($config->metadata['standings_enabled']);
+        $this->assertTrue($config->metadata['matches_enabled']);
         $this->assertSame('preserved', $config->metadata['existing_key']);
     }
 }

@@ -14,6 +14,13 @@ use Illuminate\Support\Facades\DB;
 
 class TeamStatsService
 {
+    public function invalidateCache(int $teamId, int $seasonId): void
+    {
+        foreach (['season_summary', 'all_players', 'match_stats', 'leaders', 'points_dist', 'top_scorers_10', 'points_series', 'calc_summary'] as $suffix) {
+            Cache::forget("team_stats_{$teamId}_{$seasonId}_{$suffix}");
+        }
+    }
+
     /**
      * Získá sezónní souhrn týmu.
      */

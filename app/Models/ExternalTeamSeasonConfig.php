@@ -39,6 +39,16 @@ class ExternalTeamSeasonConfig extends Model
         return $this->belongsTo(Season::class);
     }
 
+    public function isMatchSyncEnabled(): bool
+    {
+        return $this->is_enabled || data_get($this->metadata, 'matches_enabled') === true;
+    }
+
+    public function isMatchesOnly(): bool
+    {
+        return ! $this->is_enabled && data_get($this->metadata, 'matches_enabled') === true;
+    }
+
     /**
      * Zjistí počet selhání v řadě pro tuto konfiguraci.
      */

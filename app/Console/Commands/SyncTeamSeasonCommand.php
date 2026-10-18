@@ -64,9 +64,11 @@ class SyncTeamSeasonCommand extends Command
         if ($seasonInput === 'all') {
             $seasons = Season::orderBy('name', 'desc')->get();
         } else {
-            $season = is_numeric($seasonInput)
-                ? Season::find($seasonInput)
-                : Season::where('name', $seasonInput)->first();
+            $season = $seasonInput === 'active'
+                ? Season::where('is_active', true)->first()
+                : (is_numeric($seasonInput)
+                    ? Season::find($seasonInput)
+                    : Season::where('name', $seasonInput)->first());
 
             if ($season) {
                 $seasons = [$season];

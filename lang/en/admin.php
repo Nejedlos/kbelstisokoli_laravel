@@ -281,10 +281,12 @@ return [
             'fields' => [
                 'competition_url' => 'Competition standings URL',
                 'standings_enabled' => 'Sync competition standings only',
+                'matches_enabled' => 'Sync matches and statistics only',
             ],
             'helpers' => [
                 'competition_url' => 'For example: https://pbasket.cz.basketball/soutez/5379?p=10466',
                 'standings_enabled' => 'Includes this competition in standings sync even when full roster and player sync is disabled.',
+                'matches_enabled' => 'With full sync disabled, imports fixtures, results and statistics without roster changes, account creation, photos or financial charges. Enable competition standings separately.',
             ],
         ],
         'financial_tariff' => [

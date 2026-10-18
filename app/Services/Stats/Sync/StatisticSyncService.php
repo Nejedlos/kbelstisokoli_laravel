@@ -9,6 +9,7 @@ use App\Models\ExternalPlayerMatch;
 use App\Models\ExternalTeamSeasonConfig;
 use App\Models\StatisticRow;
 use App\Models\StatisticSet;
+use App\Models\Team;
 use App\Models\User;
 use App\Services\Finance\FinanceAutomationService;
 use App\Services\Stats\DTO\NormalizedRowDTO;
@@ -83,7 +84,7 @@ class StatisticSyncService
     /**
      * Smaže boxscore statistik pro konkrétní zápas.
      */
-    public function clearMatchBoxscore(BasketballMatch $match, ?ExternalImportRun $run = null): void
+    public function clearMatchBoxscore(BasketballMatch $match, ?ExternalImportRun $run = null, ?int $teamId = null): void
     {
         $this->statisticSetService->ensureBaseSets();
         $set = StatisticSet::where('slug', StatisticSetService::MATCH_BOXSCORE_SET)->first();
@@ -93,9 +94,10 @@ class StatisticSyncService
         }
 
         // PŘIDÁNO: Používáme retry(5) kvůli chybě 1615 (Prepared statement needs to be re-prepared), která se objevuje na produkci.
-        $count = retry(5, function () use ($set, $match) {
+        $count = retry(5, function () use ($set, $match, $teamId) {
             return StatisticRow::where('statistic_set_id', $set->id)
                 ->where('basketball_match_id', $match->id)
+                ->when($teamId !== null, fn ($query) => $query->where('team_id', $teamId))
                 ->delete();
         }, 200, function ($e) {
             Log::warning('clearMatchBoxscore retry due to error 1615 (or other): '.$e->getMessage());
@@ -111,7 +113,7 @@ class StatisticSyncService
     /**
      * Synchronizuje statistiky z boxscoru zápasu.
      */
-    public function syncMatchBoxscore(BasketballMatch $match, NormalizedTableDTO $data, ?ExternalImportRun $run = null): void
+    public function syncMatchBoxscore(BasketballMatch $match, NormalizedTableDTO $data, ?ExternalImportRun $run = null, array $options = []): void
     {
         $this->statisticSetService->ensureBaseSets();
         $set = StatisticSet::where('slug', StatisticSetService::MATCH_BOXSCORE_SET)->first();
@@ -154,40 +156,7 @@ class StatisticSyncService
             }
         });
 
-        $isOurTeam = true;
-        // Znovu detekujeme, zda je to náš tým (pro logiku řádků)
-        $teamNameValue = $match->team->getTranslation('name', 'cs') ?: ($match->team->name ?: '');
-        if (is_array($teamNameValue)) {
-            $teamNameValue = $teamNameValue['cs'] ?? ($teamNameValue['en'] ?? (reset($teamNameValue) ?: ''));
-        }
-
-        $possibleOurNames = [
-            $this->normalizeForComparison($teamNameValue),
-        ];
-
-        $externalName = ExternalTeamSeasonConfig::where('team_id', $match->team_id)
-            ->where('season_id', $match->season_id)
-            ->value('team_name_in_source');
-
-        if ($externalName) {
-            $possibleOurNames[] = $this->normalizeForComparison($externalName);
-        }
-
-        $tableTeamName = $this->normalizeForComparison($data->name);
-        $matched = false;
-        foreach ($possibleOurNames as $ourName) {
-            if (str_contains($tableTeamName, $ourName) || str_contains($ourName, $tableTeamName)) {
-                $matched = true;
-                break;
-            }
-        }
-
-        if (! $matched) {
-            if (! str_contains(mb_strtolower($data->name), mb_strtolower($teamNameValue)) &&
-                (! $externalName || ! str_contains(mb_strtolower($data->name), mb_strtolower($externalName)))) {
-                $isOurTeam = false;
-            }
-        }
+        $isOurTeam = $this->isOwnTeamBoxscore($match, $data, $options['sync_team_id'] ?? null);
 
         // Pokud je to soupeř, uložíme ho do metadat
         if (! $isOurTeam) {
@@ -205,9 +174,14 @@ class StatisticSyncService
             return;
         }
 
+        $teamId = (int) ($options['sync_team_id'] ?? $match->team_id);
+
         // Pro náš tým synchronizujeme řádky - každý řádek v samostatné transakci pro odolnost
         foreach ($data->rows as $row) {
-            DB::transaction(function () use ($match, $row, $set, $run) {
+            if (($options['skip_total_rows'] ?? false) && ($row->metadata['is_total'] ?? false)) {
+                continue;
+            }
+            DB::transaction(function () use ($match, $row, $set, $run, $options, $teamId) {
                 $externalPlayerId = $row->metadata['external_player_id'] ?? $row->playerId;
                 $playerName = $row->rowLabel;
 
@@ -215,8 +189,8 @@ class StatisticSyncService
                 $playerId = $this->findInternalPlayerId($externalPlayerId, $match->season_id, 'czbasketball');
 
                 // Ghost hráč creation logic
-                if (! $playerId && $externalPlayerId && $playerName) {
-                    $config = ExternalTeamSeasonConfig::where('team_id', $match->team_id)
+                if (! $playerId && $externalPlayerId && $playerName && ($options['allow_player_creation'] ?? true)) {
+                    $config = ExternalTeamSeasonConfig::where('team_id', $teamId)
                         ->where('season_id', $match->season_id)
                         ->first();
 
@@ -229,7 +203,7 @@ class StatisticSyncService
                 $attributes = [
                     'statistic_set_id' => $set->id,
                     'basketball_match_id' => $match->id,
-                    'team_id' => $match->team_id,
+                    'team_id' => $teamId,
                     'player_id' => $playerId,
                 ];
 
@@ -272,7 +246,9 @@ class StatisticSyncService
                 if ($playerId) {
                     // Generování automatických pokut za TH
                     try {
-                        app(FinanceAutomationService::class)->processThFines($statRow);
+                        if ($options['process_finances'] ?? true) {
+                            app(FinanceAutomationService::class)->processThFines($statRow);
+                        }
                     } catch (\Exception $e) {
                         if ($run) {
                             $run->addLog('error', $statRow, null, null, 'Chyba při generování pokut za TH: '.$e->getMessage());
@@ -297,7 +273,52 @@ class StatisticSyncService
         }
 
         $this->recomputePlayerSummaries($match->season_id);
-        $this->recomputeTeamSummary($match->season_id, $match->team_id);
+        $this->recomputeTeamSummary($match->season_id, $teamId);
+    }
+
+    public function isOwnTeamBoxscore(BasketballMatch $match, NormalizedTableDTO $data, ?int $teamId = null): bool
+    {
+        $isOurTeam = true;
+        $teamId ??= $match->team_id;
+        $team = Team::find($teamId);
+        if (! $team) {
+            return false;
+        }
+        // Znovu detekujeme, zda je to náš tým (pro logiku řádků)
+        $teamNameValue = $team->getTranslation('name', 'cs') ?: ($team->name ?: '');
+        if (is_array($teamNameValue)) {
+            $teamNameValue = $teamNameValue['cs'] ?? ($teamNameValue['en'] ?? (reset($teamNameValue) ?: ''));
+        }
+
+        $possibleOurNames = [
+            $this->normalizeForComparison($teamNameValue),
+        ];
+
+        $externalName = ExternalTeamSeasonConfig::where('team_id', $teamId)
+            ->where('season_id', $match->season_id)
+            ->value('team_name_in_source');
+
+        if ($externalName) {
+            $possibleOurNames[] = $this->normalizeForComparison($externalName);
+        }
+
+        $tableTeamName = $this->normalizeForComparison($data->name);
+        $matched = false;
+        foreach ($possibleOurNames as $ourName) {
+            if ($ourName !== '' && $tableTeamName !== '' && (str_contains($tableTeamName, $ourName) || str_contains($ourName, $tableTeamName))) {
+                $matched = true;
+                break;
+            }
+        }
+
+        if (! $matched) {
+            if (! str_contains(mb_strtolower($data->name), mb_strtolower($teamNameValue)) &&
+                (! $externalName || ! str_contains(mb_strtolower($data->name), mb_strtolower($externalName)))) {
+                $isOurTeam = false;
+            }
+        }
+
+        return $isOurTeam;
     }
 
     /**
@@ -453,7 +474,7 @@ class StatisticSyncService
 
         // Agregace zápasů pro tým
         $matches = BasketballMatch::where('season_id', $seasonId)
-            ->where('team_id', $teamId)
+            ->where(fn ($query) => $query->where('team_id', $teamId)->orWhereHas('teams', fn ($teams) => $teams->where('teams.id', $teamId)))
             ->whereNotNull('score_home')
             ->whereNotNull('score_away')
             ->get();

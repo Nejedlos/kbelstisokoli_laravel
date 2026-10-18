@@ -6,6 +6,36 @@ Tento dokument popisuje, jak probíhá automatizovaná synchronizace sportovníc
 
 Synchronizace je rozdělena do dvou hlavních fází, aby byla šetrná k externímu serveru a efektivní:
 
+### Omezený import zápasů a statistik
+
+Konfigurace týmové sezóny může při `is_enabled = false` samostatně povolit
+`metadata.matches_enabled = true`. Tento režim zahrnují `stats:import` i
+`stats:sync-team-season <slug> active` (alias `active` vybere aktivní sezónu).
+Přepínač `metadata.standings_enabled` zůstává nezávislý. Pro PBasket ponechte
+`source_key = czbasketball` a použijte úplnou týmovou stránku se správným `y=`
+jako URL seznamu zápasů; samostatná stránka `/zapasy` může mít omezený filtr.
+
+- Importuje termíny, výsledky a individuální statistiky bez importu soupisky,
+  vytváření či párování účtů podle jména, fotografií a finančních předpisů.
+  Dříve spárovaní hráči zachovají vazbu; neznámí zůstanou ve statistice pod jménem
+  a externím ID bez nového účtu. Součtový řádek se neukládá jako hráč.
+- Přijímá pouze zápasy s externím ID, datem v dané sezóně a právě jedním výskytem
+  konfigurovaného týmu. Neurčené termíny přeskočí. Nejednoznačná existující ID nebo
+  konfliktní zápasy stejného dne zastaví import k prověření; režim neslučuje zápasy.
+- Páruje existující zápasy přes `team_id` i `basketball_match_team`, zachovává jejich
+  ID, vlastnictví a druh zápasu. Detail dostává ověřený kontext `sync_team_id`.
+- Detaily plánuje pouze pro zápasy s termínem v minulosti. Čas načtení seznamu
+  neblokuje detail: ten má samostatné `metadata.detail_synced_at`.
+- Omezení se znovu vyhodnocují při zpracování detailu, včetně ručního volání.
+  Plné `is_enabled = true` zachovává původní rozsah včetně soupisky.
+
+Boxscore se nahrazuje pouze při přítomnosti neprázdné hráčské tabulky vlastního
+týmu s číselnými body. Chybějící či pouze soupeřova tabulka nesmaže dřívější
+statistiky ani nepřidá úspěšný `boxscore_synced_at`. Náhrada je jedna transakce
+omezená na daný tým a zápas; zámek sezóny chrání stávající přepočet sezónních
+souhrnů před souběhem. Po importu se ruší pouze známé cache statistik dotčeného
+týmu a sezóny. `--force` tato omezení neobchází.
+
 1.  **Fáze 1: Sezónní přehled (`SyncTeamSeasonJob`)**
     - Stáhne soupisku týmu.
     - Stáhne seznam zápasů (termíny, soupeři, výsledky).

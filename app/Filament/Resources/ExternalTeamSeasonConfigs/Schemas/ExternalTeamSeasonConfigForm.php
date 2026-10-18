@@ -73,6 +73,10 @@ class ExternalTeamSeasonConfigForm
                             ->label(__('admin.resources.external_team_season_config.fields.standings_enabled'))
                             ->helperText(__('admin.resources.external_team_season_config.helpers.standings_enabled'))
                             ->default(false),
+                        Toggle::make('metadata.matches_enabled')
+                            ->label(__('admin.resources.external_team_season_config.fields.matches_enabled'))
+                            ->helperText(__('admin.resources.external_team_season_config.helpers.matches_enabled'))
+                            ->default(false),
                         TextInput::make('last_synced_at')
                             ->label('Naposledy synchronizováno')
                             ->readOnly()

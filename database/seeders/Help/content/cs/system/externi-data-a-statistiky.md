@@ -18,6 +18,10 @@ Pražské soutěže na `pbasket.cz.basketball` jsou součástí stejné platform
 
 Pokud chcete zveřejnit a pravidelně aktualizovat pouze tabulku soutěže, ponechte **Aktivní pro synchronizaci** vypnuté a zapněte **Synchronizovat pouze tabulku soutěže**. Tabulka se pak zahrne do ruční i hodinové synchronizace, ale soupisky, hráči a zápasy se z této konfigurace nenačtou. Homepage používá pro tabulky pouze konfigurace povolené jedním z těchto dvou přepínačů v aktivní sezóně.
 
+Pro rozpis, výsledky a statistiky bez zásahů do členství ponechte **Aktivní pro synchronizaci** vypnuté a zapněte **Synchronizovat pouze zápasy a statistiky**. Tento režim nemění soupisku, nezakládá účty, nestahuje fotografie a nevytváří finanční předpisy. Již spárované hráče použije, ostatní zobrazí ve statistice pod jejich jménem. Přepínač tabulky soutěže lze zapnout současně a funguje nezávisle.
+
+U PBasket použijte jako **URL seznamu zápasů** úplnou týmovou stránku pro správnou sezónu, například `https://pbasket.cz.basketball/tym/7761?y=2026`. Samostatný přehled `/zapasy` může zobrazovat jen omezený výběr. Neurčený termín se do rozpisu zatím neimportuje. Podrobné statistiky se stahují až po termínu zápasu; pokud zdroj boxscore ještě nezveřejnil, dřívější statistiky zůstanou zachované. Případné nejednoznačné párování uvidíte v logu importu a režim zápasy automaticky neslučuje.
+
 ### Řešení mismatchů (Neshody)
 Někdy synchronizace narazí na problém:
 - **Jméno nesouhlasí:** Hráč je u nás veden jinak než v ČBF (např. diakritika). Systém nahlásí "Mismatch" a vy musíte ručně potvrdit, že jde o stejnou osobu.

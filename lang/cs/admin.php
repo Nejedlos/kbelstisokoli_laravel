@@ -299,10 +299,12 @@ return [
             'fields' => [
                 'competition_url' => 'URL tabulky soutěže',
                 'standings_enabled' => 'Synchronizovat pouze tabulku soutěže',
+                'matches_enabled' => 'Synchronizovat pouze zápasy a statistiky',
             ],
             'helpers' => [
                 'competition_url' => 'Např. https://pbasket.cz.basketball/soutez/5379?p=10466',
                 'standings_enabled' => 'Zahrne tuto soutěž do synchronizace tabulek, i když je plná synchronizace soupisky a hráčů vypnutá.',
+                'matches_enabled' => 'Při vypnuté plné synchronizaci načítá rozpis, výsledky a statistiky bez změn soupisky, vytváření účtů, fotografií a finančních předpisů. Tabulku soutěže povolte samostatně.',
             ],
         ],
         'financial_tariff' => [

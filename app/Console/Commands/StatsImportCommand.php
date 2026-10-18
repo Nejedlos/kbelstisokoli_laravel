@@ -53,9 +53,9 @@ class StatsImportCommand extends Command
 
         // 1. Prioritně bereme týmy z ExternalTeamSeasonConfig (databázové nastavení)
         $configs = ExternalTeamSeasonConfig::where('season_id', $activeSeason->id)
-            ->where('is_enabled', true)
             ->with('team')
-            ->get();
+            ->get()
+            ->filter(fn (ExternalTeamSeasonConfig $config) => $config->isMatchSyncEnabled());
 
         $teams = $configs->pluck('team');
 

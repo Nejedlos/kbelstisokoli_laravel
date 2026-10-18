@@ -19,6 +19,7 @@ use App\Services\Stats\Extractors\CzBasketball\MatchDetailBoxscoreExtractor;
 use App\Services\Stats\Extractors\CzBasketball\MatchesListExtractor;
 use App\Services\Stats\Extractors\CzBasketball\TeamHeaderExtractor;
 use App\Services\Stats\Extractors\CzBasketball\TeamRosterExtractor;
+use App\Services\Stats\TeamStatsService;
 use App\Services\Support\ConsoleService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -54,8 +55,8 @@ class ExternalStatsSyncService
 
         $config = ExternalTeamSeasonConfig::where('team_id', $teamId)
             ->where('season_id', $seasonId)
-            ->where('is_enabled', true)
-            ->first();
+            ->get()
+            ->first(fn (ExternalTeamSeasonConfig $candidate) => $candidate->isMatchSyncEnabled());
 
         if (! $config) {
             ConsoleService::log("ExternalTeamSeasonConfig nebyl nalezen nebo je deaktivován pro Tým: $teamId, Sezóna: $seasonId", 'warning');
@@ -63,6 +64,9 @@ class ExternalStatsSyncService
 
             return;
         }
+
+        $options = $this->constrainOptions($config, $options);
+        $options['sync_team_id'] = $teamId;
 
         $team = Team::findOrFail($teamId);
         $season = Season::findOrFail($seasonId);
@@ -464,6 +468,7 @@ class ExternalStatsSyncService
                 }
 
                 \Log::info("Syncing matches for {$team->slug}, count: ".count($finalData->rows));
+                $importedCount = 0;
                 foreach ($finalData->rows as $row) {
                     $rowValues = $row->values;
                     $rowValues['scheduled_at'] ??= null;
@@ -473,7 +478,16 @@ class ExternalStatsSyncService
                     $rowValues['status'] ??= 'planned';
                     $rowValues['external_match_id'] ??= $rowValues['id'] ?? $rowValues['match_external_id'] ?? null;
 
-                    $this->matchSyncService->sync($team, $season, $rowValues, $run);
+                    if ($config->isMatchesOnly() && (! $rowValues['external_match_id'] || ! $rowValues['scheduled_at'] || ! $season->containsDate(Carbon::parse($rowValues['scheduled_at'])))) {
+                        $run->addLog('skipped', null, null, null, 'Match requires an external ID and a date within the configured season.');
+
+                        continue;
+                    }
+                    DB::transaction(function () use ($config, $team, $season, $rowValues, $run, $options) {
+                        ExternalTeamSeasonConfig::whereKey($config->id)->lockForUpdate()->first();
+                        $this->matchSyncService->sync($team, $season, $rowValues, $run, $options);
+                    });
+                    $importedCount++;
                 }
 
                 // Link following: Detaily zápasů
@@ -486,9 +500,12 @@ class ExternalStatsSyncService
 
                 $run->finish([
                     'extracted_count' => count($finalData->rows),
-                    'imported_count' => count($finalData->rows),
+                    'imported_count' => $importedCount,
+                    'skipped_count' => count($finalData->rows) - $importedCount,
                 ]);
             }
+
+            app(TeamStatsService::class)->invalidateCache($team->id, $season->id);
 
             // Naplánování detailů zápasů
             if ($options['sync_details'] ?? true) {
@@ -522,10 +539,14 @@ class ExternalStatsSyncService
 
         ConsoleService::log("    - Parametry detailů: limit=$limit, force=".($force ? 'true' : 'false').', recentOnly='.($recentOnly ? 'true' : 'false').', excesive='.($excesive ? 'true' : 'false'), 'debug');
 
-        $query = BasketballMatch::where('team_id', $team->id)
+        $query = BasketballMatch::where(fn ($query) => $query->where('team_id', $team->id)->orWhereHas('teams', fn ($teams) => $teams->where('teams.id', $team->id)))
             ->where('season_id', $season->id)
             ->whereIn('status', ['finished', 'planned', 'scheduled', 'played'])
-            ->where('metadata', 'like', '%"external_id":%');
+            ->where(fn ($query) => $query->where('metadata', 'like', '%"external_id":%')->orWhere('metadata', 'like', '%"season_external_match_id":%'));
+
+        if ($options['conservative_matching'] ?? false) {
+            $query->where('scheduled_at', '<=', now());
+        }
 
         // Prioritizace zápasů v minulosti, které nemají skóre (uživatelova "akce proběhla")
         $query->orderByRaw('CASE WHEN scheduled_at < ? AND score_home IS NULL THEN 0 ELSE 1 END ASC', [now()])
@@ -575,9 +596,10 @@ class ExternalStatsSyncService
             }
 
             $matchOptions = $options;
+            $matchOptions['sync_team_id'] = $team->id;
 
             if (! $force) {
-                $lastSynced = $match->metadata['last_synced_at'] ?? null;
+                $lastSynced = $match->metadata[($options['conservative_matching'] ?? false) ? 'detail_synced_at' : 'last_synced_at'] ?? null;
                 $hasBoxscore = isset($match->metadata['boxscore_synced_at']);
 
                 // Pro čerstvé zápasy (např. do 7 dnů od odehrání) bez statistik chceme zkoušet častěji (každou hodinu)
@@ -635,7 +657,27 @@ class ExternalStatsSyncService
         }
 
         $match = BasketballMatch::with(['team', 'season'])->findOrFail($matchId);
-        $externalMatchId = $match->metadata['external_id'] ?? null;
+        $teamId = $options['sync_team_id'] ?? $match->team_id;
+        if (! $teamId) {
+            $teamIds = $match->teams()->pluck('teams.id');
+            if ($teamIds->count() !== 1) {
+                throw new \RuntimeException('A unique team context is required for match detail sync.');
+            }
+            $teamId = $teamIds->first();
+        }
+        $teamId = (int) $teamId;
+        if ((int) $match->team_id !== $teamId && ! $match->teams()->where('teams.id', $teamId)->exists()) {
+            throw new \RuntimeException('Match does not belong to the requested sync team.');
+        }
+        $config = ExternalTeamSeasonConfig::where('team_id', $teamId)->where('season_id', $match->season_id)->first();
+        if ($config && ! $config->isMatchSyncEnabled()) {
+            return;
+        }
+        if ($config) {
+            $options = $this->constrainOptions($config, $options);
+        }
+        $options['sync_team_id'] = $teamId;
+        $externalMatchId = $match->metadata['external_id'] ?? $match->metadata['season_external_match_id'] ?? null;
 
         if (! $externalMatchId) {
             return;
@@ -649,7 +691,7 @@ class ExternalStatsSyncService
 
         \Log::info("START: syncMatchDetail for match {$matchId} (ext_id: {$externalMatchId})");
         $url = 'https://cz.basketball/zapas/'.$externalMatchId;
-        $run = ExternalImportRun::start('czbasketball', $match->season_id, $match->team_id, 'match_detail', $externalMatchId);
+        $run = ExternalImportRun::start('czbasketball', $match->season_id, $teamId, 'match_detail', $externalMatchId);
         $run->updateMetadata(['url' => $url]);
 
         if ($options['force'] ?? false) {
@@ -753,8 +795,9 @@ class ExternalStatsSyncService
                 $run->update(['status' => 'partial_failed', 'error_summary' => 'DOM extractor failed or AI-only used, used AI.']);
             }
 
-            // Vždy smažeme staré statistiky zápasu před importem nových (aby nedocházelo k duplikacím při opakované synchronizaci)
-            $this->statisticSyncService->clearMatchBoxscore($match, $run);
+            // An absent/opponent-only boxscore must never erase our existing rows.
+            $hasReplacement = collect($tables)->contains(fn ($table) => $this->statisticSyncService->isOwnTeamBoxscore($match, $table, $teamId)
+                && collect($table->rows)->contains(fn ($row) => ! ($row->metadata['is_total'] ?? false) && $row->rowLabel !== null && is_numeric($row->values['pts'] ?? null)));
 
             // Předběžná příprava metadat z hlavičky pro detekci týmů v tabulkách
             $header = $mainData->metadata['header'] ?? [];
@@ -762,11 +805,20 @@ class ExternalStatsSyncService
             $matchMetadata = $match->metadata ?? [];
             $matchMetadata['last_synced_at'] = now()->toDateTimeString();
 
-            // Před synchronizací nových tabulek smažeme staré statistiky pro tento zápas
-            $this->statisticSyncService->clearMatchBoxscore($match, $run);
+            if ($hasReplacement) {
+                DB::transaction(function () use ($match, $run, $teamId, $tables, $options) {
+                    // Season summaries are rebuilt by the existing statistics service. Serialize
+                    // replacements within the season so concurrent details cannot interleave them.
+                    Season::whereKey($match->season_id)->lockForUpdate()->first();
+                    DB::table('matches')->where('id', $match->id)->lockForUpdate()->first();
+                    $this->statisticSyncService->clearMatchBoxscore($match, $run, $teamId);
+                    foreach ($tables as $tableData) {
+                        $this->statisticSyncService->syncMatchBoxscore($match, $tableData, $run, $options);
+                    }
+                });
+            }
 
-            foreach ($tables as $tableData) {
-                $this->statisticSyncService->syncMatchBoxscore($match, $tableData, $run);
+            foreach ($hasReplacement ? $tables : [] as $tableData) {
 
                 // OSVĚŽENÍ: syncMatchBoxscore mění metadata přímo v DB (opponent_boxscore),
                 // musíme je znovu načíst z DB, abychom je nepřepsali na konci metody zastaralými lokálními daty.
@@ -830,7 +882,9 @@ class ExternalStatsSyncService
             if (! empty($bestPlayers)) {
                 $matchMetadata['best_players'] = $bestPlayers;
                 // Zpracování fotografií nejlepších hráčů (pokud jsou naši)
-                $this->processBestPlayerPhotos($bestPlayers, $run, $match);
+                if (! ($options['skip_photos'] ?? false)) {
+                    $this->processBestPlayerPhotos($bestPlayers, $run, $match);
+                }
             }
 
             // Uložení srovnání týmů a posledních zápasů
@@ -845,7 +899,9 @@ class ExternalStatsSyncService
             }
 
             // Označíme, že synchronizace detailu proběhla v pořádku (včetně boxscore pokud byly nalezeny tabulky)
-            $matchMetadata['boxscore_synced_at'] = now()->toDateTimeString();
+            if ($hasReplacement) {
+                $matchMetadata['boxscore_synced_at'] = now()->toDateTimeString();
+            }
 
             $updateData = ['metadata' => $matchMetadata];
             Log::info('DEBUG SYNC: Match metadata before update', ['metadata_keys' => array_keys($matchMetadata)]);
@@ -867,7 +923,9 @@ class ExternalStatsSyncService
                 $updateData['status'] = 'scheduled';
             }
 
+            $updateData['metadata']['detail_synced_at'] = now()->toDateTimeString();
             $match->update($updateData);
+            app(TeamStatsService::class)->invalidateCache($teamId, $match->season_id);
 
             // Po úspěšné synchronizaci detailu (i pro budoucí zápasy) vyvoláme přepočet predikce
             if (class_exists(ComputeMatchPredictionJob::class)) {
@@ -1034,6 +1092,24 @@ class ExternalStatsSyncService
             $run->fail($e);
             throw $e;
         }
+    }
+
+    private function constrainOptions(ExternalTeamSeasonConfig $config, array $options): array
+    {
+        if ($config->isMatchesOnly()) {
+            // These are scope limits, not defaults that a queued/manual caller can override.
+            $options = array_replace($options, [
+                'sync_roster' => false,
+                'sync_competition' => false,
+                'allow_player_creation' => false,
+                'process_finances' => false,
+                'skip_photos' => true,
+                'conservative_matching' => true,
+                'skip_total_rows' => true,
+            ]);
+        }
+
+        return $options;
     }
 
     protected function getTeamHeaderSchema(): string
