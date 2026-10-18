@@ -10,6 +10,7 @@ use App\Models\Team;
 use App\Services\Stats\Contracts\StatFetcherInterface;
 use App\Services\Stats\Extractors\CzBasketball\CompetitionScheduleExtractor;
 use App\Services\Stats\Extractors\CzBasketball\CompetitionStandingExtractor;
+use App\Services\Stats\StandingsConfigService;
 use App\Services\Support\ConsoleService;
 use Illuminate\Support\Facades\Log;
 
@@ -17,7 +18,8 @@ class CompetitionSyncService
 {
     public function __construct(
         protected StatFetcherInterface $fetcher,
-        protected MatchSyncService $matchSyncService
+        protected MatchSyncService $matchSyncService,
+        protected StandingsConfigService $standingsConfigService,
     ) {}
 
     /**
@@ -25,12 +27,7 @@ class CompetitionSyncService
      */
     public function syncAllStandings(Season $season): array
     {
-        $configs = ExternalTeamSeasonConfig::where('season_id', $season->id)
-            ->whereNotNull('competition_url')
-            ->where('is_enabled', true)
-            ->get();
-
-        $urls = $configs->pluck('competition_url')->unique();
+        $urls = $this->standingsConfigService->competitionUrls($season);
 
         if ($urls->isEmpty()) {
             return ['synced' => 0, 'total' => 0];

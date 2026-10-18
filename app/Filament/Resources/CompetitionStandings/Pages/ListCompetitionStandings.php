@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\CompetitionStandings\Pages;
 
 use App\Filament\Resources\CompetitionStandings\CompetitionStandingResource;
-use App\Models\ExternalTeamSeasonConfig;
 use App\Models\Season;
 use App\Models\Team;
+use App\Services\Stats\StandingsConfigService;
 use App\Services\Stats\Sync\CompetitionSyncService;
 use App\Support\FilamentIcon;
 use App\Support\Icons\AppIcon;
@@ -50,14 +50,8 @@ class ListCompetitionStandings extends ListRecords
                     try {
                         if ($teamId) {
                             // Sync pouze soutěže daného týmu v dané sezóně
-                            $urls = ExternalTeamSeasonConfig::query()
-                                ->where('season_id', $season->id)
-                                ->where('team_id', $teamId)
-                                ->where('is_enabled', true)
-                                ->whereNotNull('competition_url')
-                                ->pluck('competition_url')
-                                ->filter()
-                                ->unique();
+                            $urls = app(StandingsConfigService::class)
+                                ->competitionUrls($season, $teamId);
 
                             foreach ($urls as $url) {
                                 $syncService->syncStandingsOnly($url, $season);
@@ -100,16 +94,15 @@ class ListCompetitionStandings extends ListRecords
                 ->modifyQueryUsing(function (Builder $query) use ($team) {
                     $seasonId = request()->query('tableFilters')['season_id']['value'] ?? null;
 
-                    $urlsQuery = ExternalTeamSeasonConfig::query()
-                        ->where('team_id', $team->id)
-                        ->where('is_enabled', true)
-                        ->whereNotNull('competition_url');
-
-                    if ($seasonId) {
-                        $urlsQuery->where('season_id', $seasonId);
-                    }
-
-                    $competitionUrls = $urlsQuery->pluck('competition_url')->filter()->unique();
+                    $standingsConfigService = app(StandingsConfigService::class);
+                    $competitionUrls = $seasonId
+                        ? $standingsConfigService->competitionUrls((int) $seasonId, $team->id)
+                        : $standingsConfigService
+                            ->forTeam($team->id)
+                            ->pluck('competition_url')
+                            ->filter()
+                            ->unique()
+                            ->values();
 
                     if ($competitionUrls->isEmpty()) {
                         // Žádné soutěže pro tento tým; vrať prázdný výsledek

@@ -53,6 +53,10 @@ class ExternalTeamSeasonConfigForm
                             ->url()
                             ->required()
                             ->helperText('https://smo.cz.basketball/zapasy?c=7738&y=2025'),
+                        TextInput::make('competition_url')
+                            ->label(__('admin.resources.external_team_season_config.fields.competition_url'))
+                            ->url()
+                            ->helperText(__('admin.resources.external_team_season_config.helpers.competition_url')),
                     ]),
                 Section::make('Nastavení a stav')
                     ->columns(2)
@@ -65,6 +69,10 @@ class ExternalTeamSeasonConfigForm
                         Toggle::make('is_enabled')
                             ->label('Aktivní pro synchronizaci')
                             ->default(true),
+                        Toggle::make('metadata.standings_enabled')
+                            ->label(__('admin.resources.external_team_season_config.fields.standings_enabled'))
+                            ->helperText(__('admin.resources.external_team_season_config.helpers.standings_enabled'))
+                            ->default(false),
                         TextInput::make('last_synced_at')
                             ->label('Naposledy synchronizováno')
                             ->readOnly()

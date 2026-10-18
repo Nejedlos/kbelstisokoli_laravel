@@ -20,6 +20,8 @@ Slouží k definici základní identity týmu napříč sezónami.
 Sezónně specifické nastavení pro synchronizaci.
 - **Externí rok sezóny:** Parametr `y`, který určuje sezónu (např. `2025` pro 2025/26).
 - **URL soupisky a zápasů:** Konkrétní adresy, ze kterých se čerpají data.
+- **URL tabulky soutěže:** Adresa stránky soutěže, ze které se načítá pořadí.
+- **Synchronizovat pouze tabulku soutěže:** Povolí tabulku pro ruční i hodinovou synchronizaci, i když je plná synchronizace konfigurace vypnutá. Tím se nezapne import soupisky, hráčů ani zápasů.
 - **Akce:**
     - **Sync:** Spustí okamžitou synchronizaci (soupiska + seznam zápasů + naplánování detailů).
     - **Dry-run:** Stáhne data a zobrazí náhled (roster, zápasy) v modálním okně bez uložení do databáze.

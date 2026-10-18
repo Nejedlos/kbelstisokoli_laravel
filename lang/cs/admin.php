@@ -296,6 +296,14 @@ return [
         'external_team_season_config' => [
             'label' => 'Konfigurace sezóny',
             'plural_label' => 'Konfigurace sezón',
+            'fields' => [
+                'competition_url' => 'URL tabulky soutěže',
+                'standings_enabled' => 'Synchronizovat pouze tabulku soutěže',
+            ],
+            'helpers' => [
+                'competition_url' => 'Např. https://pbasket.cz.basketball/soutez/5379?p=10466',
+                'standings_enabled' => 'Zahrne tuto soutěž do synchronizace tabulek, i když je plná synchronizace soupisky a hráčů vypnutá.',
+            ],
         ],
         'financial_tariff' => [
             'label' => 'Finanční tarif',

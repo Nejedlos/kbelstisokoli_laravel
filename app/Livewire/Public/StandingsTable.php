@@ -7,6 +7,7 @@ use App\Models\ExternalTeamSeasonConfig;
 use App\Models\Season;
 use App\Models\Team;
 use App\Services\PublicMatchListingService;
+use App\Services\Stats\StandingsConfigService;
 use Illuminate\Support\Collection;
 use Livewire\Component;
 
@@ -59,13 +60,8 @@ class StandingsTable extends Component
         if ($this->competitionUrl) {
             $query->where('competition_url', $this->competitionUrl);
         } elseif ($this->teamId || $this->configuredOnly) {
-            $competitionUrls = ExternalTeamSeasonConfig::query()
-                ->when($this->teamId, fn ($configQuery) => $configQuery->where('team_id', $this->teamId))
-                ->where('season_id', $this->seasonId)
-                ->where('is_enabled', true)
-                ->pluck('competition_url')
-                ->filter()
-                ->unique();
+            $competitionUrls = app(StandingsConfigService::class)
+                ->competitionUrls($this->seasonId, $this->teamId);
 
             if ($competitionUrls->isEmpty()) {
                 return collect();
@@ -81,12 +77,10 @@ class StandingsTable extends Component
     {
         $standings = $this->standings;
         $groupedStandings = $standings->groupBy('competition_url');
-        $configuredTeamNames = ExternalTeamSeasonConfig::query()
-            ->with('team:id,name')
-            ->where('season_id', $this->seasonId)
-            ->where('is_enabled', true)
+        $configuredTeamNames = app(StandingsConfigService::class)
+            ->forSeason($this->seasonId)
+            ->load('team:id,name')
             ->whereIn('competition_url', $groupedStandings->keys())
-            ->get()
             ->groupBy('competition_url')
             ->map(fn (Collection $configs) => $configs
                 ->map(fn (ExternalTeamSeasonConfig $config) => $config->team_name_in_source ?: $config->team?->name)

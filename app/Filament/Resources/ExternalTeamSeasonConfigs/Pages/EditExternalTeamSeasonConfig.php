@@ -10,6 +10,16 @@ class EditExternalTeamSeasonConfig extends EditRecord
 {
     protected static string $resource = ExternalTeamSeasonConfigResource::class;
 
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $data['metadata'] = array_replace(
+            $this->getRecord()->metadata ?? [],
+            $data['metadata'] ?? [],
+        );
+
+        return $data;
+    }
+
     protected function getHeaderActions(): array
     {
         return [

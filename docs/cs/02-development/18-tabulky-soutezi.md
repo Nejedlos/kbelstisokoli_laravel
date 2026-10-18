@@ -13,7 +13,7 @@ Komponenta `App\Livewire\Public\StandingsTable` je navržena pro znovupoužiteln
 - `showFilters` (bool, true): Zda zobrazit výběr sezóny a týmu.
 - `limit` (int, null): Omezení počtu zobrazených řádků (vhodné pro náhledy).
 - `compact` (bool, false): Kompaktní režim zobrazení (méně sloupců, vhodné do sidebarů).
-- `configuredOnly` (bool, false): Omezí výpis na povolené soutěžní URL z `external_team_season_configs` pro vybranou sezónu. Homepage používá hodnotu `true`, aby nezobrazila osiřelé nebo historické tabulky.
+- `configuredOnly` (bool, false): Omezí výpis na soutěžní URL povolené pro tabulky z `external_team_season_configs` pro vybranou sezónu. Způsobilá je konfigurace s `is_enabled=true` nebo s `metadata.standings_enabled=true`. Homepage používá hodnotu `true`, aby nezobrazila osiřelé nebo historické tabulky.
 
 ### Použití v Blade
 ```blade
@@ -32,6 +32,10 @@ Komponenta `App\Livewire\Public\StandingsTable` je navržena pro znovupoužiteln
 
 ## Datový zdroj
 Data se berou z tabulky `competition_standings`, která je plněna službou `StatisticSyncService`. Pro správné spárování s týmem musí existovat záznam v `external_team_season_configs` se shodným `competition_url`.
+
+Výběr konfigurací pro tabulky centralizuje `StandingsConfigService`. Příznak `metadata.standings_enabled` umožní pravidelně stahovat jen tabulku soutěže, zatímco `is_enabled=false` dál blokuje plnou synchronizaci soupisky, hráčů a zápasů. Filtrace příznaku probíhá nad Eloquent kolekcí, protože `metadata` je přenosně uložené jako `longText`; nepoužívají se databázově specifické JSON operátory.
+
+Příkaz `stats:sync-standings` synchronizuje všechny takto způsobilé URL aktivní sezóny. Databázový plánovač jej spouští každou hodinu ve 45. minutě.
 
 Pražský portál PBasket běží na stejné platformě CZ.BASKETBALL. Jeho adresy `https://pbasket.cz.basketball/tym/...` a `https://pbasket.cz.basketball/soutez/...` proto používají stávající `source_key=czbasketball`, fetcher, extraktory i synchronizační služby; nevytváří se paralelní importér.
 

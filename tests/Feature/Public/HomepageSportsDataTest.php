@@ -99,6 +99,46 @@ class HomepageSportsDataTest extends TestCase
             ->assertDontSee('6'.__('general.rank_suffix'));
     }
 
+    public function test_homepage_standings_mode_includes_standings_only_config_but_excludes_other_disabled_configs(): void
+    {
+        $season = Season::create(['name' => '2026/2027', 'is_active' => true]);
+        $team = Team::factory()->create(['slug' => 'muzi-c']);
+        $disabledTeam = Team::factory()->create(['slug' => 'muzi-x']);
+        $standingsOnlyUrl = 'https://pbasket.cz.basketball/soutez/5379?p=10466';
+        $disabledUrl = 'https://pbasket.cz.basketball/soutez/9999';
+        $standingsOnly = $this->createConfig($team, $season, $standingsOnlyUrl);
+        $standingsOnly->update([
+            'is_enabled' => false,
+            'metadata' => ['standings_enabled' => true],
+        ]);
+        $disabled = $this->createConfig($disabledTeam, $season, $disabledUrl);
+        $disabled->update(['is_enabled' => false]);
+
+        foreach ([
+            [$standingsOnlyUrl, 'Sokol Kbely C'],
+            [$disabledUrl, 'Skrytý tým'],
+        ] as [$url, $teamName]) {
+            CompetitionStanding::create([
+                'season_id' => $season->id,
+                'competition_url' => $url,
+                'competition_name' => 'Přebor B',
+                'team_name' => $teamName,
+                'rank' => 1,
+                'gp' => 1,
+                'w' => 1,
+                'l' => 0,
+                'score' => '70:60',
+                'points' => 2,
+            ]);
+        }
+
+        Livewire::test(StandingsTable::class, ['configuredOnly' => true])
+            ->assertViewHas('groupedStandings', fn ($standings): bool => $standings->keys()->all() === [$standingsOnlyUrl])
+            ->assertViewHas('configuredTeamNames', fn ($names): bool => $names->has($standingsOnlyUrl))
+            ->assertSee('Sokol Kbely C')
+            ->assertDontSee('Skrytý tým');
+    }
+
     public function test_archived_season_is_not_used_when_no_current_season_exists(): void
     {
         $archivedSeason = Season::create(['name' => '2024/2025', 'is_active' => false]);
