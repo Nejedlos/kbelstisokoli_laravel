@@ -86,7 +86,7 @@ class MatchesOnlySyncTest extends TestCase
     public function test_matches_only_import_reuses_pivot_match_queues_details_and_skips_undated_rows(): void
     {
         $match = $this->match(true);
-        $match->update(['match_type' => 'poharove']);
+        $match->update(['match_type' => 'poharove', 'metadata' => ['season_external_match_id' => '550451']]);
         $future = $this->match(true);
         $future->update(['scheduled_at' => now()->addWeek(), 'metadata' => ['external_id' => '550452'], 'status' => 'planned']);
         $this->mock(RosterSyncService::class)->shouldNotReceive('syncWithData');

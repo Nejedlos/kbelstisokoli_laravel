@@ -218,7 +218,7 @@ class StatisticSyncService
                     'values' => $rowValues,
                     'source_metadata' => array_merge($row->metadata ?? [], [
                         'source' => 'czbasketball',
-                        'match_external_id' => $match->metadata['external_id'] ?? null,
+                        'match_external_id' => $match->metadata['external_id'] ?? $match->metadata['season_external_match_id'] ?? null,
                         'player_external_id' => $externalPlayerId,
                         'scraped_at' => now()->toDateTimeString(),
                         'is_opponent' => false,
@@ -257,7 +257,7 @@ class StatisticSyncService
 
                     $this->updateExternalPlayerMatch(
                         userId: $playerId,
-                        externalMatchId: (string) ($match->external_id ?: ($match->metadata['external_id'] ?? null)),
+                        externalMatchId: (string) ($match->external_id ?: ($match->metadata['external_id'] ?? $match->metadata['season_external_match_id'] ?? null)),
                         externalPlayerId: $externalPlayerId,
                         rowValues: $row->values,
                         rowMetadata: $row->metadata ?? [],

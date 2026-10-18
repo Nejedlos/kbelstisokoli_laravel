@@ -584,7 +584,7 @@ class ExternalStatsSyncService
 
         $dispatchedCount = 0;
         foreach ($matches as $match) {
-            $matchExtId = $match->metadata['external_id'] ?? 'N/A';
+            $matchExtId = $match->metadata['external_id'] ?? $match->metadata['season_external_match_id'] ?? 'N/A';
 
             if (ConsoleService::isStopped()) {
                 ConsoleService::log('Plánování detailů zápasů zastaveno uživatelem.', 'warning');
@@ -636,7 +636,7 @@ class ExternalStatsSyncService
                 $job->delay(now()->addSeconds($dispatchedCount * 2));
             }
 
-            ConsoleService::log("    -> Naplánován detail zápasu: ID {$match->id} ({$match->metadata['external_id']})", 'debug');
+            ConsoleService::log("    -> Naplánován detail zápasu: ID {$match->id} ({$matchExtId})", 'debug');
             $dispatchedCount++;
         }
 
