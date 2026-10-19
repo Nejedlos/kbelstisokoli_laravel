@@ -123,7 +123,10 @@
 
                             // Obnovit Livewire komponenty (karty) pro synchronizaci dat
                             if (window.Livewire) {
-                                Livewire.dispatch('attendanceUpdated');
+                                eventIds.forEach(id => {
+                                    const [type, eventId] = id.split(':');
+                                    Livewire.dispatch(`attendanceUpdated.${type}.${eventId}`);
+                                });
                             }
                         } else {
                             // Standardní hláška při erroru

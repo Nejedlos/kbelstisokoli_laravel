@@ -10,9 +10,11 @@ use App\Models\Season;
 use App\Models\Training;
 use App\Models\UserSeasonConfig;
 use Illuminate\Support\Facades\Cache;
+use Livewire\Attributes\Isolate;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
+#[Isolate]
 class EventCard extends Component
 {
     public $type;
@@ -34,7 +36,7 @@ class EventCard extends Component
         $this->compact = $compact;
     }
 
-    #[On('attendanceUpdated')]
+    #[On('attendanceUpdated.{type}.{eventId}')]
     public function refresh($eventId = null, $type = null)
     {
         if ($eventId === null || ($eventId == $this->eventId && $type == $this->type)) {
@@ -85,8 +87,7 @@ class EventCard extends Component
 
         event(new RsvpChanged($attendance));
 
-        // Dispatch event pro ostatní komponenty (pokud by někdo poslouchal)
-        $this->dispatch('attendanceUpdated', eventId: $this->eventId, type: $this->type);
+        // The action already re-renders this card; no broadcast refresh is needed.
 
         // Vizuální feedback (volitelně můžeme použít flash, ale u AJAXu je lepší tichá aktualizace nebo toast)
         // $this->dispatch('notify', ['type' => 'success', 'message' => __('member.attendance.save_success')]);

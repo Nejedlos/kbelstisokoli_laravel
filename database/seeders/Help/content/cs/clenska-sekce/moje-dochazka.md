@@ -30,3 +30,6 @@ Omluva ze zápasu je ještě kritičtější než z tréninku. U zápasů trené
 
 ## Statistiky docházky
 Svoji historickou docházku a "procentuální morálku" můžete sledovat v sekci **[Moje statistiky](/member/statistics/me)**. Dobrá docházka je často klíčovým faktorem pro nominaci do důležitých utkání!
+
+Po uložení účasti nebo omluvy se aktualizují příslušné karty programu.
+Hromadné změny lze používat i v přehledu s více než 20 událostmi.
