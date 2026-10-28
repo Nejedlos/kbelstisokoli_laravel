@@ -3,6 +3,7 @@
 namespace App\Services\Prediction;
 
 use App\Models\BasketballMatch;
+use App\Support\MatchResultHelper;
 
 class MutualMatchesCalculator
 {
@@ -24,32 +25,21 @@ class MutualMatchesCalculator
 
         $wins = 0;
         $totalDiff = 0;
-        $count = count($mutualMatches);
-        $teamName = $match->team->name;
+        $count = 0;
+        $teamName = $match->official_team_name;
 
         foreach ($mutualMatches as $m) {
-            // Skóre je v metadata jako stringy nebo inty
-            $scoreHome = (int) $m['score_home'];
-            $scoreAway = (int) $m['score_away'];
-
-            // Zjistíme, jestli jsme byli domácí nebo hosté v tom zápase
-            // V metadata mutual_matches bývá team_home a team_away
-            $isHomeInMatch = str_contains(strtolower($m['team_home']), strtolower($teamName));
-
-            $isWin = false;
-            if ($isHomeInMatch) {
-                if ($scoreHome > $scoreAway) {
-                    $isWin = true;
-                    $wins++;
-                }
-                $totalDiff += ($scoreHome - $scoreAway);
-            } else {
-                if ($scoreAway > $scoreHome) {
-                    $isWin = true;
-                    $wins++;
-                }
-                $totalDiff += ($scoreAway - $scoreHome);
+            $result = MatchResultHelper::for($m, $teamName);
+            if ($result['ourScore'] === null || ($result['ourScore'] + $result['opponentScore']) === 0) {
+                continue;
             }
+            $count++;
+            $wins += (int) $result['isWin'];
+            $totalDiff += $result['ourScore'] - $result['opponentScore'];
+        }
+
+        if ($count === 0) {
+            return ['delta' => 0, 'wins' => 0, 'count' => 0, 'avg_diff' => 0];
         }
 
         $avgDiff = $totalDiff / $count;

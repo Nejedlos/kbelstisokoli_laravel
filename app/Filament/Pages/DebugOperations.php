@@ -522,7 +522,7 @@ class DebugOperations extends Page
                             ->nullable(),
                         Toggle::make('all_matches')
                             ->label('Všechny zápasy')
-                            ->helperText('Pokud je zapnuto, přepočítá i již odehrané zápasy. Jinak jen budoucí.')
+                            ->helperText('Zahrne i historii; uložené předzápasové predikce odehraných zápasů se zachovají. Jinak jen budoucí.')
                             ->default(false),
                     ])
                     ->requiresConfirmation()

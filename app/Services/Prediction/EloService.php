@@ -4,7 +4,9 @@ namespace App\Services\Prediction;
 
 use App\Jobs\ComputeMatchPredictionJob;
 use App\Models\BasketballMatch;
+use App\Models\Season;
 use App\Models\TeamEloRating;
+use Illuminate\Support\Facades\DB;
 
 class EloService
 {
@@ -13,74 +15,100 @@ class EloService
     ) {}
 
     /**
-     * Updates Elo ratings based on a finished match.
+     * Replay rather than apply a result twice when a score or status changes.
+     * This also removes the contribution of a deleted or no longer finished match.
      */
     public function updateFromMatch(BasketballMatch $match): void
     {
-        if (! $match->score_home || ! $match->score_away || ! $match->hasPredictionContext()) {
+        if ($match->season_id === null) {
             return;
         }
 
-        $seasonId = $match->season_id;
-        $teamKey = TeamEloRating::getInternalTeamKey($match->team_id);
-        $oppKey = TeamEloRating::getOpponentKey($match->opponent_id);
-
-        $eloTeam = TeamEloRating::where('season_id', $seasonId)->where('team_key', $teamKey)->value('rating') ?? $this->eloCalculator::INITIAL_ELO;
-        $eloOpp = TeamEloRating::where('season_id', $seasonId)->where('team_key', $oppKey)->value('rating') ?? $this->eloCalculator::INITIAL_ELO;
-
-        $outcome = 0.5;
-        if ($match->is_win) {
-            $outcome = 1;
-        } elseif ($match->is_loss) {
-            $outcome = 0;
-        }
-
-        $scoreDiff = ($match->our_score ?? 0) - ($match->opponent_score ?? 0);
-
-        $newRatings = $this->eloCalculator->calculateNewRatings(
-            $eloTeam,
-            $eloOpp,
-            $outcome,
-            $scoreDiff,
-            $match->is_home
-        );
-
-        TeamEloRating::updateOrCreate(
-            ['season_id' => $seasonId, 'team_key' => $teamKey],
-            ['rating' => $newRatings['new_elo_team'], 'last_match_at' => $match->scheduled_at]
-        );
-
-        TeamEloRating::updateOrCreate(
-            ['season_id' => $seasonId, 'team_key' => $oppKey],
-            ['rating' => $newRatings['new_elo_opponent'], 'last_match_at' => $match->scheduled_at]
-        );
-
-        // Re-predict future matches for these teams
-        $this->dispatchFuturePredictions($match->team_id, $seasonId);
-        $this->dispatchFuturePredictionsForOpponent($match->opponent_id, $seasonId);
+        $this->rebuildSeason((int) $match->season_id);
     }
 
-    private function dispatchFuturePredictions(int $teamId, int $seasonId): void
+    /**
+     * Rebuild the entire season because opponents can be shared by several teams.
+     *
+     * @return int Number of completed results included in the replay.
+     */
+    public function rebuildSeason(int $seasonId): int
     {
-        $futureMatches = BasketballMatch::where('team_id', $teamId)
-            ->where('season_id', $seasonId)
-            ->whereIn('status', ['planned', 'scheduled'])
-            ->get();
+        return DB::transaction(function () use ($seasonId): int {
+            // A stable row serializes rebuilds even when the season has no ratings yet.
+            if (! Season::whereKey($seasonId)->lockForUpdate()->first()) {
+                return 0;
+            }
 
-        foreach ($futureMatches as $futureMatch) {
-            ComputeMatchPredictionJob::dispatch($futureMatch->id);
-        }
+            $matches = BasketballMatch::where('season_id', $seasonId)
+                ->whereNotNull('team_id')
+                ->whereNotNull('opponent_id')
+                ->whereNotNull('scheduled_at')
+                ->whereIn('status', ['finished', 'played', 'completed'])
+                ->whereNotNull('score_home')
+                ->whereNotNull('score_away')
+                ->where('score_home', '>=', 0)
+                ->where('score_away', '>=', 0)
+                ->where(function ($query): void {
+                    $query->where('score_home', '>', 0)->orWhere('score_away', '>', 0);
+                })
+                ->orderBy('scheduled_at')
+                ->orderBy('id')
+                ->get();
+
+            $ratings = [];
+            $gamesPlayed = [];
+            $lastMatches = [];
+
+            foreach ($matches as $match) {
+                $teamKey = TeamEloRating::getInternalTeamKey($match->team_id);
+                $oppKey = TeamEloRating::getOpponentKey($match->opponent_id);
+                $scoreDiff = $match->our_score - $match->opponent_score;
+                $outcome = $scoreDiff > 0 ? 1.0 : ($scoreDiff < 0 ? 0.0 : 0.5);
+
+                $newRatings = $this->eloCalculator->calculateNewRatings(
+                    $ratings[$teamKey] ?? EloCalculator::INITIAL_ELO,
+                    $ratings[$oppKey] ?? EloCalculator::INITIAL_ELO,
+                    $outcome,
+                    $scoreDiff,
+                    $match->is_home,
+                    $gamesPlayed[$teamKey] ?? 0
+                );
+
+                $ratings[$teamKey] = $newRatings['new_elo_team'];
+                $ratings[$oppKey] = $newRatings['new_elo_opponent'];
+                $gamesPlayed[$teamKey] = ($gamesPlayed[$teamKey] ?? 0) + 1;
+                $lastMatches[$teamKey] = $lastMatches[$oppKey] = $match->scheduled_at;
+            }
+
+            // Replacing the snapshot also clears teams whose final result was removed.
+            TeamEloRating::where('season_id', $seasonId)->delete();
+
+            foreach ($ratings as $teamKey => $rating) {
+                TeamEloRating::create([
+                    'season_id' => $seasonId,
+                    'team_key' => $teamKey,
+                    'rating' => $rating,
+                    'last_match_at' => $lastMatches[$teamKey],
+                ]);
+            }
+
+            DB::afterCommit(fn () => $this->dispatchFuturePredictions($seasonId));
+
+            return $matches->count();
+        });
     }
 
-    private function dispatchFuturePredictionsForOpponent(int $opponentId, int $seasonId): void
+    private function dispatchFuturePredictions(int $seasonId): void
     {
-        $futureMatches = BasketballMatch::where('opponent_id', $opponentId)
-            ->where('season_id', $seasonId)
+        // A shared opponent can propagate a correction to any team in the season.
+        BasketballMatch::where('season_id', $seasonId)
+            ->whereNotNull('team_id')
+            ->whereNotNull('opponent_id')
             ->whereIn('status', ['planned', 'scheduled'])
-            ->get();
-
-        foreach ($futureMatches as $futureMatch) {
-            ComputeMatchPredictionJob::dispatch($futureMatch->id);
-        }
+            ->select('id')
+            ->eachById(function (BasketballMatch $match): void {
+                ComputeMatchPredictionJob::dispatch($match->id);
+            });
     }
 }

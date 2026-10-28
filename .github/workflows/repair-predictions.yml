@@ -1,0 +1,65 @@
+name: Repair production match predictions
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  repair:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    concurrency:
+      group: production-deploy
+      cancel-in-progress: false
+    steps:
+      - name: Configure production SSH
+        env:
+          PRODUCTION_SSH_PRIVATE_KEY: ${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}
+          PRODUCTION_SSH_KNOWN_HOSTS: ${{ secrets.PRODUCTION_SSH_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d "$RUNNER_TEMP/repair-ssh"
+          printf '%s\n' "$PRODUCTION_SSH_PRIVATE_KEY" > "$RUNNER_TEMP/repair-ssh/key"
+          printf '%s\n' "$PRODUCTION_SSH_KNOWN_HOSTS" > "$RUNNER_TEMP/repair-ssh/known_hosts"
+          chmod 600 "$RUNNER_TEMP/repair-ssh/"*
+      - name: Back up, rebuild and verify predictions on the deployed commit
+        env:
+          PRODUCTION_SSH_HOST: ${{ secrets.PRODUCTION_SSH_HOST }}
+          PRODUCTION_SSH_PORT: ${{ secrets.PRODUCTION_SSH_PORT }}
+          PRODUCTION_SSH_USER: ${{ secrets.PRODUCTION_SSH_USER }}
+          PRODUCTION_PATH: ${{ secrets.PRODUCTION_PATH }}
+        run: |
+          remote_command=$(printf 'bash -s -- %q %q' "$PRODUCTION_PATH" "$GITHUB_SHA")
+          ssh -4 -p "$PRODUCTION_SSH_PORT" \
+            -i "$RUNNER_TEMP/repair-ssh/key" -o IdentitiesOnly=yes \
+            -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/repair-ssh/known_hosts" \
+            -o ConnectTimeout=20 -o ServerAliveInterval=15 -o ServerAliveCountMax=4 \
+            "$PRODUCTION_SSH_USER@$PRODUCTION_SSH_HOST" "$remote_command" <<'REMOTE'
+          set -euo pipefail
+          production_root=$1
+          expected_sha=$2
+          exec 9>"$production_root/deploy/deployment.lock"
+          flock -w 300 9
+          cd "$production_root/deploy/current"
+          test "$(cat .release-sha)" = "$expected_sha"
+          test ! -f storage/framework/down
+          maintenance_started=false
+          restore_site() {
+            if [ "$maintenance_started" = true ]; then
+              php8.4 artisan up --no-interaction
+            fi
+          }
+          trap restore_site EXIT
+          maintenance_started=true
+          php8.4 artisan down --retry=60 --refresh=15 --no-interaction
+          php8.4 artisan queue:restart --no-interaction
+          php8.4 scripts/repair-production-predictions.php "$expected_sha"
+          php8.4 artisan page-cache:clear --no-interaction
+          REMOTE
+      - name: Remove temporary SSH material
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/repair-ssh"

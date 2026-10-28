@@ -2,9 +2,12 @@
 
 namespace App\Services\Prediction;
 
+use App\Jobs\ComputeMatchPredictionJob;
 use App\Models\BasketballMatch;
 use App\Models\MatchPrediction;
+use App\Models\StatisticRow;
 use App\Models\TeamEloRating;
+use App\Support\MatchResultHelper;
 
 class PredictionService
 {
@@ -28,10 +31,44 @@ class PredictionService
         $this->mutualMatchesCalculator = $mutualMatchesCalculator;
     }
 
+    /**
+     * Historical boxscores affect future roster strength, not the frozen snapshot.
+     */
+    public function queueForStatistics(StatisticRow $row): void
+    {
+        $sourceMatch = $row->match;
+        $seasonId = $row->season_id ?? $sourceMatch?->season_id;
+        $teamId = $row->team_id ?? $sourceMatch?->team_id;
+        $opponentId = $row->opponent_id ?? $sourceMatch?->opponent_id;
+        if (! $seasonId || (! $teamId && ! $opponentId)) {
+            return;
+        }
+
+        BasketballMatch::where('season_id', $seasonId)
+            ->whereIn('status', ['planned', 'scheduled'])
+            ->whereNotNull('team_id')->whereNotNull('opponent_id')
+            ->where(function ($query) use ($teamId, $opponentId): void {
+                $query->when($teamId, fn ($q) => $q->where('team_id', $teamId))
+                    ->when($opponentId, fn ($q) => $q->orWhere('opponent_id', $opponentId));
+            })
+            ->eachById(fn (BasketballMatch $match) => ComputeMatchPredictionJob::dispatch($match->id)->afterCommit());
+    }
+
     public function predict(BasketballMatch $match): ?MatchPrediction
     {
         if (! $match->hasPredictionContext()) {
+            if ($match->exists) {
+                $match->prediction()->delete();
+            }
+
             return null;
+        }
+
+        // A post-match import must not rewrite a pre-match snapshot using later results.
+        if (in_array($match->status, ['finished', 'played', 'completed'])
+            || ($match->has_score && ($match->score_home + $match->score_away > 0))) {
+            return $match->prediction()->where('team_id', $match->team_id)
+                ->where('season_id', $match->season_id)->first();
         }
 
         $teamKey = TeamEloRating::getInternalTeamKey($match->team_id);
@@ -46,22 +83,22 @@ class PredictionService
         // 2. Form Prob
         $formResult = $this->formCalculator->calculateFormDelta($match);
         $formDelta = $formResult['delta'];
-        $formProb = $this->sigmoid(($teamElo + $formDelta) - $oppElo);
+        $formProb = $this->eloCalculator->calculateExpected($teamElo + $formDelta, $oppElo, $match->is_home);
 
         // 3. Roster Prob
         $rosterResult = $this->rosterStrengthCalculator->calculateRosterStrength($match);
         $rosterDelta = $rosterResult['delta'];
-        $rosterProb = $this->sigmoid(($teamElo + $rosterDelta) - $oppElo);
+        $rosterProb = $this->eloCalculator->calculateExpected($teamElo + $rosterDelta, $oppElo, $match->is_home);
 
         // 4. Preview Prob (from external comparison)
         $previewResult = $this->calculatePreviewDelta($match);
         $previewDelta = $previewResult['delta'];
-        $previewProb = $this->sigmoid(($teamElo + $previewDelta) - $oppElo);
+        $previewProb = $this->eloCalculator->calculateExpected($teamElo + $previewDelta, $oppElo, $match->is_home);
 
         // 5. Mutual Matches Prob (H2H)
         $mutualResult = $this->mutualMatchesCalculator->calculateMutualMatchesDelta($match);
         $mutualDelta = $mutualResult['delta'];
-        $mutualProb = $this->sigmoid(($teamElo + $mutualDelta) - $oppElo);
+        $mutualProb = $this->eloCalculator->calculateExpected($teamElo + $mutualDelta, $oppElo, $match->is_home);
 
         // Mix probabilities
         $w1 = 0.40; // Elo (reduced from 0.50)
@@ -70,7 +107,7 @@ class PredictionService
         $w4 = 0.15; // Preview
         $w5 = 0.15; // Mutual Matches (H2H)
 
-        if ($rosterResult['opponent']['count'] === 0) {
+        if ($rosterResult['opponent']['count'] === 0 || $rosterResult['team']['count'] === 0) {
             $w3 = 0;
             // Přerozdělíme w3 mezi ostatní
             $totalRemaining = $w1 + $w2 + $w4 + $w5;
@@ -82,7 +119,7 @@ class PredictionService
             }
         }
 
-        if ($previewDelta === 0) {
+        if (empty($previewResult['factors'])) {
             $prevW4 = $w4;
             $w4 = 0;
             // Přerozdělíme w4 mezi ostatní
@@ -121,10 +158,15 @@ class PredictionService
 
         // Confidence
         $confidence = 'low';
-        $teamMatchesCount = BasketballMatch::where('team_id', $match->team_id)->where('season_id', $match->season_id)->whereNotNull('score_home')->count();
-        if ($teamMatchesCount >= 10 && ($rosterResult['opponent']['count'] > 0 || $previewDelta !== 0)) {
+        $teamMatchesCount = BasketballMatch::where('team_id', $match->team_id)
+            ->where('season_id', $match->season_id)
+            ->whereIn('status', ['finished', 'played', 'completed'])
+            ->when($match->scheduled_at, fn ($query) => $query->where('scheduled_at', '<', $match->scheduled_at))
+            ->whereNotNull('score_home')->whereNotNull('score_away')
+            ->whereRaw('(score_home + score_away) > 0')->count();
+        if ($teamMatchesCount >= 10 && ($rosterResult['opponent']['count'] > 0 || ! empty($previewResult['factors']))) {
             $confidence = 'high';
-        } elseif ($teamMatchesCount >= 5 || $previewDelta !== 0) {
+        } elseif ($teamMatchesCount >= 5 || ! empty($previewResult['factors'])) {
             $confidence = 'medium';
         }
 
@@ -137,7 +179,7 @@ class PredictionService
                 'season_id' => $match->season_id,
                 'team_id' => $match->team_id,
                 'computed_at' => now(),
-                'model_version' => 'elo+form+roster+preview:v2',
+                'model_version' => 'elo+form+roster+preview+h2h:v3',
                 'probability_win' => $finalProb,
                 'probability_loss' => 1 - $finalProb,
                 'confidence' => $confidence,
@@ -157,7 +199,7 @@ class PredictionService
                     'home_adv_applied' => $match->is_home,
                 ],
                 'explanation_points' => $explanation,
-                'expires_at' => $match->scheduled_at ? $match->scheduled_at->subHour() : now()->addDay(),
+                'expires_at' => $match->scheduled_at ? $match->scheduled_at->copy()->subHour() : now()->addDay(),
             ]
         );
     }
@@ -173,7 +215,7 @@ class PredictionService
         $factors = [];
 
         // Body na zápas (PG)
-        if (isset($comparison['pts_per_game'])) {
+        if ($this->hasNumericComparison($comparison['pts_per_game'] ?? [])) {
             $homePts = (float) str_replace(',', '.', $comparison['pts_per_game']['home']);
             $awayPts = (float) str_replace(',', '.', $comparison['pts_per_game']['away']);
 
@@ -184,11 +226,12 @@ class PredictionService
         }
 
         // Úspěšnost střelby
-        if (isset($comparison['fg2_pct'])) {
+        if ($this->hasNumericComparison($comparison['fg2_pct'] ?? [])) {
             $homePct = (float) str_replace(['%', ','], ['', '.'], $comparison['fg2_pct']['home']);
             $awayPct = (float) str_replace(['%', ','], ['', '.'], $comparison['fg2_pct']['away']);
             $diff = $match->is_home ? ($homePct - $awayPct) : ($awayPct - $homePct);
             $delta += $diff * 2; // 1% = 2 Elo
+            $factors['fg2_pct'] = $diff;
         }
 
         return [
@@ -210,11 +253,16 @@ class PredictionService
         return 1 / (1 + exp(-$x));
     }
 
-    private function sigmoid(float $x): float
+    private function hasNumericComparison(array $comparison): bool
     {
-        // Simple mapping for delta to probability
-        // Používáme 1000 místo 600 pro méně extrémní pravděpodobnosti (více konzervativní odhad pro basketbal)
-        return 1 / (1 + 10 ** (-$x / 1000));
+        foreach (['home', 'away'] as $side) {
+            $value = str_replace(['%', ',', ' ', "\u{00A0}"], ['', '.', '', ''], (string) ($comparison[$side] ?? ''));
+            if (! is_numeric($value)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private function generateExplanation(BasketballMatch $match, float $eloProb, array $formResult, array $rosterResult, array $previewResult, array $mutualResult): array
@@ -250,19 +298,19 @@ class PredictionService
 
         // 4. Forma soupeře (pokud je v preview_data)
         $lastMatches = $match->metadata['last_matches'] ?? [];
-        if (! empty($lastMatches['away'])) {
-            $awayMatches = array_slice($lastMatches['away'], 0, 5);
+        $opponentSide = $match->is_home ? 'away' : 'home';
+        if (! empty($lastMatches[$opponentSide])) {
+            $awayMatches = array_slice($lastMatches[$opponentSide], 0, 5);
             $oppWins = 0;
-            $oppCount = count($awayMatches);
-            $oppName = $match->opponent?->name ?? 'Soupeř';
+            $oppCount = 0;
+            $oppName = $match->official_opponent_name;
             foreach ($awayMatches as $m) {
-                $isWin = (int) $m['score_home'] > (int) $m['score_away'];
-                if (str_contains(strtolower($m['team_home']), strtolower($oppName)) === false) {
-                    $isWin = (int) $m['score_away'] > (int) $m['score_home'];
+                $result = MatchResultHelper::for($m, $oppName);
+                if ($result['ourScore'] === null) {
+                    continue;
                 }
-                if ($isWin) {
-                    $oppWins++;
-                }
+                $oppCount++;
+                $oppWins += (int) $result['isWin'];
             }
             if ($oppCount >= 3) {
                 $points[] = "Forma soupeře: z posledních {$oppCount} zápasů vyhráli {$oppWins}x.";
@@ -271,7 +319,7 @@ class PredictionService
 
         // 5. Soupiska
         if ($rosterResult['team']['count'] >= 3) {
-            $points[] = 'Naše soupiska: top 5 hráčů drží průměrně '.round($rosterResult['team']['total'] / 5, 1).' bodů na zápas (dle interních dat).';
+            $points[] = __('matches.prediction.roster_summary', ['count' => $rosterResult['team']['count'], 'points' => round($rosterResult['team']['total'] / $rosterResult['team']['count'], 1)]);
         }
 
         // 6. Rozvaha (externí srovnání)

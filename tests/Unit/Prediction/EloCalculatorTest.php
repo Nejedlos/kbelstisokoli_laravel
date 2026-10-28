@@ -17,7 +17,7 @@ class EloCalculatorTest extends TestCase
 
     public function test_expected_probability_is_50_for_equal_ratings_without_home_adv(): void
     {
-        $prob = $this->calculator->calculateExpected(1500, 1500, false);
+        $prob = $this->calculator->calculateExpected(1500, 1500);
         $this->assertEquals(0.5, $prob);
     }
 
@@ -27,6 +27,15 @@ class EloCalculatorTest extends TestCase
         $probAway = $this->calculator->calculateExpected(1500, 1500, false);
 
         $this->assertGreaterThan($probAway, $probHome);
+    }
+
+    public function test_home_and_away_probabilities_are_complementary(): void
+    {
+        $home = $this->calculator->calculateExpected(1600, 1450, true);
+        $away = $this->calculator->calculateExpected(1450, 1600, false);
+
+        $this->assertEqualsWithDelta(1, $home + $away, 0.0000001);
+        $this->assertLessThan(0.5, $this->calculator->calculateExpected(1500, 1500, false));
     }
 
     public function test_rating_change_is_positive_on_win(): void

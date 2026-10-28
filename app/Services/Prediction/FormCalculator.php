@@ -23,6 +23,8 @@ class FormCalculator
         $lastMatches = BasketballMatch::where('team_id', $match->team_id)
             ->where('season_id', $match->season_id)
             ->where('scheduled_at', '<', $match->scheduled_at)
+            ->whereIn('status', ['finished', 'played', 'completed'])
+            ->whereRaw('(score_home + score_away) > 0')
             ->whereNotNull('score_home')
             ->whereNotNull('score_away')
             ->orderBy('scheduled_at', 'desc')

@@ -218,7 +218,7 @@
 
                     @php
                         $prediction = $match->prediction;
-                        $isPlayed = $match->status === 'finished';
+                        $isPlayed = $match->has_score;
                         $winChance = $prediction ? round($prediction->probability_win * 100) : null;
 
                         $colorHsl = null;

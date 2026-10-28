@@ -13,37 +13,34 @@ class MatchResultHelper
      */
     public function getResultForTeam(array $matchData, string $teamName): array
     {
-        $scoreHome = (int) ($matchData['score_home'] ?? 0);
-        $scoreAway = (int) ($matchData['score_away'] ?? 0);
-        $teamHome = $matchData['team_home'] ?? '';
-        $teamAway = $matchData['team_away'] ?? '';
+        $isHome = self::homeSideFor($matchData, $teamName);
+        $scoreHome = $matchData['score_home'] ?? null;
+        $scoreAway = $matchData['score_away'] ?? null;
 
-        $isHome = str_contains(mb_strtolower($teamHome), mb_strtolower($teamName));
-
-        $isWin = false;
-        $isLoss = false;
-        $isDraw = false;
-
-        if ($scoreHome === $scoreAway) {
-            $isDraw = true;
-        } elseif ($isHome) {
-            $isWin = $scoreHome > $scoreAway;
-            $isLoss = $scoreHome < $scoreAway;
-        } else {
-            $isWin = $scoreAway > $scoreHome;
-            $isLoss = $scoreAway < $scoreHome;
+        if ($isHome === null || ! is_numeric($scoreHome) || ! is_numeric($scoreAway)) {
+            return self::getResult(false, null, null);
         }
 
-        return [
-            'isWin' => $isWin,
-            'isLoss' => $isLoss,
-            'isDraw' => $isDraw,
-            'resultLetter' => $isWin ? 'V' : ($isLoss ? 'P' : 'R'),
-            'textColor' => $isWin ? 'text-emerald-600' : ($isLoss ? 'text-rose-600' : 'text-slate-600'),
-            'bgColor' => $isWin ? 'bg-emerald-500' : ($isLoss ? 'bg-rose-500' : 'bg-slate-500'),
-            'ourScore' => $isHome ? $scoreHome : $scoreAway,
-            'opponentScore' => $isHome ? $scoreAway : $scoreHome,
-        ];
+        return self::getResult($isHome, (int) $scoreHome, (int) $scoreAway);
+    }
+
+    /**
+     * Unknown names must never silently count as the away team.
+     */
+    public static function homeSideFor(array $matchData, string $teamName): ?bool
+    {
+        $normalize = static fn (string $name): string => mb_strtolower(
+            trim(preg_replace('/\\s+/u', ' ', str_replace("\u{00A0}", ' ', $name)))
+        );
+        $name = $normalize($teamName);
+        if ($name === '') {
+            return null;
+        }
+
+        $home = $normalize((string) ($matchData['team_home'] ?? '')) === $name;
+        $away = $normalize((string) ($matchData['team_away'] ?? '')) === $name;
+
+        return $home === $away ? null : $home;
     }
 
     /**

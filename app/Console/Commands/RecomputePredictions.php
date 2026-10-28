@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 
 class RecomputePredictions extends Command
 {
-    protected $signature = 'stats:predictions:recompute {--all : Recompute for all matches, not just future ones}';
+    protected $signature = 'stats:predictions:recompute {--all : Include historical matches; existing pre-match snapshots are preserved}';
 
     protected $description = 'Recompute match predictions';
 

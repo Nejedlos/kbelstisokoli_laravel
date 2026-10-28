@@ -601,7 +601,7 @@
                                 {{-- Home Team Last Matches --}}
                                 @if(!empty($lastMatches['home']))
                                     @php
-                                        $homeTeamName = $match->is_home ? $match->team->name : ($match->opponent?->name ?? 'Soupeř');
+                                        $homeTeamName = $match->is_home ? $match->official_team_name : $match->official_opponent_name;
                                     @endphp
                                     <div class="space-y-6">
                                         <div class="flex items-center gap-4">
@@ -647,7 +647,7 @@
                                 {{-- Away Team Last Matches --}}
                                 @if(!empty($lastMatches['away']))
                                     @php
-                                        $awayTeamName = $match->is_home ? ($match->opponent?->name ?? 'Soupeř') : $match->team->name;
+                                        $awayTeamName = $match->is_home ? $match->official_opponent_name : $match->official_team_name;
                                     @endphp
                                     <div class="space-y-6">
                                         <div class="flex items-center gap-4">
