@@ -24,6 +24,8 @@ return [
     'empty_cta_contact' => 'Máte dotaz? Kontaktujte nás',
     'view_detail' => 'Detail zápasu',
     'date_time' => 'Datum a čas',
+    'date_not_specified' => 'Termín bude upřesněn',
+    'time_not_specified' => 'Čas bude upřesněn',
     'location' => 'Místo',
     'opponent' => 'Soupeř',
     'score' => 'Skóre',

@@ -98,10 +98,12 @@ class MatchController extends Controller
         $teamNames = $match->teams->pluck('name')->join(' & ');
         $mainTeamName = ($hasKlub || $match->teams->count() > 1) ? ($hasKlub ? 'Sokoli (Celý klub)' : $teamNames) : ($match->teams->first()?->name ?? $match->team?->name);
 
+        $matchDate = $match->scheduled_at?->format('d. m. Y H:i') ?? __('matches.date_not_specified');
+
         return view('public.matches.show', [
             'match' => $match,
             'seo_title' => "{$mainTeamName} vs {$match->opponent->name} | Zápasy",
-            'seo_description' => "Detail zápasu {$mainTeamName} proti {$match->opponent->name}. Termín: {$match->scheduled_at->format('d. m. Y H:i')}, místo: {$match->location}.",
+            'seo_description' => "Detail zápasu {$mainTeamName} proti {$match->opponent->name}. Termín: {$matchDate}, místo: {$match->location}.",
         ]);
     }
 }

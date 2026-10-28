@@ -18,4 +18,12 @@ class WeekdayShortComponentTest extends TestCase
         app()->setLocale('en');
         $this->assertStringContainsString('Mon', Blade::render('<x-weekday-short :date="$date" />', compact('date')));
     }
+
+    public function test_missing_date_does_not_invent_a_weekday_or_fail(): void
+    {
+        foreach (['cs', 'en'] as $locale) {
+            app()->setLocale($locale);
+            $this->assertSame('', trim(Blade::render('<x-weekday-short :date="$date" />', ['date' => null])));
+        }
+    }
 }

@@ -3,6 +3,7 @@
 namespace Tests\Feature\Public;
 
 use App\Models\BasketballMatch;
+use App\Models\MatchPrediction;
 use App\Models\Opponent;
 use App\Models\Season;
 use App\Models\Team;
@@ -53,5 +54,40 @@ class MatchRoutesTest extends TestCase
         $this->get(route('public.matches.show', ['id' => $match->id]))
             ->assertOk()
             ->assertSee('Testovací soupeř');
+    }
+
+    public function test_undated_match_renders_its_prediction_instead_of_failing(): void
+    {
+        $team = Team::factory()->create();
+        $season = Season::create(['name' => '2026/2027', 'is_active' => true]);
+        $opponent = Opponent::create(['name' => 'Testovací soupeř']);
+        $match = BasketballMatch::withoutEvents(fn () => BasketballMatch::create([
+            'team_id' => $team->id,
+            'season_id' => $season->id,
+            'opponent_id' => $opponent->id,
+            'scheduled_at' => null,
+            'is_home' => true,
+            'status' => 'planned',
+        ]));
+        MatchPrediction::create([
+            'basketball_match_id' => $match->id,
+            'season_id' => $season->id,
+            'team_id' => $team->id,
+            'computed_at' => now(),
+            'expires_at' => now()->addDay(),
+            'model_version' => 'elo+form+roster+preview+h2h:v3',
+            'probability_win' => 0.73,
+            'probability_loss' => 0.27,
+            'confidence' => 'low',
+            'factors' => [],
+            'explanation_points' => [],
+        ]);
+
+        $this->get(route('public.matches.show', ['id' => $match->id]))
+            ->assertOk()->assertSee('Termín bude upřesněn')->assertSee('Čas bude upřesněn')
+            ->assertSee('73%');
+        $this->followingRedirects()->get(route('public.matches.show', ['id' => $match->id, 'lang' => 'en']))
+            ->assertOk()->assertSee('Date to be confirmed')->assertSee('Time to be confirmed')
+            ->assertSee('73%');
     }
 }
