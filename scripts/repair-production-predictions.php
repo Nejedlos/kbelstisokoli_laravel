@@ -23,6 +23,28 @@ if (! app()->isProduction() || ! preg_match('/^[a-f0-9]{40}$/', $expectedSha)
     exit(1);
 }
 
+if (! app()->isDownForMaintenance()) {
+    throw new RuntimeException('Maintenance mode is required to prevent new queue workers.');
+}
+
+// Old in-flight workers must finish before their prediction writes can race repair.
+$queueConnection = config('queue.connections.database.connection');
+$queueTable = config('queue.connections.database.table', 'jobs');
+$deadline = microtime(true) + 180;
+do {
+    $active = DB::connection($queueConnection)->table($queueTable)
+        ->whereNotNull('reserved_at')
+        ->where('reserved_at', '>', time() - (int) config('queue.connections.database.retry_after', 300))
+        ->where('payload', 'like', '%ComputeMatchPredictionJob%')->count();
+    if ($active === 0) {
+        break;
+    }
+    if (microtime(true) >= $deadline) {
+        throw new RuntimeException('Active prediction workers did not drain; no data changed.');
+    }
+    usleep(500000);
+} while (true);
+
 umask(0077);
 $directory = storage_path('app/private/prediction-repairs');
 if (! is_dir($directory) && ! mkdir($directory, 0700, true) && ! is_dir($directory)) {

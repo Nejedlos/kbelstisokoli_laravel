@@ -42,8 +42,20 @@ jobs:
           set -euo pipefail
           production_root=$1
           expected_sha=$2
+          exec 9>"$production_root/deploy/deployment.lock"
+          flock -w 300 9
           cd "$production_root/deploy/current"
           test "$(cat .release-sha)" = "$expected_sha"
+          test ! -f storage/framework/down
+          maintenance_started=false
+          restore_site() {
+            if [ "$maintenance_started" = true ]; then
+              php8.4 artisan up --no-interaction
+            fi
+          }
+          trap restore_site EXIT
+          maintenance_started=true
+          php8.4 artisan down --retry=60 --refresh=15 --no-interaction
           php8.4 artisan queue:restart --no-interaction
           php8.4 scripts/repair-production-predictions.php "$expected_sha"
           REMOTE
