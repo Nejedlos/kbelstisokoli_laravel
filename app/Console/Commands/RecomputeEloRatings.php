@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\BasketballMatch;
 use App\Models\TeamEloRating;
-use App\Services\Prediction\EloCalculator;
+use App\Services\Prediction\EloService;
 use Illuminate\Console\Command;
 
 class RecomputeEloRatings extends Command
@@ -13,110 +13,42 @@ class RecomputeEloRatings extends Command
 
     protected $description = 'Recompute Elo ratings from historical matches';
 
-    private EloCalculator $eloCalculator;
-
-    public function __construct(EloCalculator $eloCalculator)
-    {
-        parent::__construct();
-        $this->eloCalculator = $eloCalculator;
-    }
-
-    public function handle(): int
+    public function handle(EloService $eloService): int
     {
         $seasonId = $this->argument('season');
         $teamId = $this->argument('team');
 
-        $query = BasketballMatch::whereNotNull('score_home')
-            ->whereNotNull('score_away')
-            ->whereNotNull('team_id')
-            ->whereNotNull('opponent_id')
-            ->orderBy('scheduled_at', 'asc');
+        $matches = BasketballMatch::query();
+        $ratings = TeamEloRating::query();
 
         if ($seasonId) {
-            $query->where('season_id', $seasonId);
+            $matches->where('season_id', $seasonId);
+            $ratings->where('season_id', $seasonId);
         }
 
         if ($teamId) {
-            $query->where('team_id', $teamId);
+            $matches->where('team_id', $teamId);
+            $ratings->where('team_key', TeamEloRating::getInternalTeamKey((int) $teamId));
+            $this->info('Team filter selects seasons; each selected season is rebuilt in full to preserve shared opponent histories.');
         }
 
-        $matches = $query->get();
+        $seasonIds = $matches->distinct()->pluck('season_id')
+            ->merge($ratings->distinct()->pluck('season_id'))
+            ->unique()->sort()->values();
 
-        if ($matches->isEmpty()) {
+        if ($seasonIds->isEmpty()) {
             $this->info('No matches found to recompute Elo.');
 
-            return 0;
+            return self::SUCCESS;
         }
 
-        // Reset Elo ratings if we are recomputing everything or a specific season
-        if (! $teamId) {
-            $eloQuery = TeamEloRating::query();
-            if ($seasonId) {
-                $eloQuery->where('season_id', $seasonId);
-            }
-            $eloQuery->delete();
+        $count = 0;
+        foreach ($seasonIds as $selectedSeasonId) {
+            $count += $eloService->rebuildSeason((int) $selectedSeasonId);
         }
 
-        $this->info("Recomputing Elo for {$matches->count()} matches...");
+        $this->info("Elo ratings recomputed successfully from {$count} completed matches.");
 
-        $eloRatings = []; // [season_id][team_key] => rating
-
-        foreach ($matches as $match) {
-            if (! $match->hasPredictionContext()) {
-                continue;
-            }
-
-            $seasonId = $match->season_id;
-            $teamKey = TeamEloRating::getInternalTeamKey($match->team_id);
-            $oppKey = TeamEloRating::getOpponentKey($match->opponent_id);
-
-            if (! $oppKey) {
-                continue;
-            }
-
-            if (! isset($eloRatings[$seasonId][$teamKey])) {
-                $eloRatings[$seasonId][$teamKey] = TeamEloRating::where('season_id', $seasonId)->where('team_key', $teamKey)->value('rating') ?? $this->eloCalculator::INITIAL_ELO;
-            }
-            if (! isset($eloRatings[$seasonId][$oppKey])) {
-                $eloRatings[$seasonId][$oppKey] = TeamEloRating::where('season_id', $seasonId)->where('team_key', $oppKey)->value('rating') ?? $this->eloCalculator::INITIAL_ELO;
-            }
-
-            $eloTeam = $eloRatings[$seasonId][$teamKey];
-            $eloOpp = $eloRatings[$seasonId][$oppKey];
-
-            $outcome = 0.5;
-            if ($match->is_win) {
-                $outcome = 1;
-            } elseif ($match->is_loss) {
-                $outcome = 0;
-            }
-
-            $scoreDiff = ($match->our_score ?? 0) - ($match->opponent_score ?? 0);
-
-            $newRatings = $this->eloCalculator->calculateNewRatings(
-                $eloTeam,
-                $eloOpp,
-                $outcome,
-                $scoreDiff,
-                $match->is_home
-            );
-
-            $eloRatings[$seasonId][$teamKey] = $newRatings['new_elo_team'];
-            $eloRatings[$seasonId][$oppKey] = $newRatings['new_elo_opponent'];
-
-            TeamEloRating::updateOrCreate(
-                ['season_id' => $seasonId, 'team_key' => $teamKey],
-                ['rating' => $newRatings['new_elo_team'], 'last_match_at' => $match->scheduled_at]
-            );
-
-            TeamEloRating::updateOrCreate(
-                ['season_id' => $seasonId, 'team_key' => $oppKey],
-                ['rating' => $newRatings['new_elo_opponent'], 'last_match_at' => $match->scheduled_at]
-            );
-        }
-
-        $this->info('Elo ratings recomputed successfully.');
-
-        return 0;
+        return self::SUCCESS;
     }
 }

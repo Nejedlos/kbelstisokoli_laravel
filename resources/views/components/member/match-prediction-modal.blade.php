@@ -7,6 +7,10 @@
     $mutualMatches = $match->metadata['mutual_matches'] ?? [];
     $bestPlayers = $match->metadata['best_players'] ?? [];
     $hasScore = !is_null($match->score_home) && !is_null($match->score_away);
+    $ourSide = $match->is_home ? 'home' : 'away';
+    $opponentSide = $match->is_home ? 'away' : 'home';
+    $ourName = $match->team?->name ?? $match->official_team_name;
+    $opponentName = $match->opponent?->name ?? 'Soupeř';
 
     $colorHsl = null;
     $bgHsl = null;
@@ -171,14 +175,14 @@
                                 </div>
 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    @foreach(['home', 'away'] as $side)
+                                    @foreach([$ourSide, $opponentSide] as $side)
                                         @php
                                             $player = $categoryData[$side] ?? null;
-                                            $isHome = $side === 'home';
+                                            $isOurTeam = $side === $ourSide;
                                         @endphp
                                         @if($player)
-                                            <div class="group relative flex items-center gap-4 p-3 rounded-[2rem] {{ $isHome ? 'bg-brand-50/50 border-brand-100' : 'bg-slate-50 border-slate-100' }} border-2 transition-all hover:shadow-xl hover:bg-white hover:-translate-y-1 overflow-hidden">
-                                                @if($isHome)
+                                            <div class="group relative flex items-center gap-4 p-3 rounded-[2rem] {{ $isOurTeam ? 'bg-brand-50/50 border-brand-100' : 'bg-slate-50 border-slate-100' }} border-2 transition-all hover:shadow-xl hover:bg-white hover:-translate-y-1 overflow-hidden">
+                                                @if($isOurTeam)
                                                     <div class="absolute top-0 right-0 w-24 h-24 bg-brand-500/5 rounded-full -mr-8 -mt-8"></div>
                                                 @endif
 
@@ -209,14 +213,14 @@
                                                             </div>
                                                         @endif
                                                     </div>
-                                                    <div class="absolute -top-2 -right-2 w-7 h-7 rounded-full {{ $isHome ? 'bg-brand-500' : 'bg-slate-400' }} text-white flex items-center justify-center text-[10px] shadow-lg border-2 border-white">
+                                                    <div class="absolute -top-2 -right-2 w-7 h-7 rounded-full {{ $isOurTeam ? 'bg-brand-500' : 'bg-slate-400' }} text-white flex items-center justify-center text-[10px] shadow-lg border-2 border-white">
                                                         <i class="fa-solid fa-crown"></i>
                                                     </div>
                                                 </div>
 
                                                 <div class="flex-grow min-w-0 relative">
-                                                    <span class="px-2 py-0.5 {{ $isHome ? 'bg-brand-500 text-white' : 'bg-slate-200 text-slate-600' }} text-[8px] font-black rounded uppercase tracking-widest mb-1 inline-block whitespace-nowrap">
-                                                        {{ $isHome ? ($match->team->name) : ($match->opponent?->name ?? 'Soupeř') }}
+                                                    <span class="px-2 py-0.5 {{ $isOurTeam ? 'bg-brand-500 text-white' : 'bg-slate-200 text-slate-600' }} text-[8px] font-black rounded uppercase tracking-widest mb-1 inline-block whitespace-nowrap">
+                                                        {{ $isOurTeam ? ($match->team->name) : ($match->opponent?->name ?? 'Soupeř') }}
                                                     </span>
                                                     <span class="text-sm font-black text-slate-900 leading-tight block group-hover:text-brand-600 transition-colors truncate">{{ $player['name'] }}</span>
                                                 </div>
@@ -257,8 +261,9 @@
 
                                 <div class="flex items-center justify-between gap-4 relative px-4">
                                     <div class="text-center flex-1 min-w-0">
+                                        <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">{{ $ourName }}</span>
                                         <span class="text-xl sm:text-2xl font-black text-brand-600 tabular-nums block break-words">
-                                            {{ $data['home'] }}
+                                            {{ $data[$ourSide] }}
                                         </span>
                                     </div>
 
@@ -269,8 +274,9 @@
                                     </div>
 
                                     <div class="text-center flex-1 min-w-0">
+                                        <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">{{ $opponentName }}</span>
                                         <span class="text-xl sm:text-2xl font-black text-slate-900 tabular-nums block break-words">
-                                            {{ $data['away'] }}
+                                            {{ $data[$opponentSide] }}
                                         </span>
                                     </div>
                                 </div>
@@ -288,10 +294,12 @@
                     </h4>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        @foreach(['home', 'away'] as $side)
+                        @foreach([$ourSide, $opponentSide] as $side)
                             @php
                                 $sideMatches = array_slice($lastMatches[$side] ?? [], 0, 5);
-                                $teamName = $side === 'home' ? $match->team->name : ($match->opponent?->name ?? 'Soupeř');
+                                $isOurTeam = $side === $ourSide;
+                                $teamName = $isOurTeam ? $ourName : $opponentName;
+                                $sourceTeamName = $isOurTeam ? $match->official_team_name : $match->official_opponent_name;
                             @endphp
                             <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm space-y-4">
                                 <div class="flex items-center justify-between">
@@ -299,7 +307,7 @@
                                     <div class="flex gap-1.5">
                                         @foreach($sideMatches as $m)
                                             @php
-                                                $res = \App\Support\MatchResultHelper::for($m, $teamName);
+                                                $res = \App\Support\MatchResultHelper::for($m, $sourceTeamName);
                                             @endphp
                                             <div
                                                 class="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black text-white shadow-sm {{ $res['bgColor'] }}"
@@ -314,10 +322,12 @@
                                 <div class="space-y-2">
                                     @foreach($sideMatches as $m)
                                         @php
-                                            $res = \App\Support\MatchResultHelper::for($m, $teamName);
+                                            $res = \App\Support\MatchResultHelper::for($m, $sourceTeamName);
+                                            $sourceIsHome = \App\Support\MatchResultHelper::homeSideFor($m, $sourceTeamName);
+                                            $opponent = $sourceIsHome === null ? ($m['team_home'] . ' vs ' . $m['team_away']) : ($sourceIsHome ? $m['team_away'] : $m['team_home']);
                                         @endphp
                                         <div class="flex items-center justify-between text-[11px] py-1 border-b border-slate-50 last:border-0">
-                                            <span class="text-slate-500 font-bold truncate pr-4 max-w-[140px]">{{ str_contains(mb_strtolower($m['team_home']), mb_strtolower($teamName)) ? $m['team_away'] : $m['team_home'] }}</span>
+                                            <span class="text-slate-500 font-bold truncate pr-4 max-w-[140px]">{{ $opponent }}</span>
                                             <span class="font-black tabular-nums {{ $res['textColor'] }}">
                                                 {{ $m['score_home'] }}:{{ $m['score_away'] }}
                                             </span>

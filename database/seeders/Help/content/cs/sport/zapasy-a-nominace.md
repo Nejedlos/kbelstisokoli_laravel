@@ -41,3 +41,11 @@ Tento proces probíhá ve dvou fázích (Pozvánka a Skutečnost):
 - **Neplatný odkaz na veřejný detail**: Adresa `/zapasy/{id}` vyžaduje číselné ID existujícího zápasu. Neplatný odkaz (např. `/zapasy/null`) nebo smazaný zápas vrací stránku „Nenalezeno“ (HTTP 404).
 - **Změna času**: Pokud se čas zápasu změní v ČBF, systém jej při příští synchronizaci sám aktualizuje.
 - **Mismatch v docházce**: Pokud hráč potvrdil účast, ale nepřišel, systém v tabulce zápasů zobrazí **červený badge s počtem rozporů** (Mismatches). To je signál pro trenéra, aby docházku prověřil.
+
+### Předzápasová predikce
+
+Procento vždy vyjadřuje šanci našeho týmu, také při zápase venku. V programu, detailu, modalu a na veřejném webu se používá stejná uložená hodnota. Model kombinuje Elo, posledních pět dokončených zápasů, soupisku, externí srovnání a vzájemnou historii. Chybějící statistika není nula ani prohra; nízká důvěra znamená málo podkladů. Výstup je konzervativní odhad v rozsahu 10–90 %, nikoli záruka výsledku.
+
+U venkovních zápasů modal správně přiřazuje hráče, srovnání a bilanci našemu týmu a soupeři. Při nejasném názvu se výsledek z historie neodhaduje. Po odehrání se původní předpověď zachová, import statistik ji nepřepisuje pozdějšími údaji. Chybějící předzápasový snímek se zpětně nevymýšlí.
+
+Oprava či odstranění výsledku přepočítá Elo celé sezóny a zařadí aktualizaci budoucích předpovědí do fronty. Po ručním přepočtu v systémové konzoli proto vyčkejte na dokončení fronty a obnovte stránku; zpráva o naplánování úloh ještě nepotvrzuje nový výsledek. Změna týmu, soupeře, sezóny nebo strany utkání odstraní původní předpověď a u plánovaného zápasu vyvolá nový výpočet.

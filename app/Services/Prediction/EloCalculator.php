@@ -17,9 +17,10 @@ class EloCalculator
     /**
      * Calculate expected win probability.
      */
-    public function calculateExpected(float $eloTeam, float $eloOpponent, bool $isHome = false): float
+    public function calculateExpected(float $eloTeam, float $eloOpponent, ?bool $isHome = null): float
     {
-        $ratingDiff = ($eloOpponent - ($eloTeam + ($isHome ? self::HOME_ADVANTAGE : 0)));
+        $homeAdvantage = $isHome === null ? 0 : ($isHome ? self::HOME_ADVANTAGE : -self::HOME_ADVANTAGE);
+        $ratingDiff = $eloOpponent - ($eloTeam + $homeAdvantage);
 
         return 1 / (1 + 10 ** ($ratingDiff / 800));
     }
@@ -27,7 +28,7 @@ class EloCalculator
     /**
      * Calculate new Elo ratings after a match.
      */
-    public function calculateNewRatings(float $eloTeam, float $eloOpponent, float $outcome, int $scoreDiff, bool $isHome = false, int $gamesPlayed = 0): array
+    public function calculateNewRatings(float $eloTeam, float $eloOpponent, float $outcome, int $scoreDiff, ?bool $isHome = null, int $gamesPlayed = 0): array
     {
         $expected = $this->calculateExpected($eloTeam, $eloOpponent, $isHome);
         $k = $this->getKFactor($gamesPlayed);

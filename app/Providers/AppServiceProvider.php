@@ -281,6 +281,10 @@ class AppServiceProvider extends ServiceProvider
                 ->outsidePanelsRenderHook(PanelsRenderHook::BODY_START);
         });
 
+        // Domain calculations also run during console imports and queue jobs.
+        BasketballMatch::observe(MatchPredictionObserver::class);
+        StatisticRow::observe(MatchPredictionObserver::class);
+
         // Optimalizovaná registrace observerů - pouze pro zápisové požadavky
         if (! $this->app->runningInConsole()
             && ! request()->isMethod('GET')
@@ -327,8 +331,6 @@ class AppServiceProvider extends ServiceProvider
             }
         }
 
-        BasketballMatch::observe(MatchPredictionObserver::class);
-        StatisticRow::observe(MatchPredictionObserver::class);
     }
 
     /**
