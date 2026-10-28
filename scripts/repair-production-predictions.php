@@ -34,7 +34,6 @@ $deadline = microtime(true) + 180;
 do {
     $active = DB::connection($queueConnection)->table($queueTable)
         ->whereNotNull('reserved_at')
-        ->where('reserved_at', '>', time() - (int) config('queue.connections.database.retry_after', 300))
         ->where('payload', 'like', '%ComputeMatchPredictionJob%')->count();
     if ($active === 0) {
         break;
