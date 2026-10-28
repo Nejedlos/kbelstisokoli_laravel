@@ -24,6 +24,8 @@ return [
     'empty_cta_contact' => 'Have a question? Contact us',
     'view_detail' => 'Match details',
     'date_time' => 'Date and time',
+    'date_not_specified' => 'Date to be confirmed',
+    'time_not_specified' => 'Time to be confirmed',
     'location' => 'Location',
     'opponent' => 'Opponent',
     'score' => 'Score',

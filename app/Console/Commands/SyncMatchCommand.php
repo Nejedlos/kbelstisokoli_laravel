@@ -68,7 +68,10 @@ class SyncMatchCommand extends Command
                     || ($m->metadata['season_external_match_id'] ?? null) == $matchExternalId;
             });
 
-        $this->info('Synchronizuji zápas: '.($match ? "{$match->scheduled_at->toDateString()} vs {$match->opponent?->name}" : $matchExternalId));
+        $matchLabel = $match
+            ? (($match->scheduled_at?->toDateString() ?? __('matches.date_not_specified')).' vs '.$match->opponent?->name)
+            : $matchExternalId;
+        $this->info('Synchronizuji zápas: '.$matchLabel);
 
         $options = [
             'force' => $this->option('force'),
@@ -104,7 +107,7 @@ class SyncMatchCommand extends Command
                 $matchExternalId
             );
             $run->update(['total_count' => 1]);
-            $run->updateProgress(0, 1, 'Zápas: '.($match ? "{$match->scheduled_at->toDateString()} vs {$match->opponent?->name}" : $matchExternalId));
+            $run->updateProgress(0, 1, 'Zápas: '.$matchLabel);
 
             // Podpora pro signály (zrušení přes Ctrl+C)
             if (function_exists('pcntl_signal')) {
@@ -141,7 +144,7 @@ class SyncMatchCommand extends Command
 
                 return self::FAILURE;
             }
-            SyncMatchDetailJob::dispatch($match->id, $team->id, $season->id, $matchExternalId, $options);
+            SyncMatchDetailJob::dispatch($match->id, $options);
             $this->info('Úloha byla zařazena.');
         }
 
