@@ -80,3 +80,9 @@ Obsahuje:
 
 ## 6. Budoucí rozvoj
 Model je připraven na přidání dalších faktorů (vážení zranění, dojezdová vzdálenost, čas zápasu) úpravou `PredictionService` a přidáním nového kalkulátoru.
+
+## 7. Jednorázová produkční obnova stávajících predikcí
+
+Workflow **Repair production match predictions** se spouští ručně z `main` po úspěšném nasazení stejného commitu. Sdílí zámek deploymentu a používá produkční SSH secrets s povinným ověřením hostitele. Skript `scripts/repair-production-predictions.php` odmítne jiné prostředí nebo nesoulad `.release-sha`.
+
+Před zápisem uloží soukromou zálohu původních `team_elo_ratings` a `match_predictions` do `storage/app/private/prediction-repairs/`. Poté v jedné transakci přehraje Elo a synchronně přepočítá všechny plánované zápasy s jednoznačným týmem a soupeřem bez skutečného výsledku. Během této obnovy potlačí pouze duplicitní joby predikcí. Ověří verzi v3, konečnost a rozsah pravděpodobností, jejich součet 1 a nezměněné historické snímky; nesoulad vrací celou databázovou změnu zpět. Výstup obsahuje počty a příklady procent před/po. Workflow předem požádá trvalé workery o restart.
