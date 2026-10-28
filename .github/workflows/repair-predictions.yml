@@ -58,6 +58,7 @@ jobs:
           php8.4 artisan down --retry=60 --refresh=15 --no-interaction
           php8.4 artisan queue:restart --no-interaction
           php8.4 scripts/repair-production-predictions.php "$expected_sha"
+          php8.4 artisan page-cache:clear --no-interaction
           REMOTE
       - name: Remove temporary SSH material
         if: always()
