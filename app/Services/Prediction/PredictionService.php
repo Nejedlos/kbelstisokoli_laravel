@@ -7,7 +7,6 @@ use App\Models\BasketballMatch;
 use App\Models\MatchPrediction;
 use App\Models\StatisticRow;
 use App\Models\TeamEloRating;
-use App\Support\MatchResultHelper;
 
 class PredictionService
 {
@@ -82,7 +81,13 @@ class PredictionService
 
         // 2. Form Prob
         $formResult = $this->formCalculator->calculateFormDelta($match);
-        $formDelta = $formResult['delta'];
+        $teamFormSource = $formResult['count'] > 0 ? 'internal' : 'none';
+        if ($formResult['count'] === 0) {
+            $formResult = $this->formCalculator->calculateSourceFormDelta($match, 'team');
+            $teamFormSource = $formResult['count'] > 0 ? 'external_preview' : 'none';
+        }
+        $opponentFormResult = $this->formCalculator->calculateSourceFormDelta($match, 'opponent');
+        $formDelta = max(-60, min(60, $formResult['delta'] - $opponentFormResult['delta']));
         $formProb = $this->eloCalculator->calculateExpected($teamElo + $formDelta, $oppElo, $match->is_home);
 
         // 3. Roster Prob
@@ -158,20 +163,21 @@ class PredictionService
 
         // Confidence
         $confidence = 'low';
-        $teamMatchesCount = BasketballMatch::where('team_id', $match->team_id)
+        $teamMatchesCount = BasketballMatch::forHistoricalPredictionTeam($match->team_id)
             ->where('season_id', $match->season_id)
             ->whereIn('status', ['finished', 'played', 'completed'])
             ->when($match->scheduled_at, fn ($query) => $query->where('scheduled_at', '<', $match->scheduled_at))
             ->whereNotNull('score_home')->whereNotNull('score_away')
             ->whereRaw('(score_home + score_away) > 0')->count();
-        if ($teamMatchesCount >= 10 && ($rosterResult['opponent']['count'] > 0 || ! empty($previewResult['factors']))) {
+        $teamMatchesCount = max($teamMatchesCount, $formResult['count']);
+        if ($teamMatchesCount >= 10 && ($rosterResult['opponent']['count'] > 0 || ! empty($previewResult['factors']) || $opponentFormResult['count'] > 0)) {
             $confidence = 'high';
-        } elseif ($teamMatchesCount >= 5 || ! empty($previewResult['factors'])) {
+        } elseif ($teamMatchesCount >= 5 || ! empty($previewResult['factors']) || $opponentFormResult['count'] > 0) {
             $confidence = 'medium';
         }
 
         // Explanation
-        $explanation = $this->generateExplanation($match, $eloProb, $formResult, $rosterResult, $previewResult, $mutualResult);
+        $explanation = $this->generateExplanation($match, $formResult, $opponentFormResult, $rosterResult, $previewResult, $mutualResult);
 
         return MatchPrediction::updateOrCreate(
             ['basketball_match_id' => $match->id],
@@ -179,7 +185,7 @@ class PredictionService
                 'season_id' => $match->season_id,
                 'team_id' => $match->team_id,
                 'computed_at' => now(),
-                'model_version' => 'elo+form+roster+preview+h2h:v3',
+                'model_version' => 'elo+form+roster+preview+h2h:v4',
                 'probability_win' => $finalProb,
                 'probability_loss' => 1 - $finalProb,
                 'confidence' => $confidence,
@@ -188,6 +194,9 @@ class PredictionService
                     'elo_opp' => $oppElo,
                     'elo_prob' => $eloProb,
                     'form_team' => $formResult,
+                    'form_team_source' => $teamFormSource,
+                    'form_opp' => $opponentFormResult,
+                    'form_opp_source' => $opponentFormResult['count'] > 0 ? 'external_preview' : 'none',
                     'form_delta' => $formDelta,
                     'roster_team' => $rosterResult['team'],
                     'roster_opp' => $rosterResult['opponent'],
@@ -265,7 +274,7 @@ class PredictionService
         return true;
     }
 
-    private function generateExplanation(BasketballMatch $match, float $eloProb, array $formResult, array $rosterResult, array $previewResult, array $mutualResult): array
+    private function generateExplanation(BasketballMatch $match, array $formResult, array $opponentFormResult, array $rosterResult, array $previewResult, array $mutualResult): array
     {
         $points = [];
 
@@ -290,31 +299,17 @@ class PredictionService
         }
 
         // 3. Forma týmu (z interních dat)
-        if ($formResult['count'] >= 3) {
+        if ($formResult['count'] > 0) {
             $winText = "{$formResult['wins']}–".($formResult['count'] - $formResult['wins']);
             $diffPrefix = $formResult['avg_diff'] > 0 ? '+' : '';
             $points[] = "Naše forma: posledních {$formResult['count']} zápasů {$winText}, průměrný rozdíl skóre {$diffPrefix}".round($formResult['avg_diff'], 1).'.';
         }
 
-        // 4. Forma soupeře (pokud je v preview_data)
-        $lastMatches = $match->metadata['last_matches'] ?? [];
-        $opponentSide = $match->is_home ? 'away' : 'home';
-        if (! empty($lastMatches[$opponentSide])) {
-            $awayMatches = array_slice($lastMatches[$opponentSide], 0, 5);
-            $oppWins = 0;
-            $oppCount = 0;
-            $oppName = $match->official_opponent_name;
-            foreach ($awayMatches as $m) {
-                $result = MatchResultHelper::for($m, $oppName);
-                if ($result['ourScore'] === null) {
-                    continue;
-                }
-                $oppCount++;
-                $oppWins += (int) $result['isWin'];
-            }
-            if ($oppCount >= 3) {
-                $points[] = "Forma soupeře: z posledních {$oppCount} zápasů vyhráli {$oppWins}x.";
-            }
+        // 4. Forma soupeře ze stejné ověřené historie, kterou používá výpočet.
+        if ($opponentFormResult['count'] > 0) {
+            $oppCount = $opponentFormResult['count'];
+            $oppWins = $opponentFormResult['wins'];
+            $points[] = "Forma soupeře: z posledních {$oppCount} zápasů vyhráli {$oppWins}x.";
         }
 
         // 5. Soupiska
@@ -330,7 +325,7 @@ class PredictionService
         }
 
         // 7. Varování
-        if ($rosterResult['opponent']['count'] === 0 && empty($previewResult['factors'])) {
+        if ($rosterResult['opponent']['count'] === 0 && empty($previewResult['factors']) && $opponentFormResult['count'] === 0) {
             $points[] = 'Pozor: o soupeři máme málo dat → predikce má nižší jistotu.';
         }
 

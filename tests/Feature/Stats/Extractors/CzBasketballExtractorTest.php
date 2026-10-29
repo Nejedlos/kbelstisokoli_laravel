@@ -16,6 +16,17 @@ class CzBasketballExtractorTest extends TestCase
         parent::tearDown();
     }
 
+    public function test_match_header_team_links_exclude_ranking_badges(): void
+    {
+        $html = '<div class="match-header">'
+            .'<a href="/tym/7738" class="alfa"><div class="group"><div>11. místo</div> Sokol Kbely E </div></a>'
+            .'<a href="/tym/7843" class="alfa"><div class="group"><div>2. místo</div> Sokol Zlíchov B </div></a>'
+            .'</div>';
+        $header = (new MatchDetailBoxscoreExtractor)->extract($html)['data']->metadata['header'];
+        $this->assertSame('Sokol Kbely E', $header['home_team']);
+        $this->assertSame('Sokol Zlíchov B', $header['away_team']);
+    }
+
     public function test_team_roster_extractor()
     {
         $html = file_get_contents(base_path('tests/Fixtures/Stats/CzBasketball/team_page.html'));

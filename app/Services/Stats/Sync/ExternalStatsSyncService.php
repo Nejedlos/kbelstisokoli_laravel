@@ -4,6 +4,7 @@ namespace App\Services\Stats\Sync;
 
 use App\Jobs\ComputeMatchPredictionJob;
 use App\Jobs\Stats\SyncMatchDetailJob;
+use App\Jobs\Stats\SyncMatchPreviewJob;
 use App\Models\BasketballMatch;
 use App\Models\ExternalImportRun;
 use App\Models\ExternalTeamSeasonConfig;
@@ -553,6 +554,18 @@ class ExternalStatsSyncService
         }
         $limit = $options['maxMatchDetails'] ?? $options['limit'] ?? $defaultLimit;
         $recentOnly = ($options['recentOnly'] ?? false);
+
+        if ($season->is_active) {
+            BasketballMatch::where('team_id', $team->id)
+                ->where('season_id', $season->id)
+                ->whereIn('status', ['planned', 'scheduled'])
+                ->where('scheduled_at', '>', now())
+                ->whereNotNull('opponent_id')
+                ->orderBy('scheduled_at')
+                ->limit($limit)
+                ->get()
+                ->each(fn (BasketballMatch $match) => SyncMatchPreviewJob::dispatch($match->id, $team->id, $force));
+        }
 
         ConsoleService::log("    - Parametry detailů: limit=$limit, force=".($force ? 'true' : 'false').', recentOnly='.($recentOnly ? 'true' : 'false').', excesive='.($excesive ? 'true' : 'false'), 'debug');
 

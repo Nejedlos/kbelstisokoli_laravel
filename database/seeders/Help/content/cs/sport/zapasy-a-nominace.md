@@ -45,7 +45,7 @@ Tento proces probíhá ve dvou fázích (Pozvánka a Skutečnost):
 
 ### Předzápasová predikce
 
-Procento vždy vyjadřuje šanci našeho týmu, také při zápase venku. V programu, detailu, modalu a na veřejném webu se používá stejná uložená hodnota. Model kombinuje Elo, posledních pět dokončených zápasů, soupisku, externí srovnání a vzájemnou historii. Chybějící statistika není nula ani prohra; nízká důvěra znamená málo podkladů. Výstup je konzervativní odhad v rozsahu 10–90 %, nikoli záruka výsledku.
+Procento vždy vyjadřuje šanci našeho týmu, také při zápase venku. V programu, detailu, modalu a na veřejném webu se používá stejná uložená hodnota. Model kombinuje Elo, posledních pět dokončených zápasů obou týmů v dané sezóně, soupisku, externí srovnání a vzájemnou historii. Starší dokončené zápasy s jediným přiřazeným klubovým týmem se do historie započítají i bez vyplněného primárního týmu. Když naše výsledky chybí v interní evidenci, může použít ověřené výsledky z předzápasového přehledu ČBF. Výsledky soupeře proti jiným klubům přebírá ze stejného přehledu. Chybějící statistika není nula ani prohra; nízká důvěra znamená málo podkladů. Výstup je konzervativní odhad v rozsahu 10–90 %, nikoli záruka výsledku.
 
 U venkovních zápasů modal správně přiřazuje hráče, srovnání a bilanci našemu týmu a soupeři. Při nejasném názvu se výsledek z historie neodhaduje. Po odehrání se původní předpověď zachová, import statistik ji nepřepisuje pozdějšími údaji. Chybějící předzápasový snímek se zpětně nevymýšlí.
 
