@@ -46,3 +46,7 @@ Detailní audit všech proběhlých pokusů o import.
 1. **Nový tým/sezóna:** Nejdříve vytvořte Mapování týmu, poté Konfiguraci sezóny.
 2. **Pravidelná kontrola:** Jednou týdně zkontrolujte sekci *Párování hráčů* a propojte nově objevené hráče ("Ghost uživatele").
 3. **Ladění:** Pokud synchronizace hlásí chybu, podívejte se do *Historie importů* na konkrétní `error_summary`.
+
+### Místo budoucího zápasu z ČBF
+
+Samostatná synchronizace předzápasového přehledu po ověření obou týmů uloží zveřejněný název haly do `metadata.venue`. Pokud zápas nemá přiřazenou halu (`venue_id`) a jeho `location` je prázdné, doplní také toto pole pro program. Při dalších synchronizacích mění `location` jen tehdy, když stále odpovídá poslední hodnotě uložené v `metadata.preview_location`; ruční změnu ani přiřazenou halu nepřepisuje. Prázdný či zástupný údaj ze zdroje nemaže dřívější místo. Import nevytváří záznam haly ani neodhaduje adresu a souřadnice.

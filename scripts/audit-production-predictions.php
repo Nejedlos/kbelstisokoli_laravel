@@ -22,6 +22,8 @@ foreach (Team::whereIn('slug', ['muzi-e', 'muzi-c'])->get() as $team) {
         'completed_result_count' => $completed->count(),
         'completed_without_primary_team_count' => $completed->whereNull('team_id')->count(),
         'planned_count' => $planned->count(),
+        'planned_with_location_count' => $planned->filter(fn ($m) => filled($m->display_location))->count(),
+        'planned_with_source_venue_count' => $planned->filter(fn ($m) => filled($m->metadata['venue'] ?? null))->count(),
         'planned_with_team_comparison_count' => $planned->filter(fn ($m) => ! empty($m->metadata['team_comparison']))->count(),
         'planned_with_opponent_recent_results_count' => $planned->filter(fn ($m) => ! empty($m->metadata['last_matches'][$m->is_home ? 'away' : 'home']))->count(),
         'planned_with_mutual_results_count' => $planned->filter(fn ($m) => ! empty($m->metadata['mutual_matches']))->count(),

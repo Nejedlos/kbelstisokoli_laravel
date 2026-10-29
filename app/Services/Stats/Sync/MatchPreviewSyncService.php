@@ -46,8 +46,20 @@ class MatchPreviewSyncService
             foreach (['last_matches', 'team_comparison', 'mutual_matches'] as $key) {
                 $metadata[$key] = $data[$key] ?? [];
             }
+            $venue = trim(preg_replace('/\s+/u', ' ', (string) ($header['venue'] ?? '')));
+            $changes = [];
+            if ($venue !== '' && ! in_array($venue, ['-', '–', '—'], true)) {
+                $metadata['venue'] = $venue;
+                $previousPreviewLocation = $metadata['preview_location'] ?? null;
+                if ($fresh->venue_id === null && (blank($fresh->location)
+                    || ($previousPreviewLocation !== null && $fresh->location === $previousPreviewLocation))) {
+                    $changes['location'] = $venue;
+                    $metadata['preview_location'] = $venue;
+                }
+            }
             $metadata['preview_synced_at'] = now()->toIso8601String();
-            $fresh->update(['metadata' => $metadata]);
+            $changes['metadata'] = $metadata;
+            $fresh->update($changes);
             ComputeMatchPredictionJob::dispatch($fresh->id)->afterCommit();
         });
     }

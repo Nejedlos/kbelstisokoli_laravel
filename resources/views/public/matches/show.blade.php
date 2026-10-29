@@ -23,7 +23,7 @@
     @endphp
     <x-page-header
         :title="$mainTeamName . ' ' . __('matches.vs') . ' ' . $match->official_opponent_name"
-        :subtitle="($match->scheduled_at ? __('general.weekdays_short.' . $match->scheduled_at->dayOfWeekIso) . ' ' . $match->scheduled_at->format(__('general.date_time_format')) : __('matches.date_not_specified')) . ' | ' . ($match->location ?? __('matches.location_not_specified'))"
+        :subtitle="($match->scheduled_at ? __('general.weekdays_short.' . $match->scheduled_at->dayOfWeekIso) . ' ' . $match->scheduled_at->format(__('general.date_time_format')) : __('matches.date_not_specified')) . ' | ' . ($match->display_location ?? __('matches.location_not_specified'))"
         :breadcrumbs="[__('matches.breadcrumbs') => route('public.matches.index'), __('matches.view_detail') => null]"
         image="assets/img/hero/hero-match-detail.webp"
     />
@@ -184,7 +184,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                        {{ $match->location ?? __('matches.location_not_specified') }}
+                        {{ $match->display_location ?? __('matches.location_not_specified') }}
                     </div>
                     <div class="flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">

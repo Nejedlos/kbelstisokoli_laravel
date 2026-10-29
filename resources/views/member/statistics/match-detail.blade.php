@@ -78,10 +78,10 @@
                                 {{ $match->match_type ? (__('matches.type_' . strtolower($match->match_type)) !== 'matches.type_' . strtolower($match->match_type) ? __('matches.type_' . strtolower($match->match_type)) : $match->match_type) : __('matches.type_mi') }}
                             </span>
                         </div>
-                        @if($match->metadata['venue'] ?? $match->location)
+                        @if($match->display_location)
                             <div class="w-full sm:w-auto flex items-center justify-center gap-2.5 px-5 py-3 sm:py-2.5 bg-white/15 border border-white/30 rounded-2xl sm:rounded-full shadow-2xl backdrop-blur-xl hover:bg-white/25 transition-all cursor-default group/pill">
                                 <i class="fa-light fa-location-dot text-white group-hover/pill:scale-110 transition-transform"></i>
-                                <span class="text-white">{{ $match->metadata['venue'] ?? $match->location }}</span>
+                                <span class="text-white">{{ $match->display_location }}</span>
                             </div>
                         @endif
                         @if(!empty($match->metadata['external_id']))

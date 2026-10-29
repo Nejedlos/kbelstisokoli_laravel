@@ -1,4 +1,5 @@
 @php
+    $displayLocation = $type === 'match' ? $item->display_location : $item->location;
     $typeIcons = [
         'training' => [
             'basketball' => 'basketball',
@@ -82,10 +83,10 @@
                                             – {{ $item->ends_at->format('H:i') }}
                                         @endif
                                     </div>
-                                    @if($item->location)
+                                    @if($displayLocation)
                                         <div class="flex items-center gap-1.5 truncate">
                                             <i class="fa-light fa-map-pin text-primary"></i>
-                                            {{ $item->location }}
+                                            {{ $displayLocation }}
                                         </div>
                                     @endif
                                     @if($type === 'training')
