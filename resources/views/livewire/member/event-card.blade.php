@@ -77,7 +77,7 @@
              :class="selectedEvents.includes('{{ $type . ':' . $data->id }}') ? 'w-2 bg-primary' : ''"></div>
     </div>
 
-    <div class="relative {{ $compact ? 'p-4 sm:p-5 lg:p-6' : 'p-5 sm:p-6 lg:p-8' }} flex flex-col lg:flex-row items-start lg:items-center justify-between {{ $compact ? 'gap-4 lg:gap-6' : 'gap-6 lg:gap-10' }}">
+    <div class="relative {{ $compact ? 'p-4 sm:p-5 lg:p-6' : 'p-5 sm:p-6 lg:p-8' }} flex flex-col 2xl:flex-row items-start 2xl:items-center justify-between {{ $compact ? 'gap-4 lg:gap-6' : 'gap-6 lg:gap-10' }}">
         <div class="flex items-center gap-4 sm:gap-5 flex-1 w-full min-w-0">
             @if($showActions && $canChange && !($type === 'match' && $data->has_score))
                 <div class="shrink-0 z-20">
@@ -106,6 +106,12 @@
                         <i class="fa-light fa-{{ $icon }} text-primary"></i>
                         {{ $label }}
                     </span>
+                    @if($type === 'match')
+                        <span class="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-primary">
+                            <i class="fa-light fa-{{ $data->is_home === true ? 'house' : ($data->is_home === false ? 'bus' : 'circle-question') }}" aria-hidden="true"></i>
+                            {{ $data->is_home === true ? __('matches.home') : ($data->is_home === false ? __('matches.away') : __('matches.side_not_specified')) }}
+                        </span>
+                    @endif
                     <div class="flex items-center gap-1.5">
                         <span class="text-[7px] font-black uppercase tracking-widest text-slate-400/80">{{ __('member.attendance.my_status') }}:</span>
                         <span class="js-event-status-badge px-2 py-0.5 sm:px-2.5 lg:px-4 lg:py-1.5 rounded-lg text-[8px] sm:text-[9px] lg:text-[11px] font-black uppercase tracking-widest shadow-sm {{ $statusColors[$status] }} flex items-center gap-1.5">
@@ -114,9 +120,9 @@
                         </span>
                     </div>
                 </div>
-                <h4 class="text-base sm:text-lg font-black text-secondary leading-tight truncate tracking-tight">
+                <h4 class="text-base sm:text-lg font-black text-secondary leading-tight {{ $type === 'match' ? 'whitespace-normal break-words' : 'truncate' }} tracking-tight">
                     @if($type === 'match')
-                        {{ $data->team?->name }} <span class="text-primary italic mx-1">vs</span> {{ $data->opponent?->name }}
+                        <span class="text-primary italic mr-1">vs</span> {{ $data->opponent?->name ?: __('matches.opponent') }}
                     @elseif($type === 'training')
                         {{ $label }}
                     @else
@@ -133,7 +139,7 @@
             </a>
         </div>
 
-        <div class="flex items-center flex-wrap lg:flex-nowrap justify-between lg:justify-end gap-x-3 gap-y-4 sm:gap-x-6 {{ $compact ? 'lg:gap-x-4' : 'lg:gap-x-8' }} w-full lg:w-auto pt-4 lg:pt-0 border-t lg:border-t-0 border-slate-100 lg:pl-0 {{ $showActions && $canChange && !($type === 'match' && $data->has_score) ? 'pl-[calc(1.75rem+1rem)] sm:pl-[calc(1.75rem+1.25rem)]' : 'pl-0' }}">
+        <div class="flex items-center flex-wrap lg:flex-nowrap justify-between lg:justify-end gap-x-3 gap-y-4 sm:gap-x-6 {{ $compact ? 'lg:gap-x-4' : 'lg:gap-x-8' }} w-full 2xl:w-auto pt-4 2xl:pt-0 border-t 2xl:border-t-0 border-slate-100 lg:pl-0 {{ $showActions && $canChange && !($type === 'match' && $data->has_score) ? 'pl-[calc(1.75rem+1rem)] sm:pl-[calc(1.75rem+1.25rem)]' : 'pl-0' }}">
             <div class="flex items-center gap-2 sm:gap-4 {{ $compact ? 'lg:gap-3' : 'lg:gap-6' }}">
                 <!-- Attendance Stats -->
                 <div class="flex items-center gap-3 sm:gap-4 {{ $compact ? 'lg:gap-4' : 'lg:gap-6' }} bg-slate-50/50 px-3 sm:px-4 {{ $compact ? 'lg:px-4' : 'lg:px-6' }} py-2 {{ $compact ? 'lg:py-2' : 'lg:py-3' }} rounded-2xl border border-slate-100/50">

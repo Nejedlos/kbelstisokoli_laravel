@@ -58,6 +58,7 @@ return [
     'result_k' => 'FORFEIT',
     'home_upper' => 'HOME',
     'away_upper' => 'AWAY',
+    'side_not_specified' => 'Home/away to be confirmed',
     'home' => 'Home',
     'away' => 'Away',
     'is_home' => 'Home',
