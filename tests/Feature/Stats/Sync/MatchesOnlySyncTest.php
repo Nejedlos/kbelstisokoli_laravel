@@ -30,6 +30,7 @@ use App\Services\Stats\Sync\PlayerSyncService;
 use App\Services\Stats\Sync\RosterSyncService;
 use App\Services\Stats\Sync\StatisticSetService;
 use App\Services\Stats\Sync\StatisticSyncService;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
@@ -73,6 +74,32 @@ class MatchesOnlySyncTest extends TestCase
         $match->teams()->attach($this->team);
 
         return $match;
+    }
+
+    public function test_repeated_import_updates_future_fixture_and_reconciles_unchanged_source(): void
+    {
+        $this->travelTo(Carbon::parse('2026-10-01 10:00:00'));
+        $this->mock(StatFetcherInterface::class)->shouldReceive('fetch')->times(3)->andReturn('<html></html>');
+        $row = fn ($date) => new NormalizedRowDTO([
+            'external_match_id' => '550451', 'scheduled_at' => $date,
+            'home_team' => 'Sokol Kbely C', 'away_team' => 'Opponent', 'status' => 'planned',
+        ]);
+        $this->mock(MatchesListExtractor::class)->shouldReceive('extract')->times(3)->andReturn(
+            ['data' => new NormalizedTableDTO('Matches', [], [$row('2026-11-01 00:00:00')]), 'fragment_html' => 'initial'],
+            ['data' => new NormalizedTableDTO('Matches', [], [$row('2026-11-02 19:30:00')]), 'fragment_html' => 'updated'],
+            ['data' => new NormalizedTableDTO('Matches', [], [$row('2026-11-02 19:30:00')]), 'fragment_html' => 'updated'],
+        );
+        $sync = fn () => app(ExternalStatsSyncService::class)->syncTeamSeason($this->team->id, $this->season->id, ['sync_details' => false]);
+        $sync();
+        $match = BasketballMatch::sole();
+        $sync();
+        $this->assertSame('2026-11-02 19:30:00', $match->fresh()->scheduled_at->toDateTimeString());
+        $match->update(['scheduled_at' => '2026-11-01 00:00:00']);
+        $sync();
+        $this->assertDatabaseCount('matches', 1);
+        $this->assertSame($match->id, BasketballMatch::sole()->id);
+        $this->assertSame('2026-11-02 19:30:00', $match->fresh()->scheduled_at->toDateTimeString());
+        Bus::assertNotDispatched(SyncMatchDetailJob::class);
     }
 
     private function detail(array $tables): void

@@ -97,7 +97,7 @@ class MatchesListExtractor implements StatExtractorInterface
                             // Zkusíme bez času - rozdělíme podle mezer a vezmeme první 3 části (např. 6., 3., 2026)
                             $parts = array_filter(explode(' ', $cleanDateStr));
                             $dateOnly = implode(' ', array_slice($parts, 0, 3));
-                            $scheduledAt = Carbon::createFromFormat('j. n. Y', $dateOnly, 'Europe/Prague');
+                            $scheduledAt = Carbon::createFromFormat('!j. n. Y', $dateOnly, 'Europe/Prague');
                         } catch (\Exception $e2) {
                             $warnings[] = "Could not parse date: $dateStr";
                         }
