@@ -2,13 +2,18 @@ name: Repair production match predictions
 
 on:
   workflow_dispatch:
+    inputs:
+      audit_only:
+        type: boolean
+        default: false
+        description: Read-only sports prediction input audit
 
 permissions:
   contents: read
 
 jobs:
   repair:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || inputs.audit_only
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: production
@@ -16,6 +21,7 @@ jobs:
       group: production-deploy
       cancel-in-progress: false
     steps:
+      - uses: actions/checkout@v4
       - name: Configure production SSH
         env:
           PRODUCTION_SSH_PRIVATE_KEY: ${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}
@@ -25,7 +31,18 @@ jobs:
           printf '%s\n' "$PRODUCTION_SSH_PRIVATE_KEY" > "$RUNNER_TEMP/repair-ssh/key"
           printf '%s\n' "$PRODUCTION_SSH_KNOWN_HOSTS" > "$RUNNER_TEMP/repair-ssh/known_hosts"
           chmod 600 "$RUNNER_TEMP/repair-ssh/"*
+      - name: Audit prediction inputs
+        if: inputs.audit_only
+        env:
+          PRODUCTION_SSH_HOST: ${{ secrets.PRODUCTION_SSH_HOST }}
+          PRODUCTION_SSH_PORT: ${{ secrets.PRODUCTION_SSH_PORT }}
+          PRODUCTION_SSH_USER: ${{ secrets.PRODUCTION_SSH_USER }}
+          PRODUCTION_PATH: ${{ secrets.PRODUCTION_PATH }}
+        run: |
+          remote_command=$(printf 'cd %q/deploy/current && php8.4' "$PRODUCTION_PATH")
+          ssh -4 -p "$PRODUCTION_SSH_PORT" -i "$RUNNER_TEMP/repair-ssh/key" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$RUNNER_TEMP/repair-ssh/known_hosts" -o ConnectTimeout=20 "$PRODUCTION_SSH_USER@$PRODUCTION_SSH_HOST" "$remote_command" < scripts/audit-production-predictions.php
       - name: Back up, rebuild and verify predictions on the deployed commit
+        if: ${{ !inputs.audit_only }}
         env:
           PRODUCTION_SSH_HOST: ${{ secrets.PRODUCTION_SSH_HOST }}
           PRODUCTION_SSH_PORT: ${{ secrets.PRODUCTION_SSH_PORT }}
