@@ -86,11 +86,14 @@ class MatchPreviewSyncService
     {
         $normalize = fn ($name) => mb_strtolower(trim(preg_replace('/\s+/u', ' ', (string) $name)));
         $team = $normalize($config->team_name_in_source);
-        $opponent = $normalize($match->official_opponent_name);
+        // A legacy opponent label may omit the generic Sokol club prefix.
+        // Preserve every remaining token, including team letter and age category.
+        $opponentName = fn ($name) => preg_replace('/^sokol\s+/u', '', $normalize($name));
+        $opponent = $opponentName($match->official_opponent_name);
         $home = $normalize($header['home_team'] ?? '');
         $away = $normalize($header['away_team'] ?? '');
 
         return $team !== '' && $opponent !== '' && $team !== $opponent
-            && ($match->is_home ? ($home === $team && $away === $opponent) : ($away === $team && $home === $opponent));
+            && ($match->is_home ? ($home === $team && $opponentName($away) === $opponent) : ($away === $team && $opponentName($home) === $opponent));
     }
 }
