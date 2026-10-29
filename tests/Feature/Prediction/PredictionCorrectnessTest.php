@@ -96,18 +96,86 @@ class PredictionCorrectnessTest extends TestCase
 
     public function test_away_match_opponent_form_uses_the_home_source_column(): void
     {
+        $pastDate = '20. 10. 2026';
         $theirGames = array_fill(0, 3, [
-            'team_home' => 'Opponent', 'team_away' => 'Other', 'score_home' => 80, 'score_away' => 60,
+            'date' => $pastDate, 'team_home' => 'Opponent', 'team_away' => 'Other', 'score_home' => 80, 'score_away' => 60,
         ]);
         $ourGames = array_fill(0, 3, [
-            'team_home' => 'Other', 'team_away' => 'Sokol Kbely C', 'score_home' => 80, 'score_away' => 60,
+            'date' => $pastDate, 'team_home' => 'Other', 'team_away' => 'Sokol Kbely C', 'score_home' => 80, 'score_away' => 60,
         ]);
-        $match = $this->match(['is_home' => false, 'metadata' => [
+        $match = $this->match(['scheduled_at' => '2026-10-29 12:00:00', 'is_home' => false, 'metadata' => [
             'official_team_name' => 'Sokol Kbely C',
             'last_matches' => ['home' => $theirGames, 'away' => $ourGames],
         ]]);
         $prediction = app(PredictionService::class)->predict($match);
         $this->assertContains('Forma soupeře: z posledních 3 zápasů vyhráli 3x.', $prediction->explanation_points);
+        $this->assertSame(3, $prediction->factors['form_opp']['count']);
+        $this->assertLessThan(0, $prediction->factors['form_delta']);
+    }
+
+    public function test_source_results_fill_missing_own_form_and_opponent_form_changes_probability(): void
+    {
+        $pastDate = '20. 10. 2026';
+        $ours = array_fill(0, 3, [
+            'date' => $pastDate, 'team_home' => 'Sokol Kbely C', 'team_away' => 'Other', 'score_home' => 80, 'score_away' => 60,
+        ]);
+        $theirs = array_fill(0, 3, [
+            'date' => $pastDate, 'team_home' => 'Opponent', 'team_away' => 'Other', 'score_home' => 40, 'score_away' => 60,
+        ]);
+        $match = $this->match(['scheduled_at' => '2026-10-29 12:00:00', 'metadata' => [
+            'official_team_name' => 'Sokol Kbely C',
+            'last_matches' => ['home' => $ours, 'away' => $theirs],
+        ]]);
+
+        $prediction = app(PredictionService::class)->predict($match);
+        $this->assertSame(3, $prediction->factors['form_team']['count']);
+        $this->assertSame('external_preview', $prediction->factors['form_team_source']);
+        $this->assertSame(3, $prediction->factors['form_opp']['count']);
+        $this->assertSame('external_preview', $prediction->factors['form_opp_source']);
+        $this->assertSame(60, $prediction->factors['form_delta']);
+
+        $match->metadata = ['official_team_name' => 'Sokol Kbely C'];
+        $neutral = app(PredictionService::class)->predict($match);
+        $this->assertGreaterThan($neutral->probability_win, $prediction->probability_win);
+    }
+
+    public function test_source_form_excludes_ambiguous_missing_duplicate_and_later_results(): void
+    {
+        $pastDate = '20. 10. 2026';
+        $futureDate = '30. 10. 2026';
+        $match = $this->match(['scheduled_at' => '2026-10-29 12:00:00', 'metadata' => [
+            'official_team_name' => 'Sokol Kbely C',
+            'last_matches' => ['away' => [
+                ['date' => $pastDate, 'team_home' => 'Opponent', 'team_away' => 'Other', 'score_home' => 70, 'score_away' => 60, 'external_id' => '1'],
+                ['date' => $pastDate, 'team_home' => 'Opponent', 'team_away' => 'Other', 'score_home' => 70, 'score_away' => 60, 'external_id' => '1'],
+                ['date' => $futureDate, 'team_home' => 'Opponent', 'team_away' => 'Other', 'score_home' => 100, 'score_away' => 10],
+                ['date' => '20. 08. 2026', 'team_home' => 'Opponent', 'team_away' => 'Other', 'score_home' => 100, 'score_away' => 10],
+                ['date' => $pastDate, 'team_home' => 'Unknown', 'team_away' => 'Other', 'score_home' => 100, 'score_away' => 10],
+                ['date' => $pastDate, 'team_home' => 'Opponent', 'team_away' => 'Other', 'score_home' => '-', 'score_away' => '-'],
+                ['date' => $pastDate, 'team_home' => 'Opponent', 'team_away' => 'Other', 'score_home' => 0, 'score_away' => 0],
+            ]],
+        ]]);
+
+        $form = app(FormCalculator::class)->calculateSourceFormDelta($match, 'opponent');
+        $this->assertSame(1, $form['count']);
+        $this->assertSame(1, $form['wins']);
+        $this->assertEqualsWithDelta(10, $form['avg_diff'], 0.00001);
+    }
+
+    public function test_source_form_selects_newest_results_within_match_season(): void
+    {
+        $match = $this->match(['scheduled_at' => '2026-10-29 12:00:00', 'metadata' => [
+            'last_matches' => ['away' => [
+                ['date' => '01. 10. 2026', 'team_home' => 'Opponent', 'team_away' => 'Other', 'score_home' => 90, 'score_away' => 30],
+                ['date' => '20. 10. 2026', 'team_home' => 'Opponent', 'team_away' => 'Other', 'score_home' => 40, 'score_away' => 70],
+                ['date' => '15. 10. 2026', 'team_home' => 'Opponent', 'team_away' => 'Other', 'score_home' => 30, 'score_away' => 60],
+            ]],
+        ]]);
+
+        $form = app(FormCalculator::class)->calculateSourceFormDelta($match, 'opponent', 2);
+        $this->assertSame(2, $form['count']);
+        $this->assertSame(0, $form['wins']);
+        $this->assertEqualsWithDelta(-30, $form['avg_diff'], 0.00001);
     }
 
     public function test_score_corrections_rebuild_elo_through_the_console_observer(): void
@@ -145,5 +213,29 @@ class PredictionCorrectnessTest extends TestCase
             'score_away' => 0,
         ]));
         $this->assertSame(0, app(FormCalculator::class)->calculateFormDelta($match)['count']);
+    }
+
+    public function test_form_uses_only_unambiguous_pivot_historical_results(): void
+    {
+        $match = $this->match();
+        $single = BasketballMatch::withoutEvents(fn () => BasketballMatch::create([
+            'team_id' => null, 'opponent_id' => $match->opponent_id,
+            'season_id' => $match->season_id, 'scheduled_at' => now()->subDays(2),
+            'is_home' => true, 'status' => 'finished', 'score_home' => 70, 'score_away' => 50,
+        ]));
+        $single->teams()->attach($match->team_id);
+        $ambiguous = BasketballMatch::withoutEvents(fn () => BasketballMatch::create([
+            'team_id' => null, 'opponent_id' => $match->opponent_id,
+            'season_id' => $match->season_id, 'scheduled_at' => now()->subDay(),
+            'is_home' => true, 'status' => 'finished', 'score_home' => 10, 'score_away' => 90,
+        ]));
+        $ambiguous->teams()->attach([$match->team_id, Team::factory()->create()->id]);
+
+        $form = app(FormCalculator::class)->calculateFormDelta($match);
+        $this->assertSame(1, $form['count']);
+        $this->assertSame(1, $form['wins']);
+        $prediction = app(PredictionService::class)->predict($match);
+        $this->assertSame(1, $prediction->factors['form_team']['count']);
+        $this->assertSame('internal', $prediction->factors['form_team_source']);
     }
 }

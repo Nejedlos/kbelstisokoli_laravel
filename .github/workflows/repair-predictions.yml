@@ -57,7 +57,10 @@ jobs:
           maintenance_started=true
           php8.4 artisan down --retry=60 --refresh=15 --no-interaction
           php8.4 artisan queue:restart --no-interaction
-          php8.4 scripts/repair-production-predictions.php "$expected_sha"
+          umask 077
+          mkdir -p storage/app/private/prediction-repairs
+          php8.4 scripts/repair-production-predictions.php "$expected_sha" > storage/app/private/prediction-repairs/last-run-summary.log
+          echo "Prediction repair completed; diagnostic counts remain in private server storage."
           php8.4 artisan page-cache:clear --no-interaction
           REMOTE
       - name: Remove temporary SSH material

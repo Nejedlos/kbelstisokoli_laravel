@@ -180,6 +180,28 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         ];
     }
 
+    /** Extract the name without the ranking badge inside the current ČBF team link. */
+    protected function extractTeamName(Crawler $node): string
+    {
+        $link = ($node->getNode(0)->nodeName === 'a' && str_contains($node->attr('href') ?? '', '/tym/')) ? $node : $node->filter('a[href*="/tym/"]')->first();
+        if ($link->count() > 0) {
+            $group = $link->filter('.group')->first();
+            if ($group->count() > 0) {
+                $name = '';
+                foreach ($group->getNode(0)->childNodes as $child) {
+                    if ($child instanceof \DOMText) {
+                        $name .= ' '.$child->textContent;
+                    }
+                }
+                if (trim($name) !== '') {
+                    return trim(preg_replace('/\s+/u', ' ', $name));
+                }
+            }
+        }
+
+        return trim($node->text());
+    }
+
     protected function extractHeader(Crawler $crawler): array
     {
         $header = [];
@@ -201,8 +223,8 @@ class MatchDetailBoxscoreExtractor implements StatExtractorInterface
         });
 
         if ($teamNodes->count() >= 2) {
-            $header['home_team'] = trim($teamNodes->eq(0)->text());
-            $header['away_team'] = trim($teamNodes->eq(1)->text());
+            $header['home_team'] = $this->extractTeamName($teamNodes->eq(0));
+            $header['away_team'] = $this->extractTeamName($teamNodes->eq(1));
         } else {
             // Původní fallback logika
             $homeNode = $searchIn->filter('.alfa, .score-home-team, .team-home h1, .team-home h2, h4.text-center')->first();

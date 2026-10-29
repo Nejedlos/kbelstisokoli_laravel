@@ -7,6 +7,7 @@ use App\Models\Season;
 use App\Models\TeamEloRating;
 use App\Services\Prediction\EloService;
 use App\Services\Prediction\PredictionService;
+use App\Services\Stats\Sync\MatchPreviewSyncService;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
@@ -56,6 +57,19 @@ if (! $lock || ! flock($lock, LOCK_EX | LOCK_NB)) {
 
 // This repair computes predictions synchronously after the Elo replay.
 Bus::fake([ComputeMatchPredictionJob::class]);
+// Fetch only verified upcoming preview inputs; never import rosters or boxscores.
+$previewCandidates = BasketballMatch::whereHas('season', fn ($query) => $query->where('is_active', true))
+    ->whereIn('status', ['planned', 'scheduled'])->where('scheduled_at', '>', now())
+    ->whereNotNull('team_id')->whereNotNull('opponent_id')->orderBy('scheduled_at')->get();
+$previewsRefreshed = 0;
+foreach ($previewCandidates as $candidate) {
+    $before = $candidate->metadata['preview_synced_at'] ?? null;
+    app(MatchPreviewSyncService::class)->sync($candidate->id, $candidate->team_id, true);
+    $after = $candidate->fresh()->metadata['preview_synced_at'] ?? null;
+    $previewsRefreshed += (int) ($after !== null && $after !== $before);
+    usleep(200000);
+}
+echo json_encode(['preview_candidates' => $previewCandidates->count(), 'previews_refreshed' => $previewsRefreshed], JSON_THROW_ON_ERROR).PHP_EOL;
 $summary = DB::transaction(function () use ($directory, $expectedSha): array {
     // Lock before the first snapshot read so a concurrent import cannot finish a
     // selected fixture or publish a newer season rating during this repair.
@@ -95,11 +109,10 @@ $summary = DB::transaction(function () use ($directory, $expectedSha): array {
             $query->whereNull('score_home')->orWhereNull('score_away')->orWhereRaw('(score_home + score_away) = 0');
         })->orderBy('id')->lockForUpdate()->get();
     $changed = 0;
-    $examples = [];
     foreach ($matches as $match) {
         $previous = $beforePredictions->firstWhere('basketball_match_id', $match->id);
         $prediction = app(PredictionService::class)->predict($match);
-        if (! $prediction || $prediction->model_version !== 'elo+form+roster+preview+h2h:v3'
+        if (! $prediction || $prediction->model_version !== 'elo+form+roster+preview+h2h:v4'
             || ! is_finite($prediction->probability_win) || ! is_finite($prediction->probability_loss)
             || $prediction->probability_win < 0.1 || $prediction->probability_win > 0.9
             || abs($prediction->probability_win + $prediction->probability_loss - 1) > 0.000001) {
@@ -108,9 +121,7 @@ $summary = DB::transaction(function () use ($directory, $expectedSha): array {
         if (! $previous || abs($previous->probability_win - $prediction->probability_win) > 0.000001) {
             $changed++;
         }
-        if (count($examples) < 12) {
-            $examples[] = ['match_id' => $match->id, 'before_pct' => $previous ? round($previous->probability_win * 100, 1) : null, 'after_pct' => round($prediction->probability_win * 100, 1)];
-        }
+
     }
 
     $historicalAfter = MatchPrediction::whereIn('basketball_match_id', $historicalIds)
@@ -130,7 +141,6 @@ $summary = DB::transaction(function () use ($directory, $expectedSha): array {
         'planned_predictions_recomputed' => $matches->count(),
         'probabilities_changed' => $changed,
         'historical_snapshots_preserved' => count($historicalAfter),
-        'examples' => $examples,
     ];
 }, 3);
 echo json_encode($summary, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT).PHP_EOL;

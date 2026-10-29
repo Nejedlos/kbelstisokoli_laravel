@@ -27,7 +27,7 @@ class RecomputeEloRatings extends Command
         }
 
         if ($teamId) {
-            $matches->where('team_id', $teamId);
+            $matches->forHistoricalPredictionTeam((int) $teamId);
             $ratings->where('team_key', TeamEloRating::getInternalTeamKey((int) $teamId));
             $this->info('Team filter selects seasons; each selected season is rebuilt in full to preserve shared opponent histories.');
         }

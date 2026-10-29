@@ -21,7 +21,9 @@ Dlouhodobá síla týmu.
 ### B) Aktuální forma (15 % váha)
 Krátkodobá výkonnost v posledních 5 zápasech.
 - `form_delta = clamp((win_rate * 5 - 2.5) * 20 + (avg_diff * 2), -60, +60)`
-- Zohledňuje počet výher a průměrný bodový rozdíl.
+- Zohledňuje počet výher a průměrný bodový rozdíl obou stran. Forma soupeře se odečítá od formy našeho týmu; společná úprava je omezená na ±60 Elo.
+- Pro náš tým mají přednost dokončené zápasy uložené v systému, včetně historických záznamů bez `team_id`, které mají právě jeden tým ve vazební tabulce. Když chybí, lze použít poslední výsledky ze zdrojového předzápasového přehledu. Výsledky soupeře se berou z téhož přehledu, protože jeho utkání proti jiným klubům v interní evidenci obvykle nejsou.
+- Zdrojový výsledek se použije jen při jednoznačném názvu týmu, číselném skóre a datu v dané sezóně před predikovaným zápasem. Výsledky se řadí od nejnovějšího; neznámé výsledky, zástupné 0:0 a duplicitní externí ID se přeskočí.
 
 ### C) Síla soupisky (15 % váha)
 Aktuální přínos hráčů na základě boxscore.
@@ -38,7 +40,7 @@ Bilance a rozdíl skóre z dostupné historie. Strana našeho týmu se určuje p
 Pravděpodobnosti jsou převedeny na logity, smíchány podle vah a převedeny zpět na výsledné procento pomocí `invLogit` funkce. Výsledek se konzervativně mapuje do rozsahu 10–90 %. Chybějící srovnání a historie mají nulovou váhu, zbývající váhy se normalizují. Nízká důvěra značí nedostatek dat, nikoli automaticky nízkou šanci na výhru.
 
 ## 3. Confidence Score (Úroveň důvěry)
-- **High:** Máme odehráno >= 10 zápasů v sezóně a známe data soupeře.
+- **High:** Máme odehráno >= 10 zápasů v sezóně a známe data soupeře (soupisku, srovnání nebo výsledky v předzápasovém přehledu).
 - **Medium:** Máme odehráno >= 5 zápasů.
 - **Low:** Méně než 5 zápasů v sezóně nebo chybějící data o soupeři.
 
@@ -47,15 +49,17 @@ Pravděpodobnosti jsou převedeny na logity, smíchány podle vah a převedeny z
 ### Databázové tabulky
 - `team_elo_ratings`: Ukládá aktuální Elo hodnocení týmů v rámci sezóny.
 - `match_predictions`: Ukládá vypočítané predikce, faktory a slovní vysvětlení.
-- Predikce a Elo se počítají jen pro zápasy s jednoznačně vyplněným interním
-  `team_id` a `opponent_id`. Vícetýmové zápasy bez primárního týmu se bezpečně
-  přeskočí, protože jednu predikci nelze přiřadit více týmům současně.
+- Předzápasová predikce vyžaduje jednoznačně vyplněné interní `team_id` a
+  `opponent_id`. Historické Elo navíc používá odehrané zápasy s prázdným
+  `team_id`, pokud mají právě jeden tým ve vazbě `basketball_match_team`.
+  Vícetýmové zápasy bez primárního týmu se přeskočí; uložené `team_id` se
+  zpětně nedoplňuje.
 
 ### Proces výpočtu
 1. **Trigger (web i konzole/fronta):** `MatchPredictionObserver` zachytí změnu v modelu `BasketballMatch` (např. vytvoření zápasu, zadání výsledku) nebo `StatisticRow` (nahrání boxscore).
 2. **Job:** Spustí se `ComputeMatchPredictionJob` asynchronně přes frontu.
-3. **Service:** `PredictionService` provede matematický výpočet a uloží výsledek (`elo+form+roster+preview+h2h:v3`). U odehraného zápasu zachová existující předzápasový snímek; pokud chybí, nevytváří zpětně předzápasový odhad s pozdějšími daty. Změna týmu, soupeře, sezóny či strany utkání zneplatní původní predikci.
-4. **Elo:** Po změně výsledku, stavu, termínu nebo kontextu odehraného utkání a po jeho smazání se celá sezóna přehraje od 1500 v pořadí termín/ID. Tím se oprava výsledku nezapočte dvakrát. Zahrnují se jen dokončené zápasy se skóre, nikoli plánované zástupné hodnoty 0:0; výsledek 20:0 je platný. Přepočty stejné sezóny se serializují transakcí se zámkem sezóny.
+3. **Service:** `PredictionService` provede matematický výpočet a uloží výsledek (`elo+form+roster+preview+h2h:v4`). U odehraného zápasu zachová existující předzápasový snímek; pokud chybí, nevytváří zpětně předzápasový odhad s pozdějšími daty. Změna týmu, soupeře, sezóny či strany utkání zneplatní původní predikci.
+4. **Elo:** Po změně výsledku, stavu, termínu nebo kontextu odehraného utkání a po jeho smazání se celá sezóna přehraje od 1500 v pořadí termín/ID. Tím se oprava výsledku nezapočte dvakrát. Zahrnují se jen dokončené zápasy se skóre, včetně jednoznačných historických vazeb týmu, nikoli plánované zástupné hodnoty 0:0; výsledek 20:0 je platný. Přepočty stejné sezóny se serializují transakcí se zámkem sezóny.
 5. Po dokončení přepočtu Elo se do fronty zařadí nové predikce pro plánované zápasy sezóny, včetně ostatních týmů se společnými soupeři.
 
 ### Artisan příkazy
@@ -85,8 +89,10 @@ Model je připraven na přidání dalších faktorů (vážení zranění, dojez
 
 Workflow **Repair production match predictions** se spouští ručně z `main` po úspěšném nasazení stejného commitu. Sdílí zámek deploymentu a používá produkční SSH secrets s povinným ověřením hostitele. Skript `scripts/repair-production-predictions.php` odmítne jiné prostředí nebo nesoulad `.release-sha`.
 
-Před zápisem uloží soukromou zálohu původních `team_elo_ratings` a `match_predictions` do `storage/app/private/prediction-repairs/`. Poté v jedné transakci přehraje Elo a synchronně přepočítá všechny plánované zápasy s jednoznačným týmem a soupeřem bez skutečného výsledku. Během této obnovy potlačí pouze duplicitní joby predikcí. Ověří verzi v3, konečnost a rozsah pravděpodobností, jejich součet 1 a nezměněné historické snímky; nesoulad vrací celou databázovou změnu zpět. Výstup obsahuje počty a příklady procent před/po. Workflow pod sdíleným deploymentovým zámkem krátce zapne údržbu, požádá workery o restart a vyčká nejvýše 180 sekund na dokončení aktivních predikčních úloh. Tím se zabrání přepsání nového výpočtu starým workerem. Při úspěchu i chybě obnoví web; pokud již byl v údržbě před spuštěním, opravu odmítne.
+Před zápisem uloží soukromou zálohu původních `team_elo_ratings` a `match_predictions` do `storage/app/private/prediction-repairs/`. Poté v jedné transakci přehraje Elo a synchronně přepočítá všechny plánované zápasy s jednoznačným týmem a soupeřem bez skutečného výsledku. Během této obnovy potlačí pouze duplicitní joby predikcí. Ověří verzi v4, konečnost a rozsah pravděpodobností, jejich součet 1 a nezměněné historické snímky; nesoulad vrací celou databázovou změnu zpět. Výstup obsahuje pouze souhrnné počty. Před přehráním Elo se načtou ověřené podklady budoucích zápasů aktivní sezóny; tato fáze mění jen metadata a soukromá záloha následně chrání tabulky hodnocení a předpovědí. Workflow pod sdíleným deploymentovým zámkem krátce zapne údržbu, požádá workery o restart a vyčká nejvýše 180 sekund na dokončení aktivních predikčních úloh. Tím se zabrání přepsání nového výpočtu starým workerem. Při úspěchu i chybě obnoví web; pokud již byl v údržbě před spuštěním, opravu odmítne.
 
 Veřejný detail podporuje i starší plánované zápasy s `scheduled_at = null`: SEO metadata, hlavička, datum i čas používají lokalizovaný zástupný text a uložená predikce zůstává viditelná. Regresní test pokrývá češtinu i angličtinu.
 
 Ochrana proti prázdnému termínu je rovněž ve sdílené kartě zápasu, komponentě zkratky dne a konzolové synchronizaci detailu. Týmový a administrátorský přehled používají datumový filtr, který záznamy bez termínu vylučuje. Datum se nevynucuje zpětným doplněním ani odhadem.
+
+Čtecí kontrolu úplnosti vstupů provádí `scripts/audit-production-predictions.php` přímo přes ověřené SSH. Vypisuje pouze souhrnné počty bez jednotlivých zápasů, skóre nebo hráčů. Výstup obnovy předpovědí zůstává na serveru v soukromém `storage/app/private/prediction-repairs/last-run-summary.log`; workflow zveřejní pouze informaci o úspěchu.

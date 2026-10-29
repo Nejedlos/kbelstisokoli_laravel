@@ -41,7 +41,7 @@ class EloService
             }
 
             $matches = BasketballMatch::where('season_id', $seasonId)
-                ->whereNotNull('team_id')
+                ->withHistoricalPredictionTeam()
                 ->whereNotNull('opponent_id')
                 ->whereNotNull('scheduled_at')
                 ->whereIn('status', ['finished', 'played', 'completed'])
@@ -54,6 +54,7 @@ class EloService
                 })
                 ->orderBy('scheduled_at')
                 ->orderBy('id')
+                ->with('teams:id')
                 ->get();
 
             $ratings = [];
@@ -61,7 +62,11 @@ class EloService
             $lastMatches = [];
 
             foreach ($matches as $match) {
-                $teamKey = TeamEloRating::getInternalTeamKey($match->team_id);
+                $teamId = $match->historicalPredictionTeamId();
+                if ($teamId === null) {
+                    continue;
+                }
+                $teamKey = TeamEloRating::getInternalTeamKey($teamId);
                 $oppKey = TeamEloRating::getOpponentKey($match->opponent_id);
                 $scoreDiff = $match->our_score - $match->opponent_score;
                 $outcome = $scoreDiff > 0 ? 1.0 : ($scoreDiff < 0 ? 0.0 : 0.5);

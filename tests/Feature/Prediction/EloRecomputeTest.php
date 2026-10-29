@@ -84,6 +84,26 @@ class EloRecomputeTest extends TestCase
         $this->assertLessThan(1500, $snapshot[TeamEloRating::getOpponentKey($this->opponent->id)]);
     }
 
+    public function test_single_pivot_historical_result_counts_but_ambiguous_multi_team_result_does_not(): void
+    {
+        $single = $this->createMatch(['team_id' => null, 'scheduled_at' => '2026-10-01 12:00:00']);
+        $single->teams()->attach($this->team);
+        $ambiguous = $this->createMatch(['team_id' => null, 'scheduled_at' => '2026-10-02 12:00:00', 'score_home' => 30, 'score_away' => 90]);
+        $ambiguous->teams()->attach([$this->team->id, Team::factory()->create()->id]);
+
+        $this->assertNull($single->fresh()->team_id);
+        $this->assertSame($this->team->id, $single->historicalPredictionTeamId());
+        $this->assertNull($ambiguous->historicalPredictionTeamId());
+        $this->assertSame(1, app(EloService::class)->rebuildSeason($this->season->id));
+        $ratings = $this->snapshot();
+        $this->assertGreaterThan(1500, $ratings[TeamEloRating::getInternalTeamKey($this->team->id)]);
+        $this->assertCount(2, $ratings);
+
+        TeamEloRating::where('season_id', $this->season->id)->delete();
+        $this->assertSame(0, Artisan::call('stats:elo:recompute', ['season' => $this->season->id, 'team' => $this->team->id]));
+        $this->assertSame($ratings, $this->snapshot());
+    }
+
     public function test_team_filter_rebuilds_shared_opponent_history_for_the_entire_season(): void
     {
         $otherTeam = Team::factory()->create();

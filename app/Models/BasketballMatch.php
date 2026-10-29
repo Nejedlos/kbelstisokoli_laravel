@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Services\BrandingService;
 use App\Traits\Auditable;
 use App\Traits\HasMatchResult;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -102,14 +103,47 @@ class BasketballMatch extends Model
     }
 
     /**
-     * Predikce a Elo vyžadují právě jeden interní tým a jednoho soupeře.
-     *
-     * team_id je po zavedení vícetýmové vazby záměrně nullable. Zápasy bez
-     * jednoznačného primárního týmu proto nelze bezpečně zahrnout do výpočtu.
+     * One stored pre-match prediction requires an explicit primary team.
+     * Historical Elo can also use the unique pivot team via the method below.
      */
     public function hasPredictionContext(): bool
     {
         return $this->team_id !== null && $this->opponent_id !== null;
+    }
+
+    /**
+     * Historical results may predate the primary team field. Only a unique
+     * pivot membership gives enough context to attribute such a result.
+     */
+    public function historicalPredictionTeamId(): ?int
+    {
+        if ($this->team_id !== null) {
+            return (int) $this->team_id;
+        }
+
+        $teamIds = $this->teams->pluck('id');
+
+        return $teamIds->count() === 1 ? (int) $teamIds->first() : null;
+    }
+
+    public function scopeWithHistoricalPredictionTeam(Builder $query): Builder
+    {
+        return $query->where(function (Builder $match): void {
+            $match->whereNotNull('team_id')
+                ->orWhere(fn (Builder $pivot) => $pivot->whereNull('team_id')->has('teams', '=', 1));
+        });
+    }
+
+    public function scopeForHistoricalPredictionTeam(Builder $query, int $teamId): Builder
+    {
+        return $query->where(function (Builder $match) use ($teamId): void {
+            $match->where('team_id', $teamId)
+                ->orWhere(function (Builder $pivot) use ($teamId): void {
+                    $pivot->whereNull('team_id')
+                        ->whereHas('teams', fn (Builder $teams) => $teams->whereKey($teamId))
+                        ->has('teams', '=', 1);
+                });
+        });
     }
 
     public function statisticRows(): HasMany
