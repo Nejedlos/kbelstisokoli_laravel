@@ -93,6 +93,20 @@ class MatchPreviewSyncTest extends TestCase
         $this->sync(true);
     }
 
+    public function test_legacy_opponent_without_sokol_prefix_accepts_only_the_same_team_letter(): void
+    {
+        $this->match->opponent->update(['name' => 'Horní Počernice B']);
+        $this->mock(StatFetcherInterface::class)->shouldReceive('fetch')->twice()->andReturn(
+            '<div class="match-header"><div class="alfa">Kbely E</div><div class="beta">Sokol Horní Počernice C</div></div>',
+            '<div class="match-header"><div class="alfa">Kbely E</div><div class="beta">Sokol Horní Počernice B</div></div>',
+        );
+        $this->sync(true);
+        $this->assertArrayNotHasKey('preview_synced_at', $this->match->fresh()->metadata);
+        $this->sync(true);
+        $this->assertSame('Sokol Horní Počernice B', $this->match->fresh()->metadata['official_opponent_name']);
+        $this->assertSame('Horní Počernice B', $this->match->opponent->fresh()->name);
+    }
+
     private function sync(bool $force = false): void
     {
         app(MatchPreviewSyncService::class)->sync($this->match->id, $this->match->team_id, $force);

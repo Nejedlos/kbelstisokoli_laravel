@@ -47,3 +47,5 @@ Pokud zdroj ještě nemá tabulku hráčských statistik, zůstane boxscore prá
 Budoucí zápasy a dnešní utkání se při každém načtení rozpisu znovu porovnají s databází, i když se HTML nezměnilo. Změna data nebo doplnění času aktualizuje původní zápas podle externího ID a zachová jeho vazby. Datum bez zveřejněného času používá stabilní půlnoc; později zveřejněný čas ji nahradí. Detaily statistik se nadále stahují až po termínu utkání.
 
 Pro budoucí zápasy s primárním týmem se samostatně nejvýše jednou denně načítají podklady předpovědi: poslední výsledky obou týmů, vzájemná utkání a dostupné srovnání. Tato fáze ověřuje oba názvy týmů a ukládá pouze metadata; nemění rozpis, výsledky, hráče ani boxscore. Chybějící statistiky budoucího utkání proto neblokují načtení historie soupeře.
+
+Při ověřování názvu soupeře v preview může starší místní název vynechávat úvodní „Sokol“. Zbytek názvu, včetně písmena týmu a věkové kategorie, se musí přesně shodovat; místní soupeř se tím nepřejmenovává ani neslučuje.
