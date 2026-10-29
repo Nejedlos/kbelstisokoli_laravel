@@ -454,7 +454,15 @@ class ExternalStatsSyncService
 
             $hash = hash('sha256', $fragmentHtml);
 
-            if ($run->isIdenticalToLast($hash) && ! ($options['force'] ?? false) && ! ($options['fresh'] ?? false)) {
+            // Reconcile upcoming fixtures even when the source fragment is unchanged.
+            // This also repairs local stale dates without requiring a forced import.
+            $hasUpcomingMatches = collect($finalData->rows)->contains(function ($row) {
+                $date = $row->values['scheduled_at'] ?? null;
+
+                return $date && Carbon::parse($date)->startOfDay()->greaterThanOrEqualTo(now()->startOfDay());
+            });
+
+            if (! $hasUpcomingMatches && $run->isIdenticalToLast($hash) && ! ($options['force'] ?? false) && ! ($options['fresh'] ?? false)) {
                 ConsoleService::log('    - Obsah seznamu zápasů se nezměnil (hash match).', 'info');
                 $run->skip();
             } else {

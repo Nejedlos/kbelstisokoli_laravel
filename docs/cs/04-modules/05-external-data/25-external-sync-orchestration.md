@@ -109,3 +109,5 @@ Chyby a průběh lze sledovat v:
 1.  Tabulce `external_import_runs` (pole `status`, `error_summary`, `metadata`).
 2.  Logu aplikace (`storage/logs/laravel.log`).
 3.  Snapshoty staženého HTML v `storage/app/external/czbasketball/`.
+
+Budoucí zápasy a dnešní utkání se při každém načtení rozpisu znovu porovnají s databází, i když se HTML nezměnilo. Změna data nebo doplnění času aktualizuje původní zápas podle externího ID a zachová jeho vazby. Datum bez zveřejněného času používá stabilní půlnoc; později zveřejněný čas ji nahradí. Detaily statistik se nadále stahují až po termínu utkání.
