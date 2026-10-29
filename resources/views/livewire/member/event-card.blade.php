@@ -59,7 +59,7 @@
     ];
 @endphp
 
-<div class="relative group" id="event-card-{{ $type }}-{{ $data->id }}" wire:key="card-{{ $type }}-{{ $data->id }}" x-data="{ predictionOpen: false }" x-effect="
+<div class="relative group @container" id="event-card-{{ $type }}-{{ $data->id }}" wire:key="card-{{ $type }}-{{ $data->id }}" x-data="{ predictionOpen: false }" x-effect="
     predictionOpen ? document.body.setAttribute('data-prediction-open', 'true') : document.body.removeAttribute('data-prediction-open');
     const fab = document.querySelector('.ks-fab-trigger');
     if (fab) {
@@ -77,8 +77,8 @@
              :class="selectedEvents.includes('{{ $type . ':' . $data->id }}') ? 'w-2 bg-primary' : ''"></div>
     </div>
 
-    <div class="relative {{ $compact ? 'p-4 sm:p-5 lg:p-6' : 'p-5 sm:p-6 lg:p-8' }} flex flex-col lg:flex-row items-start lg:items-center justify-between {{ $compact ? 'gap-4 lg:gap-6' : 'gap-6 lg:gap-10' }}">
-        <div class="flex items-center gap-4 sm:gap-5 flex-1 w-full min-w-0">
+    <div class="relative {{ $compact ? 'p-4 sm:p-5 lg:p-6' : 'p-5 sm:p-6 lg:p-8' }} flex flex-col @min-[68rem]:flex-row items-start @min-[68rem]:items-center justify-between {{ $compact ? 'gap-4 lg:gap-6' : 'gap-6 lg:gap-10' }}">
+        <div class="flex items-start gap-3 sm:gap-4 flex-1 w-full min-w-0">
             @if($showActions && $canChange && !($type === 'match' && $data->has_score))
                 <div class="shrink-0 z-20">
                     <label class="relative inline-flex items-center cursor-pointer group/cb">
@@ -93,61 +93,71 @@
                 </div>
             @endif
 
-            <a href="{{ route('member.attendance.show', ['type' => $type, 'id' => $data->id]) }}" class="flex items-center gap-4 sm:gap-5 flex-1 min-w-0 transition-all duration-500">
+            <a href="{{ route('member.attendance.show', ['type' => $type, 'id' => $data->id]) }}" class="flex items-start gap-3 sm:gap-4 flex-1 min-w-0 transition-all duration-500">
                 <div class="w-12 h-14 sm:w-14 sm:h-16 rounded-2xl bg-slate-50 flex flex-col items-center justify-center text-secondary leading-none border border-slate-100 shrink-0 group-hover:bg-white group-hover:shadow-md transition-all duration-500">
-                    <span class="text-[8px] sm:text-[9px] font-black tracking-widest text-slate-400 mb-0.5"><x-weekday-short :date="$time" /></span>
+                    <span class="text-[10px] font-black tracking-wide text-slate-500 mb-0.5"><x-weekday-short :date="$time" /></span>
                     <span class="text-lg sm:text-xl font-black tracking-tight">{{ $time->format('d') }}</span>
-                    <span class="mt-0.5 text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-400">{{ $time->copy()->locale(app()->getLocale())->translatedFormat('M') }}</span>
+                    <span class="mt-0.5 text-[10px] font-black uppercase tracking-wide text-slate-500">{{ $time->copy()->locale(app()->getLocale())->translatedFormat('M') }}</span>
                 </div>
 
             <div class="min-w-0 flex-1">
                 <div class="flex flex-wrap items-center gap-2 sm:gap-4 mb-1 sm:mb-1.5">
-                    <span class="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-1.5 group-hover:text-primary transition-colors">
+                    <span class="text-[10px] font-bold uppercase tracking-wide text-slate-500 flex items-center gap-1.5 group-hover:text-primary transition-colors">
                         <i class="fa-light fa-{{ $icon }} text-primary"></i>
                         {{ $label }}
                     </span>
+                    @if($type === 'match')
+                        <span class="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-primary">
+                            <i class="fa-light fa-{{ $data->is_home === true ? 'house' : ($data->is_home === false ? 'bus' : 'circle-question') }}" aria-hidden="true"></i>
+                            {{ $data->is_home === true ? __('matches.home') : ($data->is_home === false ? __('matches.away') : __('matches.side_not_specified')) }}
+                        </span>
+                    @endif
                     <div class="flex items-center gap-1.5">
-                        <span class="text-[7px] font-black uppercase tracking-widest text-slate-400/80">{{ __('member.attendance.my_status') }}:</span>
-                        <span class="js-event-status-badge px-2 py-0.5 sm:px-2.5 lg:px-4 lg:py-1.5 rounded-lg text-[8px] sm:text-[9px] lg:text-[11px] font-black uppercase tracking-widest shadow-sm {{ $statusColors[$status] }} flex items-center gap-1.5">
-                             <i class="fa-solid fa-{{ $status === 'confirmed' ? 'circle-check' : ($status === 'declined' ? 'circle-xmark' : ($status === 'maybe' ? 'circle-dot' : 'circle-question')) }} text-[7px] sm:text-[8px] lg:text-[10px]"></i>
+                        <span class="text-[10px] font-bold text-slate-500">{{ __('member.attendance.my_status') }}:</span>
+                        <span class="js-event-status-badge px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-sm {{ $statusColors[$status] }} flex items-center gap-1.5">
+                             <i class="fa-solid fa-{{ $status === 'confirmed' ? 'circle-check' : ($status === 'declined' ? 'circle-xmark' : ($status === 'maybe' ? 'circle-dot' : 'circle-question')) }} text-[10px]"></i>
                              {{ $statusLabels[$status] }}
                         </span>
                     </div>
                 </div>
-                <h4 class="text-base sm:text-lg font-black text-secondary leading-tight truncate tracking-tight">
+                <h4 class="text-base sm:text-lg font-black text-secondary leading-tight whitespace-normal break-words tracking-tight">
                     @if($type === 'match')
-                        {{ $data->team?->name }} <span class="text-primary italic mx-1">vs</span> {{ $data->opponent?->name }}
+                        <span class="text-primary italic mr-1">vs</span> {{ $data->opponent?->name ?: __('matches.opponent') }}
                     @elseif($type === 'training')
                         {{ $label }}
                     @else
                         {{ $data->title }}
                     @endif
                 </h4>
-                <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 sm:mt-2 text-[10px] sm:text-[11px] text-slate-500 font-bold italic opacity-80">
+                <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 sm:mt-2 text-xs text-slate-600 font-semibold">
                     <span class="flex items-center gap-1.5"><i class="fa-light fa-clock text-primary"></i> {{ $time->format('H:i') }}</span>
                     @if($displayLocation)
-                        <span class="flex items-center gap-1.5"><i class="fa-light fa-map-pin text-primary"></i> {{ Str::limit($displayLocation, 20) }}</span>
+                        <span class="flex items-center gap-1.5"><i class="fa-light fa-map-pin text-primary"></i> {{ $displayLocation }}</span>
                     @endif
                 </div>
             </div>
             </a>
         </div>
 
-        <div class="flex items-center flex-wrap lg:flex-nowrap justify-between lg:justify-end gap-x-3 gap-y-4 sm:gap-x-6 {{ $compact ? 'lg:gap-x-4' : 'lg:gap-x-8' }} w-full lg:w-auto pt-4 lg:pt-0 border-t lg:border-t-0 border-slate-100 lg:pl-0 {{ $showActions && $canChange && !($type === 'match' && $data->has_score) ? 'pl-[calc(1.75rem+1rem)] sm:pl-[calc(1.75rem+1.25rem)]' : 'pl-0' }}">
-            <div class="flex items-center gap-2 sm:gap-4 {{ $compact ? 'lg:gap-3' : 'lg:gap-6' }}">
+        <div class="flex min-w-0 flex-col gap-3 w-full @min-[68rem]:w-auto @min-[68rem]:shrink-0 pt-4 @min-[68rem]:pt-0 border-t @min-[68rem]:border-t-0 border-slate-100 @min-[68rem]:flex-row @min-[68rem]:items-center">
+            <div class="flex flex-wrap items-center justify-between gap-3 @min-[68rem]:justify-start">
                 <!-- Attendance Stats -->
                 <div class="flex items-center gap-3 sm:gap-4 {{ $compact ? 'lg:gap-4' : 'lg:gap-6' }} bg-slate-50/50 px-3 sm:px-4 {{ $compact ? 'lg:px-4' : 'lg:px-6' }} py-2 {{ $compact ? 'lg:py-2' : 'lg:py-3' }} rounded-2xl border border-slate-100/50">
                     <div class="flex flex-col items-center" title="{{ __('member.attendance.status.confirmed') }}">
-                        <span class="text-[10px] sm:text-[11px] font-black text-emerald-600 leading-none mb-1 sm:mb-1.5">{{ $confirmedCount }}</span>
-                        <i class="fa-solid fa-circle-check text-[9px] sm:text-[10px] text-emerald-200"></i>
+                        <span class="text-xs font-black text-emerald-600 leading-none mb-1 sm:mb-1.5">{{ $confirmedCount }}</span>
+                        <i class="fa-solid fa-circle-check text-[9px] sm:text-[10px] text-emerald-500"></i>
                     </div>
                     <div class="flex flex-col items-center" title="{{ __('member.attendance.status.declined') }}">
-                        <span class="text-[10px] sm:text-[11px] font-black text-rose-600 leading-none mb-1 sm:mb-1.5">{{ $declinedCount }}</span>
-                        <i class="fa-solid fa-circle-xmark text-[9px] sm:text-[10px] text-rose-200"></i>
+                        <span class="text-xs font-black text-rose-600 leading-none mb-1 sm:mb-1.5">{{ $declinedCount }}</span>
+                        <i class="fa-solid fa-circle-xmark text-[9px] sm:text-[10px] text-rose-500"></i>
+                    </div>
+                    <div class="flex flex-col items-center" title="{{ __('member.attendance.status.maybe') }}">
+                        <span class="text-xs font-black text-warning-600 leading-none mb-1 sm:mb-1.5">{{ $maybeCount }}</span>
+                        <i class="fa-solid fa-circle-dot text-[10px] text-warning-500"></i>
                     </div>
                     <div class="flex flex-col items-center" title="{{ __('member.attendance.status.pending') }}">
-                        <span class="text-[10px] sm:text-[11px] font-black text-slate-400 leading-none mb-1 sm:mb-1.5">{{ $pendingCount }}</span>
-                        <i class="fa-solid fa-circle-question text-[9px] sm:text-[10px] text-slate-200"></i>
+                        <span class="text-xs font-black text-slate-400 leading-none mb-1 sm:mb-1.5">{{ $pendingCount }}</span>
+                        <i class="fa-solid fa-circle-question text-[9px] sm:text-[10px] text-slate-500"></i>
                     </div>
                 </div>
 
@@ -180,7 +190,7 @@
                         $glowHsl = "hsla({$hue}, 75%, 45%, 0.2)";
                         $borderHsl = "hsla({$hue}, 75%, 45%, 0.15)";
                     @endphp
-                    <div @click.stop="predictionOpen = true"
+                    <div role="button" tabindex="0" aria-label="{{ __('matches.prediction.title') }}" @keydown.enter.prevent="predictionOpen = true" @keydown.space.prevent="predictionOpen = true" @click.stop="predictionOpen = true"
                          class="cursor-pointer group/pred flex items-center gap-3 {{ $compact ? 'lg:gap-3' : 'lg:gap-4' }} px-3 {{ $compact ? 'lg:px-3' : 'lg:px-5' }} py-2 {{ $compact ? 'lg:py-2' : 'lg:py-3' }} rounded-2xl border transition-all duration-300 shrink-0 relative overflow-hidden"
                          style="background: linear-gradient(135deg, {{ $bgHsl }}, white); border-color: {{ $borderHsl }};"
                          onmouseover="this.style.borderColor='hsla({{ $hue }}, 75%, 45%, 0.4)'; this.style.boxShadow='0 10px 15px -3px hsla({{ $hue }}, 75%, 45%, 0.1)';"
@@ -197,7 +207,7 @@
                             <span class="text-[15px] font-black leading-none tabular-nums" style="color: {{ $colorHsl }};">
                                 {{ $winChance }}%
                             </span>
-                            <span class="text-[7px] font-black text-slate-400 uppercase tracking-[0.2em] leading-tight mt-1">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wide leading-tight mt-1">
                                 {{ __('matches.prediction.win_chance_short') ?? 'VÝHRA' }}
                             </span>
                         </div>
@@ -207,57 +217,52 @@
 
             <!-- Quick Actions -->
             @if($showActions && $canChange)
-                <div class="grid grid-cols-4 sm:flex items-center gap-2 {{ $compact ? 'lg:gap-2' : 'lg:gap-4' }} ml-auto lg:ml-0 w-full sm:w-auto">
+                <div class="grid grid-cols-4 items-stretch gap-2 w-full @min-[68rem]:w-auto">
                     <button wire:click="setStatus('confirmed')"
                             wire:loading.attr="disabled"
                             wire:target="setStatus('confirmed')"
-                            class="h-11 sm:h-12 {{ $compact ? 'lg:h-12 lg:w-12' : 'lg:h-14 lg:px-8' }} flex items-center justify-center rounded-2xl transition-all shadow-sm active:scale-95 group/btn disabled:opacity-50 disabled:cursor-not-allowed {{ $status === 'confirmed' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/40 ring-4 ring-emerald-500/10' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white hover:shadow-lg hover:shadow-emerald-500/20' }}"
+                            class="min-h-14 px-1 py-2 @min-[40rem]:px-3 flex items-center justify-center rounded-2xl transition-all shadow-sm active:scale-95 group/btn disabled:opacity-50 disabled:cursor-not-allowed {{ $status === 'confirmed' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/40 ring-4 ring-emerald-500/10' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white hover:shadow-lg hover:shadow-emerald-500/20' }}"
                             title="{{ __('member.attendance.status.confirmed') }}">
-                        <div class="flex items-center gap-2.5 lg:gap-3">
+                        <div class="flex min-w-0 flex-col items-center gap-1 @min-[40rem]:flex-row @min-[40rem]:gap-2">
                             <div class="relative flex items-center justify-center">
                                 <i wire:loading.remove wire:target="setStatus('confirmed')" class="fa-light fa-check text-xl lg:text-2xl"></i>
                                 <i wire:loading wire:target="setStatus('confirmed')" class="fa-light fa-spinner-third fa-spin text-lg"></i>
                             </div>
-                            @if(!$compact)
-                                <span class="hidden lg:inline font-black uppercase tracking-widest text-[11px]">{{ __('member.attendance.status.confirmed') }}</span>
-                            @endif
+                            <span class="text-[10px] font-bold uppercase tracking-wide">{{ __('member.attendance.status.confirmed') }}</span>
                         </div>
                     </button>
 
                     <button wire:click="setStatus('declined')"
                             wire:loading.attr="disabled"
                             wire:target="setStatus('declined')"
-                            class="h-11 sm:h-12 {{ $compact ? 'lg:h-12 lg:w-12' : 'lg:h-14 lg:px-8' }} flex items-center justify-center rounded-2xl transition-all shadow-sm active:scale-95 group/btn disabled:opacity-50 disabled:cursor-not-allowed {{ $status === 'declined' ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/40 ring-4 ring-rose-500/10' : 'bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white hover:shadow-lg hover:shadow-rose-500/20' }}"
+                            class="min-h-14 px-1 py-2 @min-[40rem]:px-3 flex items-center justify-center rounded-2xl transition-all shadow-sm active:scale-95 group/btn disabled:opacity-50 disabled:cursor-not-allowed {{ $status === 'declined' ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/40 ring-4 ring-rose-500/10' : 'bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white hover:shadow-lg hover:shadow-rose-500/20' }}"
                             title="{{ __('member.attendance.status.declined') }}">
-                        <div class="flex items-center gap-2.5 lg:gap-3">
+                        <div class="flex min-w-0 flex-col items-center gap-1 @min-[40rem]:flex-row @min-[40rem]:gap-2">
                             <div class="relative flex items-center justify-center">
                                 <i wire:loading.remove wire:target="setStatus('declined')" class="fa-light fa-xmark text-xl lg:text-2xl"></i>
                                 <i wire:loading wire:target="setStatus('declined')" class="fa-light fa-spinner-third fa-spin text-lg"></i>
                             </div>
-                            @if(!$compact)
-                                <span class="hidden lg:inline font-black uppercase tracking-widest text-[11px]">{{ __('member.attendance.status.declined') }}</span>
-                            @endif
+                            <span class="text-[10px] font-bold uppercase tracking-wide">{{ __('member.attendance.status.declined') }}</span>
                         </div>
                     </button>
 
                     <button wire:click="setStatus('maybe')"
                             wire:loading.attr="disabled"
                             wire:target="setStatus('maybe')"
-                            class="h-11 sm:h-12 {{ $compact ? 'lg:h-12 lg:w-12' : 'lg:h-14 lg:px-8' }} flex items-center justify-center rounded-2xl transition-all shadow-sm active:scale-95 group/btn disabled:opacity-50 disabled:cursor-not-allowed {{ $status === 'maybe' ? 'bg-warning-500 text-white shadow-lg shadow-warning-500/40 ring-4 ring-warning-500/10' : 'bg-warning-50 text-warning-600 hover:bg-warning-500 hover:text-white hover:shadow-lg hover:shadow-warning-500/20' }}"
+                            class="min-h-14 px-1 py-2 @min-[40rem]:px-3 flex items-center justify-center rounded-2xl transition-all shadow-sm active:scale-95 group/btn disabled:opacity-50 disabled:cursor-not-allowed {{ $status === 'maybe' ? 'bg-warning-500 text-white shadow-lg shadow-warning-500/40 ring-4 ring-warning-500/10' : 'bg-warning-50 text-warning-600 hover:bg-warning-500 hover:text-white hover:shadow-lg hover:shadow-warning-500/20' }}"
                             title="{{ __('member.attendance.status.maybe') }}">
-                        <div class="flex items-center gap-2.5 lg:gap-3">
+                        <div class="flex min-w-0 flex-col items-center gap-1 @min-[40rem]:flex-row @min-[40rem]:gap-2">
                             <div class="relative flex items-center justify-center">
                                 <i wire:loading.remove wire:target="setStatus('maybe')" class="fa-light fa-circle-dot text-xl lg:text-2xl"></i>
                                 <i wire:loading wire:target="setStatus('maybe')" class="fa-light fa-spinner-third fa-spin text-lg"></i>
                             </div>
-                            @if(!$compact)
-                                <span class="hidden lg:inline font-black uppercase tracking-widest text-[11px]">{{ __('member.attendance.status.maybe') }}</span>
-                            @endif
+                            <span class="text-[10px] font-bold uppercase tracking-wide">{{ __('member.attendance.status.maybe') }}</span>
                         </div>
                     </button>
 
-                    <a href="{{ route('member.attendance.show', ['type' => $type, 'id' => $data->id]) }}" class="h-11 sm:h-12 {{ $compact ? 'lg:h-12 lg:w-12' : 'lg:h-14 lg:px-7' }} flex items-center justify-center rounded-2xl bg-slate-100 text-slate-400 hover:bg-primary hover:text-white transition-all shadow-sm hover:shadow-lg hover:shadow-primary/20 active:scale-95 group/btn" title="Detail">
-                        <i class="fa-light fa-chevron-right text-lg lg:text-xl"></i>
+                    <a href="{{ route('member.attendance.show', ['type' => $type, 'id' => $data->id]) }}" class="min-h-14 px-1 py-2 @min-[40rem]:px-3 flex flex-col @min-[40rem]:flex-row gap-1 @min-[40rem]:gap-2 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 hover:bg-primary hover:text-white transition-all shadow-sm hover:shadow-lg hover:shadow-primary/20 active:scale-95 group/btn" title="{{ __('general.details') }}">
+                        <i class="fa-light fa-chevron-right text-lg"></i>
+                        <span class="text-[10px] font-bold uppercase tracking-wide">{{ __('matches.card_detail') }}</span>
                     </a>
                 </div>
             @endif

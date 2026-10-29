@@ -59,6 +59,8 @@ return [
     'result_k' => 'KONTUMACE',
     'home_upper' => 'DOMA',
     'away_upper' => 'VENKU',
+    'card_detail' => 'Detail',
+    'side_not_specified' => 'Doma/venku neurčeno',
     'home' => 'Doma',
     'away' => 'Venku',
     'is_home' => 'Domácí',

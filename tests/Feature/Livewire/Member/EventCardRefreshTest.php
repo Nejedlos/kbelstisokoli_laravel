@@ -3,12 +3,38 @@
 namespace Tests\Feature\Livewire\Member;
 
 use App\Livewire\Member\EventCard;
+use App\Models\BasketballMatch;
+use App\Models\Opponent;
+use App\Models\Season;
+use App\Models\Team;
 use App\Models\Training;
 use Livewire\Livewire;
 use Tests\TestCase;
 
 class EventCardRefreshTest extends TestCase
 {
+    public function test_match_card_shows_complete_opponent_and_stored_side_independent_of_venue(): void
+    {
+        $this->actingAs($this->createMember());
+        $team = Team::factory()->create(['name' => ['cs' => 'Our team', 'en' => 'Our team']]);
+        $season = Season::create(['name' => '2026/2027', 'is_active' => true]);
+        $opponent = Opponent::create(['name' => 'Velmi dlouhý název soupeře Horní Počernice B']);
+        foreach (['cs', 'en'] as $locale) {
+            app()->setLocale($locale);
+            foreach ([true, false] as $home) {
+                $match = BasketballMatch::create([
+                    'team_id' => $team->id, 'opponent_id' => $opponent->id, 'season_id' => $season->id,
+                    'scheduled_at' => now()->addWeek(), 'status' => 'planned',
+                    'is_home' => $home, 'location' => 'hala Třinecká',
+                ]);
+                Livewire::test(EventCard::class, ['event' => ['type' => 'match', 'data' => $match]])
+                    ->assertSee($opponent->name)
+                    ->assertSee(__('matches.'.($home === true ? 'home' : ($home === false ? 'away' : 'side_not_specified'))))
+                    ->assertSee('hala Třinecká');
+            }
+        }
+    }
+
     public function test_cards_only_listen_for_their_own_event_and_use_isolated_requests(): void
     {
         $this->actingAs($this->createMember());

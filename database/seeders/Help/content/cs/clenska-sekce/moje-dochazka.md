@@ -33,3 +33,7 @@ Svoji historickou docházku a "procentuální morálku" můžete sledovat v sekc
 
 Po uložení účasti nebo omluvy se aktualizují příslušné karty programu.
 Hromadné změny lze používat i v přehledu s více než 20 událostmi.
+
+Karta zápasu v programu upřednostňuje celý název soupeře a dovoluje jeho zalomení na více řádků. Štítek Doma/Venku vychází z uloženého `is_home`, který import určuje z domácí a hostující strany rozpisu ČBF/PBasket; neodhaduje se z názvu haly. Neurčená strana se výslovně označí. Na užších obrazovkách jsou ovládací prvky pod názvem zápasu.
+
+Rozložení se řídí skutečnou šířkou karty (container queries), takže funguje i v úzkém panelu nástěnky. Místo konání se nezkracuje; tlačítka účasti mají text i na mobilu, dotykovou výšku nejméně 56 px a přehled zahrnuje i odpovědi Možná.
