@@ -106,6 +106,11 @@ class BasketballMatch extends Model
      * One stored pre-match prediction requires an explicit primary team.
      * Historical Elo can also use the unique pivot team via the method below.
      */
+    public function getDisplayLocationAttribute(): ?string
+    {
+        return $this->venue?->name ?: ($this->location ?: ($this->metadata['venue'] ?? null));
+    }
+
     public function hasPredictionContext(): bool
     {
         return $this->team_id !== null && $this->opponent_id !== null;

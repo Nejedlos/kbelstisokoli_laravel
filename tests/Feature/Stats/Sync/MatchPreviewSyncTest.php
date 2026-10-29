@@ -8,6 +8,7 @@ use App\Models\ExternalTeamSeasonConfig;
 use App\Models\Opponent;
 use App\Models\Season;
 use App\Models\Team;
+use App\Models\Venue;
 use App\Services\Stats\Contracts\StatFetcherInterface;
 use App\Services\Stats\Sync\MatchPreviewSyncService;
 use Illuminate\Support\Facades\Bus;
@@ -105,6 +106,52 @@ class MatchPreviewSyncTest extends TestCase
         $this->sync(true);
         $this->assertSame('Sokol Horní Počernice B', $this->match->fresh()->metadata['official_opponent_name']);
         $this->assertSame('Horní Počernice B', $this->match->opponent->fresh()->name);
+    }
+
+    public function test_source_venue_fills_and_refreshes_imported_location_and_empty_source_preserves_it(): void
+    {
+        $this->mock(StatFetcherInterface::class)->shouldReceive('fetch')->times(3)->andReturn(
+            $this->pageWithVenue('hala Třinecká'), $this->pageWithVenue('hala Hostivař'), $this->pageWithVenue(null),
+        );
+        $this->sync();
+        $this->assertSame('hala Třinecká', $this->match->fresh()->location);
+        $this->assertSame('hala Třinecká', $this->match->fresh()->metadata['venue']);
+        $this->sync(true);
+        $this->assertSame('hala Hostivař', $this->match->fresh()->location);
+        $this->assertSame('hala Hostivař', $this->match->fresh()->metadata['preview_location']);
+        $this->sync(true);
+        $this->assertSame('hala Hostivař', $this->match->fresh()->location);
+        $this->assertSame('hala Hostivař', $this->match->fresh()->metadata['venue']);
+    }
+
+    public function test_source_venue_does_not_replace_manual_location(): void
+    {
+        $this->mock(StatFetcherInterface::class)->shouldReceive('fetch')->twice()->andReturn(
+            $this->pageWithVenue('hala Třinecká'), $this->pageWithVenue('hala Hostivař'),
+        );
+        $this->sync();
+        $this->match->update(['location' => 'Ruční místo']);
+        $this->sync(true);
+        $this->assertSame('Ruční místo', $this->match->fresh()->location);
+        $this->assertSame('hala Hostivař', $this->match->fresh()->metadata['venue']);
+    }
+
+    public function test_source_venue_does_not_replace_explicit_venue(): void
+    {
+        $venue = Venue::create(['name' => 'Klubová hala']);
+        $this->match->update(['venue_id' => $venue->id]);
+        $this->mock(StatFetcherInterface::class)->shouldReceive('fetch')->once()->andReturn($this->pageWithVenue('hala Třinecká'));
+        $this->sync();
+        $this->assertNull($this->match->fresh()->location);
+        $this->assertSame($venue->id, $this->match->fresh()->venue_id);
+        $this->assertSame('hala Třinecká', $this->match->fresh()->metadata['venue']);
+    }
+
+    private function pageWithVenue(?string $venue): string
+    {
+        $hall = $venue === null ? '' : '<div class="font-size-smaller font-size-md-normal ml-md-4 mr-4 mb-2 mb-md-4"><a href="/haly/detail/1">'.$venue.'</a></div>';
+
+        return '<div class="match-header"><div class="alfa">Kbely E</div><div class="beta">Opponent</div>'.$hall.'</div>';
     }
 
     private function sync(bool $force = false): void

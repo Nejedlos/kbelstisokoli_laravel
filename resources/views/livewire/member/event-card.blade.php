@@ -2,6 +2,7 @@
     $type = $event['type'];
     $data = $event['data'];
     $time = $event['time'];
+    $displayLocation = $type === 'match' ? $data->display_location : $data->location;
     $isPast = $time->isPast();
     $canChange = $time->isAfter(now()->addMinutes(90));
     $attendance = $data->attendances->first();
@@ -124,8 +125,8 @@
                 </h4>
                 <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 sm:mt-2 text-[10px] sm:text-[11px] text-slate-500 font-bold italic opacity-80">
                     <span class="flex items-center gap-1.5"><i class="fa-light fa-clock text-primary"></i> {{ $time->format('H:i') }}</span>
-                    @if($data->location)
-                        <span class="flex items-center gap-1.5"><i class="fa-light fa-map-pin text-primary"></i> {{ Str::limit($data->location, 20) }}</span>
+                    @if($displayLocation)
+                        <span class="flex items-center gap-1.5"><i class="fa-light fa-map-pin text-primary"></i> {{ Str::limit($displayLocation, 20) }}</span>
                     @endif
                 </div>
             </div>

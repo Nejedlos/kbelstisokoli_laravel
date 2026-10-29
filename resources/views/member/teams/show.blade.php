@@ -29,7 +29,7 @@
                             <div>
                                 <h4 class="font-bold text-secondary">vs {{ $match->opponent->name }}</h4>
                                 <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                                    <x-weekday-short :date="$match->scheduled_at" /> {{ $match->scheduled_at->format('d.m. H:i') }} • {{ $match->location ?: __('member.teams.attendance.location_not_specified') }}
+                                    <x-weekday-short :date="$match->scheduled_at" /> {{ $match->scheduled_at->format('d.m. H:i') }} • {{ $match->display_location ?: __('member.teams.attendance.location_not_specified') }}
                                 </p>
                             </div>
                             <span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-black uppercase tracking-widest text-slate-500">{{ __('member.teams.attendance.match_badge') }}</span>
